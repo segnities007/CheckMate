@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -54,10 +55,4 @@ dependencies {
     // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
-
-    // serialization
-    implementation(libs.kotlinx.serialization.json)
-
-    //navigation
-    implementation(libs.androidx.navigation.compose)
 }

@@ -24,8 +24,14 @@
             <option value="$PROJECT_DIR$/domain/repository" />
             <option value="$PROJECT_DIR$/presentation" />
             <option value="$PROJECT_DIR$/presentation/auth" />
+            <option value="$PROJECT_DIR$/presentation/dashboard" />
+            <option value="$PROJECT_DIR$/presentation/home" />
+            <option value="$PROJECT_DIR$/presentation/hub" />
+            <option value="$PROJECT_DIR$/presentation/items" />
             <option value="$PROJECT_DIR$/presentation/login" />
+            <option value="$PROJECT_DIR$/presentation/setting" />
             <option value="$PROJECT_DIR$/presentation/splash" />
+            <option value="$PROJECT_DIR$/presentation/templates" />
           </set>
         </option>
       </GradleProjectSettings>
