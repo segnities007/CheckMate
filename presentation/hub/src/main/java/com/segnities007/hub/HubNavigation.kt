@@ -5,8 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.segnities007.dashboard.DashboardScreen
+import com.segnities007.home.HomeScreen
+import com.segnities007.items.ItemsScreen
 import com.segnities007.navigation.HubRoute
 import com.segnities007.navigation.Route
+import com.segnities007.setting.SettingScreen
+import com.segnities007.templates.TemplatesScreen
 
 @Composable
 fun HubNavigation(
@@ -20,19 +25,19 @@ fun HubNavigation(
             startDestination = HubRoute.Home,
         ){
             composable<HubRoute.Home>{
-                //TODO
+                HomeScreen()
             }
             composable<HubRoute.Items>{
-                //TODO
+                ItemsScreen()
             }
             composable<HubRoute.Dashboard>{
-                //TODO
+                DashboardScreen()
             }
             composable<HubRoute.Templates>{
-                //TODO
+                TemplatesScreen()
             }
             composable<HubRoute.Setting>{
-                //TODO
+                SettingScreen()
             }
         }
     }

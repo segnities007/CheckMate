@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.segnities007.auth.AuthNavigation
 import com.segnities007.checkmate.ui.theme.CheckMateTheme
+import com.segnities007.hub.HubNavigation
 import com.segnities007.navigation.Route
 
 class MainActivity : ComponentActivity() {
@@ -26,16 +28,19 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun MainNavigation(){
     val mainNavController = rememberNavController()
+    val onNavigate: (Route) -> Unit = { route ->
+        mainNavController.navigate(route)
+    }
 
     NavHost(
         navController = mainNavController,
         startDestination = Route.Auth,
     ){
         composable<Route.Auth>{
-            //TODO
+            AuthNavigation(onNavigate)
         }
         composable<Route.Hub>{
-            //TODO
+            HubNavigation(onNavigate)
         }
     }
 }
