@@ -55,10 +55,4 @@ dependencies {
     // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
-
-    // serialization
-    implementation(libs.kotlinx.serialization.json)
-
-    //navigation
-    implementation(libs.androidx.navigation.compose)
 }
