@@ -3,12 +3,16 @@ package com.segnities007.auth
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.segnities007.login.LoginScreen
 import com.segnities007.navigation.AuthRoute
+import com.segnities007.navigation.Route
+import com.segnities007.splash.SplashScreen
 
 @Composable
 fun AuthNavigation(
-    onNavigate: (AuthRoute) -> Unit
+    onNavigate: (Route) -> Unit
 ){
     val authNavController = rememberNavController()
 
@@ -17,7 +21,12 @@ fun AuthNavigation(
             navController = authNavController,
             startDestination = AuthRoute.Splash
         ){
-            //TODO
+            composable<AuthRoute.Splash>{
+                SplashScreen()
+            }
+            composable<AuthRoute.Login>{
+                LoginScreen()
+            }
         }
     }
 }
