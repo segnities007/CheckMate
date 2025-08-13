@@ -43,6 +43,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":presentation:auth"))
     implementation(project(":presentation:hub"))
+    implementation(project(":core:common"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

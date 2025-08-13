@@ -23,5 +23,4 @@ class UserRepositoryImpl(
     override suspend fun getUserStatus(): UserStatus {
         return auth.getUserStatus() ?: UserStatus.simpleMock()
     }
-
 }

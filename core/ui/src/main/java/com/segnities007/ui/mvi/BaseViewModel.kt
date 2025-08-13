@@ -1,4 +1,4 @@
-package com.segnities007.common.mvi
+package com.segnities007.ui.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
