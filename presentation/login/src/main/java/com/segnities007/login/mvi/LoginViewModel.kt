@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
-internal class LoginViewModel(
+class LoginViewModel(
     private val userRepository: UserRepository
 ): BaseViewModel<
         LoginIntent,
