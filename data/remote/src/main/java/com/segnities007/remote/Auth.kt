@@ -15,8 +15,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.segnities007.model.UserStatus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.json.JSONObject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -31,21 +33,20 @@ class Auth(private val context: Context) {
 
     private val credentialManager: CredentialManager = CredentialManager.create(context)
 
-    suspend fun checkIsLoggedIn(): Boolean {
-        return context.dataStore.data.map { preferences ->
-            preferences[USER_ID_KEY] != null
-        }.first()
+    suspend fun isAccountCreated(): Boolean {
+        val prefs = context.dataStore.data.first()
+        return prefs[ACCOUNT_CREATED_KEY]?.toBoolean() ?: false
     }
 
-    suspend fun clearUserSession() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
+    suspend fun markAccountCreated() {
+        context.dataStore.edit { prefs ->
+            prefs[ACCOUNT_CREATED_KEY] = "true"
         }
     }
 
     suspend fun loginWithGoogle() {
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption())
+            .addCredentialOption(googleIdLoginOption())
             .build()
 
         try {
@@ -98,7 +99,7 @@ class Auth(private val context: Context) {
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    private fun googleIdOption(): GetGoogleIdOption {
+    private fun googleIdLoginOption(): GetGoogleIdOption {
         return GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(BuildConfig.WEB_CLIENT_ID)
@@ -107,8 +108,32 @@ class Auth(private val context: Context) {
             .build()
     }
 
+    suspend fun getUserStatus(): UserStatus? {
+        val prefs = context.dataStore.data.first()
+        val idToken = prefs[ID_TOKEN_KEY] ?: return null
+
+        return try {
+            val parts = idToken.split(".")
+            if (parts.size != 3) return null
+
+            val payloadJson = String(android.util.Base64.decode(parts[1], android.util.Base64.URL_SAFE))
+            val payload = JSONObject(payloadJson)
+
+            UserStatus(
+                id = payload.optString("sub"),
+                name = payload.optString("name"),
+                email = payload.optString("email"),
+                pictureUrl = payload.optString("picture")
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse Google ID Token for account info", e)
+            null
+        }
+    }
+
     private companion object {
         val USER_ID_KEY = stringPreferencesKey("user_id")
         val ID_TOKEN_KEY = stringPreferencesKey("id_token")
+        val ACCOUNT_CREATED_KEY = stringPreferencesKey("account_created")
     }
 }
