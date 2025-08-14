@@ -11,11 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,15 +42,7 @@ fun HubNavigation(
     val hubViewModel: HubViewModel = koinInject()
     val state by hubViewModel.state.collectAsState()
     var currentRoute by remember { mutableStateOf<HubRoute>(HubRoute.Home) }
-
-    val bottomBar: @Composable () -> Unit = {
-        FloatingNavigationBar(
-            currentHubRoute = currentRoute,
-            onNavigate = {
-                hubViewModel.sendIntent(HubIntent.Navigate(it))
-            }
-        )
-    }
+    val updateCurrentRoute: (HubRoute) -> Unit = { currentRoute = it }
 
     LaunchedEffect(Unit) {
         hubViewModel.effect.collect { effect ->
@@ -67,7 +61,11 @@ fun HubNavigation(
         }
     }
 
-    HubUi(bottomBar){
+    HubUi(
+        currentRoute = currentRoute,
+        updateCurrentRoute = updateCurrentRoute,
+        sendIntent = hubViewModel::sendIntent
+    ){
         NavHost(
             navController = hubNavController,
             startDestination = HubRoute.Home,
@@ -103,16 +101,36 @@ fun HubNavigation(
 
 @Composable
 private fun HubUi(
-    bottomBar: @Composable () -> Unit,
+    currentRoute: HubRoute = HubRoute.Home,
+    updateCurrentRoute: (HubRoute) -> Unit,
+    sendIntent: (HubIntent) -> Unit,
     content: @Composable () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+    val alpha by remember {
+        derivedStateOf {
+            (1f - scrollState.value / 300f).coerceIn(0.2f, 1f)
+        }
+    }
+
+    val bottomBar: @Composable () -> Unit = {
+        FloatingNavigationBar(
+            alpha = alpha,
+            currentHubRoute = currentRoute,
+            onNavigate = {
+                updateCurrentRoute(it)
+                sendIntent(HubIntent.Navigate(it))
+            }
+        )
+    }
+
     Scaffold(
-        bottomBar = bottomBar
+        bottomBar = bottomBar,
     ){
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ){
             Spacer(modifier = Modifier.padding(top = it.calculateTopPadding()))
             content()

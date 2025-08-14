@@ -37,6 +37,7 @@ import com.segnities007.navigation.HubRoute
 
 @Composable
 fun FloatingNavigationBar(
+    alpha: Float = 1f,
     currentHubRoute: HubRoute,
     onNavigate: (HubRoute) -> Unit
 ){
@@ -46,6 +47,7 @@ fun FloatingNavigationBar(
         horizontalAlignment = Alignment.CenterHorizontally,
     ){
         FloatingActionBarUi(
+            alpha = alpha,
             currentHubRoute = currentHubRoute,
             onNavigate = onNavigate
         )
@@ -55,6 +57,7 @@ fun FloatingNavigationBar(
 
 @Composable
 private fun FloatingActionBarUi(
+    alpha: Float,
     currentHubRoute: HubRoute,
     onNavigate: (HubRoute) -> Unit
 ){
@@ -69,13 +72,14 @@ private fun FloatingActionBarUi(
         Row(
             modifier = Modifier
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onBackground)
+                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = alpha))
                 .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ){
             info.forEach { (route, icons) ->
                 NavItemButton(
+                    alpha = alpha,
                     selectedIcon = icons[0],
                     unselectedIcon = icons[1],
                     selected = currentHubRoute == route,
@@ -87,6 +91,7 @@ private fun FloatingActionBarUi(
 
 @Composable
 private fun NavItemButton(
+    alpha: Float,
     selectedIcon: ImageVector,
     unselectedIcon: ImageVector,
     selected: Boolean,
@@ -96,11 +101,12 @@ private fun NavItemButton(
         modifier = Modifier
             .clip(CircleShape)
             .background(
-                if (selected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onBackground
+                color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+                else androidx.compose.ui.graphics.Color.Transparent
             )
             .padding(8.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+,
         contentAlignment = Alignment.Center
     ) {
         Column(
