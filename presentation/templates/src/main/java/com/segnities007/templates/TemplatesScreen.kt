@@ -3,11 +3,9 @@ package com.segnities007.templates
 import androidx.compose.runtime.Composable
 
 @Composable
-fun TemplatesScreen(){
-
+fun TemplatesScreen() {
 }
 
 @Composable
-private fun TemplatesUi(){
-
+private fun TemplatesUi() {
 }

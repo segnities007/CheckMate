@@ -3,11 +3,9 @@ package com.segnities007.home
 import androidx.compose.runtime.Composable
 
 @Composable
-fun HomeScreen(){
-
+fun HomeScreen() {
 }
 
 @Composable
-private fun HomeUi(){
-
+private fun HomeUi() {
 }

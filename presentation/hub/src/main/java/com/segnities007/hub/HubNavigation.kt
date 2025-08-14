@@ -15,28 +15,28 @@ import com.segnities007.templates.TemplatesScreen
 
 @Composable
 fun HubNavigation(
-    onNavigate: (Route) -> Unit,
-){
+    onTopNavigate: (Route) -> Unit
+) {
     val hubNavController = rememberNavController()
 
-    HubUi{
+    HubUi {
         NavHost(
             navController = hubNavController,
             startDestination = HubRoute.Home,
-        ){
-            composable<HubRoute.Home>{
+        ) {
+            composable<HubRoute.Home> {
                 HomeScreen()
             }
-            composable<HubRoute.Items>{
+            composable<HubRoute.Items> {
                 ItemsScreen()
             }
-            composable<HubRoute.Dashboard>{
+            composable<HubRoute.Dashboard> {
                 DashboardScreen()
             }
-            composable<HubRoute.Templates>{
+            composable<HubRoute.Templates> {
                 TemplatesScreen()
             }
-            composable<HubRoute.Setting>{
+            composable<HubRoute.Setting> {
                 SettingScreen()
             }
         }
@@ -44,10 +44,9 @@ fun HubNavigation(
 }
 
 @Composable
-private fun HubUi(
-    content: @Composable () -> Unit,
-){
-    Scaffold{ it
+private fun HubUi(content: @Composable () -> Unit) {
+    Scaffold {
+        it
         content()
     }
 }

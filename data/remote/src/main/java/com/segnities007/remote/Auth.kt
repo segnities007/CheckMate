@@ -15,8 +15,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.segnities007.model.UserStatus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.json.JSONObject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -27,32 +29,35 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  * Google OAuth認証と、DataStoreによるセッション管理を統合したクラス。
  * @param context アプリケーションコンテキスト
  */
-class Auth(private val context: Context) {
-
+class Auth(
+    private val context: Context,
+) {
     private val credentialManager: CredentialManager = CredentialManager.create(context)
 
-    suspend fun checkIsLoggedIn(): Boolean {
-        return context.dataStore.data.map { preferences ->
-            preferences[USER_ID_KEY] != null
-        }.first()
+    suspend fun isAccountCreated(): Boolean {
+        val prefs = context.dataStore.data.first()
+        return prefs[ACCOUNT_CREATED_KEY]?.toBoolean() ?: false
     }
 
-    suspend fun clearUserSession() {
-        context.dataStore.edit { preferences ->
-            preferences.clear()
+    suspend fun markAccountCreated() {
+        context.dataStore.edit { prefs ->
+            prefs[ACCOUNT_CREATED_KEY] = "true"
         }
     }
 
     suspend fun loginWithGoogle() {
-        val request: GetCredentialRequest = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption())
-            .build()
+        val request: GetCredentialRequest =
+            GetCredentialRequest
+                .Builder()
+                .addCredentialOption(googleIdLoginOption())
+                .build()
 
         try {
-            val result = credentialManager.getCredential(
-                request = request,
-                context = context
-            )
+            val result =
+                credentialManager.getCredential(
+                    request = request,
+                    context = context,
+                )
             handleSignIn(result)
         } catch (e: GetCredentialException) {
             Log.e(TAG, "Google login failed or was cancelled.", e)
@@ -71,11 +76,10 @@ class Auth(private val context: Context) {
                         // 取得したIDとトークンを保存する
                         saveUserSession(
                             userId = googleIdTokenCredential.id,
-                            idToken = googleIdTokenCredential.idToken
+                            idToken = googleIdTokenCredential.idToken,
                         )
 
                         Log.d(TAG, "Google ID Token successfully received and saved.")
-
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Failed to parse Google ID Token.", e)
                     }
@@ -90,7 +94,10 @@ class Auth(private val context: Context) {
         }
     }
 
-    private suspend fun saveUserSession(userId: String, idToken: String) {
+    private suspend fun saveUserSession(
+        userId: String,
+        idToken: String,
+    ) {
         context.dataStore.edit { preferences ->
             preferences[USER_ID_KEY] = userId
             preferences[ID_TOKEN_KEY] = idToken
@@ -98,17 +105,41 @@ class Auth(private val context: Context) {
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    private fun googleIdOption(): GetGoogleIdOption {
-        return GetGoogleIdOption.Builder()
+    private fun googleIdLoginOption(): GetGoogleIdOption =
+        GetGoogleIdOption
+            .Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(BuildConfig.WEB_CLIENT_ID)
             .setAutoSelectEnabled(true)
             .setNonce(Uuid.random().toString())
             .build()
+
+    suspend fun getUserStatus(): UserStatus? {
+        val prefs = context.dataStore.data.first()
+        val idToken = prefs[ID_TOKEN_KEY] ?: return null
+
+        return try {
+            val parts = idToken.split(".")
+            if (parts.size != 3) return null
+
+            val payloadJson = String(android.util.Base64.decode(parts[1], android.util.Base64.URL_SAFE))
+            val payload = JSONObject(payloadJson)
+
+            UserStatus(
+                id = payload.optString("sub"),
+                name = payload.optString("name"),
+                email = payload.optString("email"),
+                pictureUrl = payload.optString("picture"),
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse Google ID Token for account info", e)
+            null
+        }
     }
 
     private companion object {
         val USER_ID_KEY = stringPreferencesKey("user_id")
         val ID_TOKEN_KEY = stringPreferencesKey("id_token")
+        val ACCOUNT_CREATED_KEY = stringPreferencesKey("account_created")
     }
 }

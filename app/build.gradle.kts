@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -23,7 +24,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -43,6 +44,10 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":presentation:auth"))
     implementation(project(":presentation:hub"))
+    implementation(project(":core:common"))
+    implementation(project(":core:ui"))
+    implementation(project(":domain:repository"))
+    implementation(project(":domain:model"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -63,10 +68,11 @@ dependencies {
     // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
+    implementation(libs.koin.compose)
 
     // serialization
     implementation(libs.kotlinx.serialization.json)
 
-    //navigation
+    // navigation
     implementation(libs.androidx.navigation.compose)
 }

@@ -20,7 +20,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -42,13 +42,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    //koin
+    // koin
     implementation(libs.koin.androidx.compose)
 
-    //room
+    // room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
 
-    //serialization
+    // serialization
     implementation(libs.kotlinx.serialization.json)
 }

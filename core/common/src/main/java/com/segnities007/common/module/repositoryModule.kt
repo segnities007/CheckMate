@@ -1,0 +1,10 @@
+package com.segnities007.common.module
+
+import com.segnities007.repository.UserRepository
+import com.segnities007.repository.UserRepositoryImpl
+import org.koin.dsl.module
+
+val repositoryModule =
+    module {
+        single<UserRepository> { UserRepositoryImpl(get()) }
+    }

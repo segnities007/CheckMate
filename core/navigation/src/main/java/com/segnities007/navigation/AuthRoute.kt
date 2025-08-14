@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface AuthRoute : Route {
     @Serializable object Login : AuthRoute
+
     @Serializable object Splash : AuthRoute
 }

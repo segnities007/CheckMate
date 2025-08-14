@@ -20,7 +20,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -34,6 +34,21 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:ui"))
+    implementation(project(":domain:repository"))
+    implementation(project(":domain:model"))
+    implementation(project(":data:remote"))
+    implementation(project(":data:repository"))
+    implementation(project(":data:local"))
+    implementation(project(":presentation:login"))
+    implementation(project(":presentation:splash"))
+    implementation(project(":presentation:auth"))
+    implementation(project(":presentation:hub"))
+    implementation(project(":presentation:dashboard"))
+    implementation(project(":presentation:home"))
+    implementation(project(":presentation:items"))
+    implementation(project(":presentation:setting"))
+    implementation(project(":presentation:templates"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
