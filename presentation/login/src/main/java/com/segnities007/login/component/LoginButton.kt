@@ -24,20 +24,21 @@ internal fun LoginButton(
     res: Int? = null,
     text: String,
     onClick: () -> Unit,
-){
+) {
     ElevatedButton(
         modifier = modifier.height(52.dp),
         onClick = onClick,
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            if (res!=null)
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (res != null) {
                 Icon(
                     painter = painterResource(res),
-                    contentDescription = "Google Login Button"
+                    contentDescription = "Google Login Button",
                 )
+            }
             Text(
                 text = text,
                 fontSize = 22.sp,
@@ -51,6 +52,6 @@ internal fun LoginButton(
 
 @Composable
 @Preview
-private fun GoogleLoginButtonPreview(){
+private fun GoogleLoginButtonPreview() {
     LoginButton(onClick = {}, text = "Google Login", res = R.drawable.icons8_google)
 }

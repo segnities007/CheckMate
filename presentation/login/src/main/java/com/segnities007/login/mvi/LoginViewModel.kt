@@ -9,20 +9,21 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
 class LoginViewModel(
-    private val userRepository: UserRepository
-): BaseViewModel<
+    private val userRepository: UserRepository,
+) : BaseViewModel<
         LoginIntent,
         MviState,
-        LoginEffect
-        >(object: MviState {}), KoinComponent{
+        LoginEffect,
+    >(object : MviState {}),
+    KoinComponent {
     override suspend fun handleIntent(intent: LoginIntent) {
-        when(intent){
+        when (intent) {
             LoginIntent.ContinueWithGoogle -> continueWithGoogle()
             LoginIntent.ContinueWithNothing -> continueWithNothing()
         }
     }
 
-    private fun continueWithGoogle(){
+    private fun continueWithGoogle() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 userRepository.loginWithGoogle()
@@ -33,11 +34,10 @@ class LoginViewModel(
         }
     }
 
-    private fun continueWithNothing(){
+    private fun continueWithNothing() {
         viewModelScope.launch(Dispatchers.IO) {
             userRepository.createAccount()
             sendEffect { LoginEffect.NavigateToHub }
         }
     }
-
 }

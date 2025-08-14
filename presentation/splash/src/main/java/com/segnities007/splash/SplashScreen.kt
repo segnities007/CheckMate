@@ -3,11 +3,9 @@ package com.segnities007.splash
 import androidx.compose.runtime.Composable
 
 @Composable
-fun SplashScreen(){
-
+fun SplashScreen() {
 }
 
 @Composable
-private fun SplashUi(){
-
+private fun SplashUi() {
 }

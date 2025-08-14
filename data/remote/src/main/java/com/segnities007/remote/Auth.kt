@@ -29,8 +29,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  * Google OAuth認証と、DataStoreによるセッション管理を統合したクラス。
  * @param context アプリケーションコンテキスト
  */
-class Auth(private val context: Context) {
-
+class Auth(
+    private val context: Context,
+) {
     private val credentialManager: CredentialManager = CredentialManager.create(context)
 
     suspend fun isAccountCreated(): Boolean {
@@ -45,15 +46,18 @@ class Auth(private val context: Context) {
     }
 
     suspend fun loginWithGoogle() {
-        val request: GetCredentialRequest = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdLoginOption())
-            .build()
+        val request: GetCredentialRequest =
+            GetCredentialRequest
+                .Builder()
+                .addCredentialOption(googleIdLoginOption())
+                .build()
 
         try {
-            val result = credentialManager.getCredential(
-                request = request,
-                context = context
-            )
+            val result =
+                credentialManager.getCredential(
+                    request = request,
+                    context = context,
+                )
             handleSignIn(result)
         } catch (e: GetCredentialException) {
             Log.e(TAG, "Google login failed or was cancelled.", e)
@@ -72,11 +76,10 @@ class Auth(private val context: Context) {
                         // 取得したIDとトークンを保存する
                         saveUserSession(
                             userId = googleIdTokenCredential.id,
-                            idToken = googleIdTokenCredential.idToken
+                            idToken = googleIdTokenCredential.idToken,
                         )
 
                         Log.d(TAG, "Google ID Token successfully received and saved.")
-
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Failed to parse Google ID Token.", e)
                     }
@@ -91,7 +94,10 @@ class Auth(private val context: Context) {
         }
     }
 
-    private suspend fun saveUserSession(userId: String, idToken: String) {
+    private suspend fun saveUserSession(
+        userId: String,
+        idToken: String,
+    ) {
         context.dataStore.edit { preferences ->
             preferences[USER_ID_KEY] = userId
             preferences[ID_TOKEN_KEY] = idToken
@@ -99,14 +105,14 @@ class Auth(private val context: Context) {
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    private fun googleIdLoginOption(): GetGoogleIdOption {
-        return GetGoogleIdOption.Builder()
+    private fun googleIdLoginOption(): GetGoogleIdOption =
+        GetGoogleIdOption
+            .Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(BuildConfig.WEB_CLIENT_ID)
             .setAutoSelectEnabled(true)
             .setNonce(Uuid.random().toString())
             .build()
-    }
 
     suspend fun getUserStatus(): UserStatus? {
         val prefs = context.dataStore.data.first()
@@ -123,7 +129,7 @@ class Auth(private val context: Context) {
                 id = payload.optString("sub"),
                 name = payload.optString("name"),
                 email = payload.optString("email"),
-                pictureUrl = payload.optString("picture")
+                pictureUrl = payload.optString("picture"),
             )
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse Google ID Token for account info", e)

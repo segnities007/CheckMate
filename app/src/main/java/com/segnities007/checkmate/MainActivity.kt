@@ -5,13 +5,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.segnities007.auth.AuthNavigation
+import com.segnities007.checkmate.mvi.MainEffect
+import com.segnities007.checkmate.mvi.MainIntent
+import com.segnities007.checkmate.mvi.MainViewModel
 import com.segnities007.checkmate.ui.theme.CheckMateTheme
 import com.segnities007.hub.HubNavigation
 import com.segnities007.navigation.Route
+import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,20 +33,31 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun MainNavigation(){
+private fun MainNavigation() {
     val mainNavController = rememberNavController()
+    val mainViewModel: MainViewModel = koinInject()
+    val state by mainViewModel.state.collectAsState()
+
     val onNavigate: (Route) -> Unit = { route ->
-        mainNavController.navigate(route)
+        mainViewModel.sendIntent(MainIntent.Navigate(route))
+    }
+
+    LaunchedEffect(Unit) {
+        mainViewModel.effect.collect {
+            when (it) {
+                is MainEffect.Navigate -> mainNavController.navigate(it.route)
+            }
+        }
     }
 
     NavHost(
         navController = mainNavController,
         startDestination = Route.Auth,
-    ){
-        composable<Route.Auth>{
+    ) {
+        composable<Route.Auth> {
             AuthNavigation(onNavigate)
         }
-        composable<Route.Hub>{
+        composable<Route.Hub> {
             HubNavigation(onNavigate)
         }
     }
