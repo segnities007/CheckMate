@@ -35,6 +35,7 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
+    implementation(project(":domain:model"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

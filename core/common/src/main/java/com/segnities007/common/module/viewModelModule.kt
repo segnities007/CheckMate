@@ -3,6 +3,7 @@ package com.segnities007.common.module
 import com.segnities007.auth.mvi.AuthViewModel
 import com.segnities007.hub.mvi.HubViewModel
 import com.segnities007.login.mvi.LoginViewModel
+import com.segnities007.setting.mvi.SettingViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -11,4 +12,5 @@ val viewModelModule =
         viewModelOf(::LoginViewModel)
         viewModelOf(::AuthViewModel)
         viewModelOf(::HubViewModel)
+        viewModelOf(::SettingViewModel)
     }
