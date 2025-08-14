@@ -35,6 +35,8 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
+    implementation(project(":core:ui"))
+    implementation(project(":domain:repository"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -55,4 +57,5 @@ dependencies {
     // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
+    implementation(libs.koin.compose)
 }
