@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -23,7 +26,6 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SpaceDashboard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +40,24 @@ fun FloatingNavigationBar(
     currentHubRoute: HubRoute,
     onNavigate: (HubRoute) -> Unit
 ){
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ){
+        FloatingActionBarUi(
+            currentHubRoute = currentHubRoute,
+            onNavigate = onNavigate
+        )
+        Spacer(modifier = Modifier.height(64.dp))
+    }
+}
 
+@Composable
+private fun FloatingActionBarUi(
+    currentHubRoute: HubRoute,
+    onNavigate: (HubRoute) -> Unit
+){
     val info = mapOf(
         HubRoute.Home to listOf(Icons.Filled.Home, Icons.Outlined.Home),
         HubRoute.Items to listOf(Icons.Filled.Category, Icons.Outlined.Category),
@@ -47,31 +66,29 @@ fun FloatingNavigationBar(
         HubRoute.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
     )
 
-    Row(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.onBackground)
-            .padding(2.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        info.forEach { (route, icons) ->
-            NavItemButton(
-                selectedIcon = icons[0],
-                unselectedIcon = icons[1],
-                label = route.toString().substringAfterLast('.'),
-                selected = currentHubRoute == route,
-                onClick = { onNavigate(route) }
-            )
+        Row(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.onBackground)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            info.forEach { (route, icons) ->
+                NavItemButton(
+                    selectedIcon = icons[0],
+                    unselectedIcon = icons[1],
+                    selected = currentHubRoute == route,
+                    onClick = { onNavigate(route) }
+                )
+            }
         }
-    }
 }
 
 @Composable
 private fun NavItemButton(
     selectedIcon: ImageVector,
     unselectedIcon: ImageVector,
-    label: String,
     selected: Boolean,
     onClick: () -> Unit,
 ) {
@@ -82,7 +99,7 @@ private fun NavItemButton(
                 if (selected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onBackground
             )
-            .size(64.dp)
+            .padding(8.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -91,18 +108,11 @@ private fun NavItemButton(
             verticalArrangement = Arrangement.Center,
         ) {
             Icon(
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(42.dp),
                 imageVector = if (selected) selectedIcon else unselectedIcon,
-                contentDescription = label,
+                contentDescription = "",
                 tint = MaterialTheme.colorScheme.background
             )
-            if (selected) {
-                Text(
-                    text = label,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
         }
     }
 }
