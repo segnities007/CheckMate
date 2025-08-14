@@ -4,13 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface HubRoute : Route {
-    @Serializable object Home : HubRoute
+    @Serializable data object Home : HubRoute
 
-    @Serializable object Items : HubRoute
+    @Serializable data object Items : HubRoute
 
-    @Serializable object Dashboard : HubRoute
+    @Serializable data object Dashboard : HubRoute
 
-    @Serializable object Templates : HubRoute
+    @Serializable data object Templates : HubRoute
 
-    @Serializable object Setting : HubRoute
+    @Serializable data object Setting : HubRoute
 }
