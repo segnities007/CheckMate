@@ -1,6 +1,7 @@
 package com.segnities007.hub
 
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,29 +60,35 @@ fun HubNavigation(
         }
     }
 
-    val onNavigate: (HubRoute) -> Unit = { route ->
-        hubViewModel.sendIntent(com.segnities007.hub.mvi.HubIntent.Navigate(route))
-    }
-
     HubUi(bottomBar){
         NavHost(
             navController = hubNavController,
             startDestination = HubRoute.Home,
         ) {
             composable<HubRoute.Home> {
-                HomeScreen()
+                HomeScreen(
+                    currentRoute = currentRoute,
+                )
             }
             composable<HubRoute.Items> {
-                ItemsScreen()
+                ItemsScreen(
+                    currentRoute = currentRoute,
+                )
             }
             composable<HubRoute.Dashboard> {
-                DashboardScreen()
+                DashboardScreen(
+                    currentRoute = currentRoute,
+                )
             }
             composable<HubRoute.Templates> {
-                TemplatesScreen()
+                TemplatesScreen(
+                    currentRoute = currentRoute,
+                )
             }
             composable<HubRoute.Setting> {
-                SettingScreen()
+                SettingScreen(
+                    currentRoute = currentRoute,
+                )
             }
         }
     }
