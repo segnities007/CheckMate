@@ -2,6 +2,7 @@ package com.segnities007.setting
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.segnities007.model.UserStatus
 import com.segnities007.navigation.HubRoute
 import com.segnities007.navigation.Route
 import com.segnities007.setting.mvi.SettingEffect
@@ -10,6 +11,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SettingScreen(
+    userStatus: UserStatus,
     currentRoute: HubRoute,
 ) {
     val settingViewModel: SettingViewModel = koinInject()
@@ -24,10 +26,12 @@ fun SettingScreen(
         }
     }
 
-    SettingUi()
+    SettingUi(userStatus)
 }
 
 @Composable
-private fun SettingUi() {
+private fun SettingUi(
+    userStatus: UserStatus,
+) {
 
 }
