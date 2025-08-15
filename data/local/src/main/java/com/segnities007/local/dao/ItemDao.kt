@@ -1,0 +1,23 @@
+package com.segnities007.local.dao
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.segnities007.local.entity.ItemEntity
+
+@Dao
+interface ItemDao {
+    @Query("SELECT * FROM items")
+    suspend fun getAll(): List<ItemEntity>
+
+    @Query("SELECT * FROM items WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): ItemEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(item: ItemEntity)
+
+    @Query("DELETE FROM items WHERE id = :id")
+    suspend fun deleteById(id: String)
+}
