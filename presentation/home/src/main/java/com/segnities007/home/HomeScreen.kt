@@ -4,9 +4,7 @@ import androidx.compose.runtime.Composable
 import com.segnities007.navigation.HubRoute
 
 @Composable
-fun HomeScreen(
-    currentRoute: HubRoute,
-) {
+fun HomeScreen(currentRoute: HubRoute) {
 }
 
 @Composable

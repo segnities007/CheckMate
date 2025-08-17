@@ -39,17 +39,17 @@ import com.segnities007.navigation.HubRoute
 fun FloatingNavigationBar(
     alpha: Float = 1f,
     currentHubRoute: HubRoute,
-    onNavigate: (HubRoute) -> Unit
-){
+    onNavigate: (HubRoute) -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
-    ){
+    ) {
         FloatingActionBarUi(
             alpha = alpha,
             currentHubRoute = currentHubRoute,
-            onNavigate = onNavigate
+            onNavigate = onNavigate,
         )
         Spacer(modifier = Modifier.height(64.dp))
     }
@@ -59,34 +59,36 @@ fun FloatingNavigationBar(
 private fun FloatingActionBarUi(
     alpha: Float,
     currentHubRoute: HubRoute,
-    onNavigate: (HubRoute) -> Unit
-){
-    val info = mapOf(
-        HubRoute.Home to listOf(Icons.Filled.Home, Icons.Outlined.Home),
-        HubRoute.Items to listOf(Icons.Filled.Category, Icons.Outlined.Category),
-        HubRoute.Dashboard to listOf(Icons.Filled.SpaceDashboard, Icons.Outlined.SpaceDashboard),
-        HubRoute.Templates to listOf(Icons.Filled.ContentPaste, Icons.Outlined.ContentPaste),
-        HubRoute.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
-    )
+    onNavigate: (HubRoute) -> Unit,
+) {
+    val info =
+        mapOf(
+            HubRoute.Home to listOf(Icons.Filled.Home, Icons.Outlined.Home),
+            HubRoute.Items to listOf(Icons.Filled.Category, Icons.Outlined.Category),
+            HubRoute.Dashboard to listOf(Icons.Filled.SpaceDashboard, Icons.Outlined.SpaceDashboard),
+            HubRoute.Templates to listOf(Icons.Filled.ContentPaste, Icons.Outlined.ContentPaste),
+            HubRoute.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
+        )
 
-        Row(
-            modifier = Modifier
+    Row(
+        modifier =
+            Modifier
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.onBackground.copy(alpha = alpha))
                 .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            info.forEach { (route, icons) ->
-                NavItemButton(
-                    alpha = alpha,
-                    selectedIcon = icons[0],
-                    unselectedIcon = icons[1],
-                    selected = currentHubRoute == route,
-                    onClick = { onNavigate(route) }
-                )
-            }
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        info.forEach { (route, icons) ->
+            NavItemButton(
+                alpha = alpha,
+                selectedIcon = icons[0],
+                unselectedIcon = icons[1],
+                selected = currentHubRoute == route,
+                onClick = { onNavigate(route) },
+            )
         }
+    }
 }
 
 @Composable
@@ -98,16 +100,19 @@ private fun NavItemButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(
-                color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = alpha)
-                else androidx.compose.ui.graphics.Color.Transparent
-            )
-            .padding(8.dp)
-            .clickable(onClick = onClick)
-,
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .clip(CircleShape)
+                .background(
+                    color =
+                        if (selected) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+                        } else {
+                            androidx.compose.ui.graphics.Color.Transparent
+                        },
+                ).padding(8.dp)
+                .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -117,23 +122,21 @@ private fun NavItemButton(
                 modifier = Modifier.size(42.dp),
                 imageVector = if (selected) selectedIcon else unselectedIcon,
                 contentDescription = "",
-                tint = MaterialTheme.colorScheme.background
+                tint = MaterialTheme.colorScheme.background.copy(alpha),
             )
         }
     }
 }
 
-
 @Composable
 @Preview
-private fun FloatingNavigationBarPreview(){
+private fun FloatingNavigationBarPreview() {
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-    ){
+    ) {
         FloatingNavigationBar(
             currentHubRoute = HubRoute.Home,
-            onNavigate = {}
+            onNavigate = {},
         )
-
     }
 }

@@ -18,5 +18,5 @@ class UserRepositoryImpl(
         auth.markAccountCreated()
     }
 
-    override suspend fun getUserStatus(): UserStatus = auth.getUserStatus() ?: UserStatus.simpleMock()
+    override suspend fun getUserStatus(): UserStatus = auth.getUserStatus() ?: UserStatus()
 }

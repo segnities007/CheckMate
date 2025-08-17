@@ -14,7 +14,6 @@ class AuthViewModel(
     private val userRepository: UserRepository,
 ) : BaseViewModel<AuthIntent, MviState, AuthEffect>(object : MviState {}),
     KoinComponent {
-
     override suspend fun handleIntent(intent: AuthIntent) {
         when (intent) {
             is AuthIntent.Navigate -> navigate(intent)

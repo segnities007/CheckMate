@@ -2,34 +2,39 @@ package com.segnities007.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.segnities007.model.DomainInstant
 import com.segnities007.model.Item
 import com.segnities007.model.ItemCategory
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @Entity(tableName = "items")
 data class ItemEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val description: String?,
-    val category: ItemCategory,
+    val category: String,
     val imagePath: String?,
-    val createdAt: DomainInstant     // TypeConverter で Long に変換,
+    val createdAt: String,
 )
 
-fun Item.toEntity(): ItemEntity = ItemEntity(
-    id = id,
-    name = name,
-    description = description,
-    category = category,
-    imagePath = imagePath,
-    createdAt = createdAt
-)
+@OptIn(ExperimentalTime::class)
+fun Item.toEntity(): ItemEntity =
+    ItemEntity(
+        id = id,
+        name = name,
+        description = description,
+        category = category.name,
+        imagePath = imagePath,
+        createdAt = createdAt.toString(),
+    )
 
-fun ItemEntity.toDomain(): Item = Item(
-    id = id,
-    name = name,
-    description = description,
-    category = category,
-    imagePath = imagePath,
-    createdAt = createdAt
-)
+@OptIn(ExperimentalTime::class)
+fun ItemEntity.toDomain(): Item =
+    Item(
+        id = id,
+        name = name,
+        description = description,
+        category = ItemCategory.valueOf(category),
+        imagePath = imagePath,
+        createdAt = Instant.parse(createdAt),
+    )

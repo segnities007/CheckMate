@@ -12,19 +12,19 @@ import com.segnities007.ui.button.RectangleButton
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
 
 @Composable
-internal fun AccountButtons(){
+internal fun AccountButtons() {
     val modifier = Modifier.fillMaxWidth()
     Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ){
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         HorizontalDividerWithLabel("Account")
         RectangleButton(
             modifier = modifier,
             text = "Linking",
             endIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {
-                //TODO
-            }
+                // TODO
+            },
         )
     }
 }

@@ -18,13 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HorizontalDividerWithLabel(
-    label: String
-){
+fun HorizontalDividerWithLabel(label: String) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ){
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         HorizontalDivider(Modifier.weight(2f))
         Text(
             text = label,
@@ -39,10 +37,11 @@ fun HorizontalDividerWithLabel(
 @Preview
 private fun HorizontalDividerWithLabelPreview() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ){
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.White),
+    ) {
         HorizontalDividerWithLabel(label = "Label")
     }
 }

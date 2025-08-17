@@ -5,4 +5,4 @@ import com.segnities007.ui.mvi.MviState
 
 data class ItemState(
     val items: List<Item> = emptyList(),
-): MviState
+) : MviState

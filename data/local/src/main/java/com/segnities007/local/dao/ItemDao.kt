@@ -13,11 +13,11 @@ interface ItemDao {
     suspend fun getAll(): List<ItemEntity>
 
     @Query("SELECT * FROM items WHERE id = :id LIMIT 1")
-    suspend fun getById(id: String): ItemEntity?
+    suspend fun getById(id: Int): ItemEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ItemEntity)
 
     @Query("DELETE FROM items WHERE id = :id")
-    suspend fun deleteById(id: String)
+    suspend fun deleteById(id: Int)
 }
