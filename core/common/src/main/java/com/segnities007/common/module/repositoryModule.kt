@@ -6,6 +6,8 @@ import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.ItemRepositoryImpl
 import com.segnities007.repository.UserRepository
 import com.segnities007.repository.UserRepositoryImpl
+import com.segnities007.repository.WeeklyTemplateRepository
+import com.segnities007.repository.WeeklyTemplateRepositoryImpl
 import org.koin.dsl.module
 
 val repositoryModule =
@@ -13,4 +15,5 @@ val repositoryModule =
         single<UserRepository> { UserRepositoryImpl(get()) }
         single<ItemRepository> { ItemRepositoryImpl(get()) }
         single<ImageRepository> { ImageRepositoryImpl(get()) }
+        single<WeeklyTemplateRepository> { WeeklyTemplateRepositoryImpl(get()) }
     }

@@ -15,6 +15,9 @@ interface ItemDao {
     @Query("SELECT * FROM items WHERE id = :id LIMIT 1")
     suspend fun getById(id: Int): ItemEntity?
 
+    @Query("SELECT * FROM items WHERE id IN (:ids)")
+    suspend fun getItemsByIds(ids: List<Int>): List<ItemEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ItemEntity)
 
