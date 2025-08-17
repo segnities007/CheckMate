@@ -29,50 +29,48 @@ import coil3.compose.AsyncImage
 import com.segnities007.model.UserStatus
 
 @Composable
-fun UserStatusCard(
-    userStatus: UserStatus,
-){
+fun UserStatusCard(userStatus: UserStatus) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
-    ){
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+    ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ){
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
             UserIcon(pictureUrl = userStatus.pictureUrl)
             InformationLabels(
                 name = userStatus.name,
-                email = userStatus.email
+                email = userStatus.email,
             )
         }
     }
 }
 
 @Composable
-private fun UserIcon(
-    pictureUrl: String?,
-){
-    if(pictureUrl != null){
+private fun UserIcon(pictureUrl: String?) {
+    if (pictureUrl != null) {
         AsyncImage(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(4.dp),
             model = pictureUrl,
-            contentDescription = null
+            contentDescription = null,
         )
-    }else{
+    } else {
         Icon(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(4.dp),
             imageVector = Icons.Default.Person,
-            contentDescription = null
+            contentDescription = null,
         )
     }
 }
@@ -81,18 +79,18 @@ private fun UserIcon(
 private fun InformationLabels(
     name: String?,
     email: String?,
-){
+) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ){
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Text(
             text = name ?: "NoName",
-            fontSize = 32.sp
+            fontSize = 32.sp,
         )
         Text(
             text = email ?: "NoEmail",
             fontSize = 12.sp,
-            color = Color.Gray
+            color = Color.Gray,
         )
     }
 }
@@ -101,10 +99,11 @@ private fun InformationLabels(
 @Preview
 private fun UserStatusCardPreview() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ){
-        UserStatusCard(UserStatus(name = null, pictureUrl = null, email = null))
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.White),
+    ) {
+        UserStatusCard(UserStatus())
     }
 }

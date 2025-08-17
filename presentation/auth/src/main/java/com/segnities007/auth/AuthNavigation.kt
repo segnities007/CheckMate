@@ -16,9 +16,7 @@ import com.segnities007.splash.SplashScreen
 import org.koin.compose.koinInject
 
 @Composable
-fun AuthNavigation(
-    topNavigate: (Route) -> Unit,
-) {
+fun AuthNavigation(topNavigate: (Route) -> Unit) {
     val authNavController = rememberNavController()
     val authViewModel: AuthViewModel = koinInject()
 

@@ -35,6 +35,9 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
+    implementation(project(":core:ui"))
+    implementation(project(":domain:model"))
+    implementation(project(":domain:repository"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -55,4 +58,14 @@ dependencies {
     // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+
+    // cameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // coil
+    implementation(libs.coil.compose)
 }

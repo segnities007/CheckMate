@@ -26,9 +26,7 @@ import com.segnities007.navigation.Route
 import org.koin.compose.koinInject
 
 @Composable
-fun LoginScreen(
-    topNavigate: (Route) -> Unit,
-) {
+fun LoginScreen(topNavigate: (Route) -> Unit) {
     val loginViewModel: LoginViewModel = koinInject()
 
     LaunchedEffect(Unit) {
@@ -38,7 +36,7 @@ fun LoginScreen(
                     topNavigate(Route.Hub)
                 }
                 is LoginEffect.ShowToast -> {
-                    //TODO
+                    // TODO
                 }
             }
         }

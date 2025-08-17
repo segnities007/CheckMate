@@ -29,8 +29,8 @@ fun RectangleButton(
     text: String,
     startIcon: ImageVector? = null,
     endIcon: ImageVector? = null,
-    onClick: () -> Unit
-){
+    onClick: () -> Unit,
+) {
     ElevatedButton(
         modifier = modifier,
         onClick = onClick,
@@ -39,14 +39,13 @@ fun RectangleButton(
         Row(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ){
-
-            if(startIcon != null){
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (startIcon != null) {
                 Icon(
                     modifier = Modifier.size(28.dp),
                     imageVector = startIcon,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
 
@@ -54,12 +53,12 @@ fun RectangleButton(
                 text = text,
                 fontSize = 24.sp,
             )
-            if(endIcon != null){
+            if (endIcon != null) {
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     modifier = Modifier.size(28.dp),
                     imageVector = endIcon,
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
         }
@@ -68,12 +67,13 @@ fun RectangleButton(
 
 @Composable
 @Preview
-private fun RectangleButtonPreview(){
+private fun RectangleButtonPreview() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ){
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.White),
+    ) {
         RectangleButton(
             startIcon = Icons.Default.Person,
             endIcon = Icons.Default.Person,

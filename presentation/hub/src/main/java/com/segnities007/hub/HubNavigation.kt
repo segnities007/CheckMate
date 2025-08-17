@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.segnities007.dashboard.DashboardScreen
 import com.segnities007.home.HomeScreen
+import com.segnities007.hub.mvi.HubEffect
 import com.segnities007.hub.mvi.HubIntent
 import com.segnities007.hub.mvi.HubViewModel
 import com.segnities007.items.ItemsScreen
@@ -35,26 +36,28 @@ import com.segnities007.ui.bar.FloatingNavigationBar
 import org.koin.compose.koinInject
 
 @Composable
-fun HubNavigation(
-    onTopNavigate: (Route) -> Unit
-) {
+fun HubNavigation(onTopNavigate: (Route) -> Unit) {
     val hubNavController = rememberNavController()
     val hubViewModel: HubViewModel = koinInject()
     val state by hubViewModel.state.collectAsState()
     var currentRoute by remember { mutableStateOf<HubRoute>(HubRoute.Home) }
+    var toastMessage by remember { mutableStateOf("") }
     val updateCurrentRoute: (HubRoute) -> Unit = { currentRoute = it }
+    val showToast: (String) -> Unit = { toastMessage = it }
+    var isValidScroll by remember { mutableStateOf(true) }
+    val updateIsValidScroll: (Boolean) -> Unit = { isValidScroll = it }
 
     LaunchedEffect(Unit) {
         hubViewModel.effect.collect { effect ->
             when (effect) {
-                is com.segnities007.hub.mvi.HubEffect.Navigate -> {
+                is HubEffect.Navigate -> {
                     currentRoute = effect.route
                     hubNavController.navigate(effect.route)
                 }
-                is com.segnities007.hub.mvi.HubEffect.ShowToast -> {
-                    // TODO: show toast
+                is HubEffect.ShowToast -> {
+                    toastMessage = effect.message
                 }
-                com.segnities007.hub.mvi.HubEffect.Logout -> {
+                HubEffect.Logout -> {
                     onTopNavigate(Route.Auth)
                 }
             }
@@ -62,10 +65,12 @@ fun HubNavigation(
     }
 
     HubUi(
+        isValidScroll = isValidScroll,
+        isShowNavigationBar = state.isShowNavigationBar,
         currentRoute = currentRoute,
         updateCurrentRoute = updateCurrentRoute,
-        sendIntent = hubViewModel::sendIntent
-    ){
+        sendIntent = hubViewModel::sendIntent,
+    ) {
         NavHost(
             navController = hubNavController,
             startDestination = HubRoute.Home,
@@ -77,7 +82,10 @@ fun HubNavigation(
             }
             composable<HubRoute.Items> {
                 ItemsScreen(
-                    currentRoute = currentRoute,
+                    showToast = showToast,
+                    updateIsValidScroll = updateIsValidScroll,
+                    showNavigationBar = { hubViewModel.sendIntent(HubIntent.ShowNavigationBar) },
+                    hideNavigationBar = { hubViewModel.sendIntent(HubIntent.HideNavigationBar) },
                 )
             }
             composable<HubRoute.Dashboard> {
@@ -101,15 +109,17 @@ fun HubNavigation(
 
 @Composable
 private fun HubUi(
+    isValidScroll: Boolean,
+    isShowNavigationBar: Boolean,
     currentRoute: HubRoute = HubRoute.Home,
     updateCurrentRoute: (HubRoute) -> Unit,
     sendIntent: (HubIntent) -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val alpha by remember {
         derivedStateOf {
-            (1f - scrollState.value / 300f).coerceIn(0.2f, 1f)
+            (1f - scrollState.value / 500f).coerceIn(0f, 1f)
         }
     }
 
@@ -120,18 +130,25 @@ private fun HubUi(
             onNavigate = {
                 updateCurrentRoute(it)
                 sendIntent(HubIntent.Navigate(it))
-            }
+            },
         )
     }
 
     Scaffold(
-        bottomBar = bottomBar,
-    ){
+        bottomBar = {
+            if (isShowNavigationBar) bottomBar()
+        },
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        ){
+                .then(
+                    if (isValidScroll) {
+                        Modifier.verticalScroll(scrollState)
+                    } else {
+                        Modifier.fillMaxSize()
+                    }
+                ),
+        ) {
             Spacer(modifier = Modifier.padding(top = it.calculateTopPadding()))
             content()
             Spacer(modifier = Modifier.padding(bottom = it.calculateBottomPadding()))

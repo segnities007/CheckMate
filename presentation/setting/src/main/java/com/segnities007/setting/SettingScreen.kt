@@ -25,16 +25,14 @@ import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import org.koin.compose.koinInject
 
 @Composable
-fun SettingScreen(
-    userStatus: UserStatus,
-) {
+fun SettingScreen(userStatus: UserStatus) {
     val settingViewModel: SettingViewModel = koinInject()
 
     LaunchedEffect(Unit) {
         settingViewModel.effect.collect { effect ->
             when (effect) {
                 is SettingEffect.ShowToast -> {
-                    //TODO
+                    // TODO
                 }
             }
         }
@@ -44,15 +42,11 @@ fun SettingScreen(
 }
 
 @Composable
-private fun SettingUi(
-    userStatus: UserStatus,
-) {
+private fun SettingUi(userStatus: UserStatus) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UserStatusCard(userStatus)
         DataButtons()
@@ -65,10 +59,11 @@ private fun SettingUi(
 @Composable
 private fun SettingScreenPreview() {
     SettingUi(
-        userStatus = UserStatus(
-            name = "John Doe",
-            email = "john.doe@example.com",
-            pictureUrl = "a"
-        )
+        userStatus =
+            UserStatus(
+                name = "John Doe",
+                email = "john.doe@example.com",
+                pictureUrl = "a",
+            ),
     )
 }

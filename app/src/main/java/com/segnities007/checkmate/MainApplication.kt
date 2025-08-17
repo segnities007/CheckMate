@@ -2,6 +2,7 @@ package com.segnities007.checkmate
 
 import android.app.Application
 import com.segnities007.checkmate.mvi.MainViewModel
+import com.segnities007.common.module.databaseModule
 import com.segnities007.common.module.remoteModule
 import com.segnities007.common.module.repositoryModule
 import com.segnities007.common.module.viewModelModule
@@ -26,7 +27,7 @@ class MainApplication : Application() {
             // Reference Android context
             androidContext(this@MainApplication)
             // Load modules
-            modules(remoteModule, repositoryModule, viewModelModule, mainModule)
+            modules(remoteModule, repositoryModule, viewModelModule, mainModule, databaseModule)
         }
     }
 }
