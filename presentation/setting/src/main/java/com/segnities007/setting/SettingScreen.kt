@@ -2,43 +2,57 @@ package com.segnities007.setting
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.UserStatus
+import com.segnities007.navigation.HubRoute
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
-import com.segnities007.setting.mvi.SettingEffect
 import com.segnities007.setting.mvi.SettingViewModel
-import com.segnities007.ui.button.RectangleButton
+import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UserStatusCard
-import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import org.koin.compose.koinInject
 
 @Composable
-fun SettingScreen(userStatus: UserStatus) {
+fun SettingScreen(
+    userStatus: UserStatus,
+    setNavigationBar: (@Composable () -> Unit) -> Unit,
+    onNavigate: (HubRoute) -> Unit,
+) {
     val settingViewModel: SettingViewModel = koinInject()
+    val scrollState = rememberScrollState()
 
-    LaunchedEffect(Unit) {
-        settingViewModel.effect.collect { effect ->
-            when (effect) {
-                is SettingEffect.ShowToast -> {
-                    // TODO
-                }
-            }
+    val alpha by remember {
+        derivedStateOf {
+            (1f - scrollState.value / 50f).coerceIn(0f, 1f)
         }
     }
 
-    SettingUi(userStatus)
+    LaunchedEffect(Unit) {
+        setNavigationBar{
+            FloatingNavigationBar(
+                alpha = alpha,
+                currentHubRoute = HubRoute.Setting,
+                onNavigate = onNavigate
+            )
+        }
+    }
+
+    Column(
+        modifier = Modifier.verticalScroll(scrollState)
+    ){
+        SettingUi(userStatus)
+    }
 }
 
 @Composable

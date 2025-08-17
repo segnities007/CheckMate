@@ -25,13 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import com.segnities007.items.mvi.ItemState
+import com.segnities007.items.mvi.ItemsState
 import com.segnities007.model.Item
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemsList(
-    state: ItemState,
+    state: ItemsState,
     onAddItem: () -> Unit,
     onDeleteItem: (Item) -> Unit,
 ) {

@@ -1,7 +1,6 @@
 package com.segnities007.items.mvi
 
 import androidx.lifecycle.viewModelScope
-import com.segnities007.model.Item
 import com.segnities007.repository.ImageRepository
 import com.segnities007.repository.ItemRepository
 import com.segnities007.ui.mvi.BaseViewModel
@@ -16,18 +15,18 @@ import kotlin.uuid.Uuid
 class ItemsViewModel(
     private val itemRepository: ItemRepository,
     private val imageRepository: ImageRepository,
-) : BaseViewModel<ItemIntent, ItemState, ItemEffect>(ItemState()),
+) : BaseViewModel<ItemsIntent, ItemsState, ItemsEffect>(ItemsState()),
     KoinComponent {
     init {
-        sendIntent(ItemIntent.GetAllItems)
+        sendIntent(ItemsIntent.GetAllItems)
     }
 
-    override suspend fun handleIntent(intent: ItemIntent) {
+    override suspend fun handleIntent(intent: ItemsIntent) {
         when (intent) {
-            is ItemIntent.GetAllItems -> getAllItems()
-            is ItemIntent.GetItemById -> getItemById(intent)
-            is ItemIntent.InsertItem -> insertItem(intent)
-            is ItemIntent.DeleteItem -> deleteItem(intent)
+            is ItemsIntent.GetAllItems -> getAllItems()
+            is ItemsIntent.GetItemsById -> getItemById(intent)
+            is ItemsIntent.InsertItems -> insertItem(intent)
+            is ItemsIntent.DeleteItems -> deleteItem(intent)
         }
     }
 
@@ -38,22 +37,22 @@ class ItemsViewModel(
         }
     }
 
-    private fun getItemById(intent: ItemIntent.GetItemById) {
+    private fun getItemById(intent: ItemsIntent.GetItemsById) {
         viewModelScope.launch(Dispatchers.IO) {
             val item = itemRepository.getItemById(intent.id)
             if (item != null) {
                 setState { copy(items = listOf(item)) }
             } else {
-                sendEffect { ItemEffect.ShowToast("アイテムが見つかりません") }
+                sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
             }
         }
     }
 
     @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
-    private fun insertItem(intent: ItemIntent.InsertItem) {
+    private fun insertItem(intent: ItemsIntent.InsertItems) {
         viewModelScope.launch {
             if (intent.item.name.isBlank()) {
-                sendEffect { ItemEffect.ShowToast("アイテム名を入力してください") }
+                sendEffect { ItemsEffect.ShowToast("アイテム名を入力してください") }
                 return@launch
             }
             val newItem =
@@ -65,20 +64,20 @@ class ItemsViewModel(
                     intent.item.copy(imagePath = savedImagePath)
                 }
             itemRepository.insertItem(newItem)
-            sendEffect { ItemEffect.ShowToast("「${newItem.name}」を追加しました") }
+            sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }
             getAllItems()
         }
     }
 
-    private fun deleteItem(intent: ItemIntent.DeleteItem) {
+    private fun deleteItem(intent: ItemsIntent.DeleteItems) {
         viewModelScope.launch(Dispatchers.IO) {
             val itemToDelete = itemRepository.getItemById(intent.id)
             if (itemToDelete != null) {
                 itemToDelete.imagePath?.let { imageRepository.deleteImage(it) }
                 itemRepository.deleteItem(intent.id)
-                sendEffect { ItemEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
+                sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
             } else {
-                sendEffect { ItemEffect.ShowToast("削除対象のアイテムが見つかりません") }
+                sendEffect { ItemsEffect.ShowToast("削除対象のアイテムが見つかりません") }
             }
             getAllItems()
         }
