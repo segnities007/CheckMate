@@ -111,7 +111,13 @@ private fun NavItemButton(
                             androidx.compose.ui.graphics.Color.Transparent
                         },
                 ).padding(8.dp)
-                .clickable(onClick = onClick),
+                .then(
+                    if (alpha > 0f) {
+                        Modifier.clickable(onClick = onClick)
+                    } else {
+                        Modifier
+                    }
+                ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
