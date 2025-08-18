@@ -29,7 +29,7 @@ import kotlin.time.ExperimentalTime
 fun MonthlyCalendarWithItems(
     yearMonth: YearMonth,
     itemsForDate: Map<LocalDate, List<Item>>,
-    onDateSelected: (LocalDate) -> Unit
+    onDateSelected: (LocalDate) -> Unit,
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
 
@@ -41,7 +41,7 @@ fun MonthlyCalendarWithItems(
             onDateSelected = {
                 selectedDate = it
                 onDateSelected(it)
-            }
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -51,7 +51,7 @@ fun MonthlyCalendarWithItems(
             Text(
                 "今日の忘れ物防止アイテム",
                 style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
 
             val itemList = itemsForDate[date].orEmpty()
@@ -60,20 +60,22 @@ fun MonthlyCalendarWithItems(
                 Text(
                     "アイテムはありません",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 )
             } else {
                 ElevatedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    shape = RoundedCornerShape(12.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                 ) {
                     LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(itemList) { item ->
                             ItemRowWithCheckbox(item = item)
@@ -92,22 +94,24 @@ fun ItemRowWithCheckbox(item: Item) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp))
-            .padding(8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp))
+                .padding(8.dp),
     ) {
         Checkbox(
             checked = isChecked,
-            onCheckedChange = { isChecked = it }
+            onCheckedChange = { isChecked = it },
         )
         Spacer(modifier = Modifier.width(8.dp))
         if (!item.imagePath.isNullOrEmpty()) {
             AsyncImage(
                 model = item.imagePath,
                 contentDescription = item.name,
-                modifier = Modifier
-                    .size(40.dp)
+                modifier =
+                    Modifier
+                        .size(40.dp),
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
@@ -125,17 +129,17 @@ fun ItemRowWithCheckbox(item: Item) {
 fun MonthlyCalendar(
     yearMonth: YearMonth,
     selectedDate: LocalDate?,
-    onDateSelected: (LocalDate) -> Unit
+    onDateSelected: (LocalDate) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "${yearMonth.year}年 ${yearMonth.monthValue}月",
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            listOf("月","火","水","木","金","土","日").forEach { day ->
+            listOf("月", "火", "水", "木", "金", "土", "日").forEach { day ->
                 Text(day, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
         }
@@ -147,11 +151,12 @@ fun MonthlyCalendar(
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(7),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(300.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             items(firstDayOfMonth) { Box(modifier = Modifier.size(40.dp)) }
 
@@ -160,19 +165,19 @@ fun MonthlyCalendar(
                 val date = yearMonth.atDay(day)
                 val isSelected = date == selectedDate
                 Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                            shape = MaterialTheme.shapes.small
-                        )
-                        .clickable { onDateSelected(date) },
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                shape = MaterialTheme.shapes.small,
+                            ).clickable { onDateSelected(date) },
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         "$day",
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -186,18 +191,19 @@ fun MonthlyCalendar(
 @Composable
 fun MonthlyCalendarWithItemsPreview() {
     val today = LocalDate.now()
-    val dummyItems = listOf(
-        Item(id = 1, name = "財布", description = "忘れずに持っていく"),
-        Item(id = 2, name = "鍵", description = "自宅と学校"),
-        Item(id = 3, name = "水筒", description = "飲み物")
-    )
+    val dummyItems =
+        listOf(
+            Item(id = 1, name = "財布", description = "忘れずに持っていく"),
+            Item(id = 2, name = "鍵", description = "自宅と学校"),
+            Item(id = 3, name = "水筒", description = "飲み物"),
+        )
     val itemsMap = mapOf(today to dummyItems)
 
     MaterialTheme {
         MonthlyCalendarWithItems(
             yearMonth = YearMonth.now(),
             itemsForDate = itemsMap,
-            onDateSelected = {}
+            onDateSelected = {},
         )
     }
 }

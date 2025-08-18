@@ -1,5 +1,6 @@
 package com.segnities007.hub.mvi
 
+import androidx.compose.runtime.Composable
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.mvi.MviIntent
 
@@ -12,9 +13,17 @@ sealed interface HubIntent : MviIntent {
         val message: String,
     ) : HubIntent
 
-    data object ShowNavigationBar : HubIntent
-
-    data object HideNavigationBar : HubIntent
-
     object Logout : HubIntent
+
+    data class SetBottomBar(
+        val bottomBar: @Composable () -> Unit,
+    ) : HubIntent
+
+    data class SetTopBar(
+        val topBar: @Composable () -> Unit,
+    ) : HubIntent
+
+    data class SetFab(
+        val fab: @Composable () -> Unit,
+    ) : HubIntent
 }

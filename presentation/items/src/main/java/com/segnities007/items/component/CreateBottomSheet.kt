@@ -72,10 +72,11 @@ fun CreateBottomSheet(
         sheetState = sheetState,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Text(
                 "アイテムを追加",
@@ -85,59 +86,64 @@ fun CreateBottomSheet(
             // 写真エリア
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 if (imageUriForPreview != null) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
                         AsyncImage(
                             model = imageUriForPreview,
                             contentDescription = "選択された画像",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp)), // 角丸
-                            contentScale = ContentScale.Crop
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp)),
+                            // 角丸
+                            contentScale = ContentScale.Crop,
                         )
 
                         // 削除ボタンを画像右上に重ねる
                         IconButton(
                             onClick = { imageUriForPreview = null },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(12.dp)
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(50))
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(12.dp)
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
                         ) {
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "画像を削除",
-                                tint = MaterialTheme.colorScheme.onSurface
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                     }
                 } else {
                     OutlinedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(150.dp)
-                            .clickable(enabled = !isLoadingFromParent) { onRequestLaunchCamera() },
-                        shape = RoundedCornerShape(16.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clickable(enabled = !isLoadingFromParent) { onRequestLaunchCamera() },
+                        shape = RoundedCornerShape(16.dp),
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(
                                     Icons.Default.Add,
                                     contentDescription = "追加",
                                     modifier = Modifier.size(36.dp),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
                                 Spacer(Modifier.height(8.dp))
                                 Text("写真を追加", style = MaterialTheme.typography.bodyMedium)
@@ -154,7 +160,7 @@ fun CreateBottomSheet(
                 label = { Text("アイテム名*") },
                 singleLine = true,
                 enabled = !isLoadingFromParent,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             // 説明
@@ -164,13 +170,13 @@ fun CreateBottomSheet(
                 label = { Text("説明") },
                 minLines = 3,
                 enabled = !isLoadingFromParent,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             // カテゴリ
             ExposedDropdownMenuBox(
                 expanded = expandedDropdown,
-                onExpandedChange = { if (!isLoadingFromParent) expandedDropdown = !expandedDropdown }
+                onExpandedChange = { if (!isLoadingFromParent) expandedDropdown = !expandedDropdown },
             ) {
                 OutlinedTextField(
                     value = selectedCategory?.name ?: "",
@@ -180,11 +186,11 @@ fun CreateBottomSheet(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown) },
                     modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true).fillMaxWidth(),
                     enabled = !isLoadingFromParent,
-                    placeholder = { Text("カテゴリを選択") }
+                    placeholder = { Text("カテゴリを選択") },
                 )
                 ExposedDropdownMenu(
                     expanded = expandedDropdown,
-                    onDismissRequest = { expandedDropdown = false }
+                    onDismissRequest = { expandedDropdown = false },
                 ) {
                     ItemCategory.entries.forEach { category ->
                         DropdownMenuItem(
@@ -192,7 +198,7 @@ fun CreateBottomSheet(
                             onClick = {
                                 selectedCategory = category
                                 expandedDropdown = false
-                            }
+                            },
                         )
                     }
                 }
@@ -201,7 +207,7 @@ fun CreateBottomSheet(
             // アクションボタン
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
             ) {
                 TextButton(onClick = onDismiss) { Text("キャンセル") }
                 Spacer(Modifier.width(12.dp))
@@ -211,7 +217,7 @@ fun CreateBottomSheet(
                             onCreateItem(itemName, itemDescription, selectedCategory!!, imageUriForPreview)
                         }
                     },
-                    enabled = itemName.isNotBlank() && selectedCategory != null && !isLoadingFromParent
+                    enabled = itemName.isNotBlank() && selectedCategory != null && !isLoadingFromParent,
                 ) {
                     Text("作成")
                 }

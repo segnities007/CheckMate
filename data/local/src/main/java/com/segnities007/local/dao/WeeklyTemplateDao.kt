@@ -6,16 +6,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeeklyTemplateDao {
+    @Query("SELECT * FROM weekly_templates WHERE daysOfWeek LIKE '%' || :dayName || '%'")
+    fun getTemplatesForDay(dayName: String): Flow<List<WeeklyTemplateEntity>>
 
-    @Query("SELECT * FROM weekly_templates WHERE dayOfWeek = :dayOfWeek")
-    fun getTemplatesByDay(dayOfWeek: String): Flow<List<WeeklyTemplateEntity>>
+    @Query("SELECT * FROM weekly_templates")
+    suspend fun getAllTemplates(): List<WeeklyTemplateEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTemplate(template: WeeklyTemplateEntity)
+    suspend fun insert(template: WeeklyTemplateEntity)
+
+    @Update
+    suspend fun update(template: WeeklyTemplateEntity)
 
     @Delete
-    suspend fun deleteTemplate(template: WeeklyTemplateEntity)
-
-    @Query("DELETE FROM weekly_templates WHERE dayOfWeek = :dayOfWeek")
-    suspend fun deleteByDay(dayOfWeek: String)
+    suspend fun delete(template: WeeklyTemplateEntity)
 }

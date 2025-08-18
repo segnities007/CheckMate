@@ -16,8 +16,9 @@ class HubViewModel(
             is HubIntent.Navigate -> navigate(intent)
             is HubIntent.ShowToast -> showToast(intent)
             HubIntent.Logout -> logout()
-            HubIntent.ShowNavigationBar -> showNavigationBar()
-            HubIntent.HideNavigationBar -> hideNavigationBar()
+            is HubIntent.SetBottomBar -> setBottomBar(intent)
+            is HubIntent.SetFab -> setFab(intent)
+            is HubIntent.SetTopBar -> setTopBar(intent)
         }
     }
 
@@ -28,15 +29,20 @@ class HubViewModel(
         }
     }
 
-    private fun showNavigationBar() {
-        setState { copy(isShowNavigationBar = true) }
+    private fun setBottomBar(intent: HubIntent.SetBottomBar) {
+        setState { copy(bottomBar = intent.bottomBar) }
     }
 
-    private fun hideNavigationBar() {
-        setState { copy(isShowNavigationBar = false) }
+    private fun setTopBar(intent: HubIntent.SetTopBar) {
+        setState { copy(topBar = intent.topBar) }
+    }
+
+    private fun setFab(intent: HubIntent.SetFab) {
+        setState { copy(fab = intent.fab) }
     }
 
     private fun navigate(intent: HubIntent.Navigate) {
+        setState { copy(currentHubRoute = intent.hubRoute) }
         sendEffect { HubEffect.Navigate(intent.hubRoute) }
     }
 

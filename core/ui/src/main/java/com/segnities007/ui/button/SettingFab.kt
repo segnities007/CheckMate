@@ -41,40 +41,40 @@ fun SettingFab(
         // 展開時のメニュー
         AnimatedVisibility(visible = expanded) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 FabActionButton(
                     icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
                     onClick = {
                         onAdd()
                         expanded = false
-                    }
+                    },
                 )
                 FabActionButton(
                     icon = { Icon(Icons.Default.Edit, contentDescription = "Edit") },
                     onClick = {
                         onEdit()
                         expanded = false
-                    }
+                    },
                 )
                 FabActionButton(
                     icon = { Icon(Icons.Default.Delete, contentDescription = "Delete") },
                     onClick = {
                         onDelete()
                         expanded = false
-                    }
+                    },
                 )
             }
         }
 
         // メインのFAB
         FloatingActionButton(
-            onClick = { expanded = !expanded }
+            onClick = { expanded = !expanded },
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Menu",
-                modifier = Modifier.rotate(rotation)
+                modifier = Modifier.rotate(rotation),
             )
         }
     }
@@ -87,7 +87,7 @@ fun FabPreview() {
         SettingFab(
             onAdd = {},
             onEdit = {},
-            onDelete = {}
+            onDelete = {},
         )
     }
 }
