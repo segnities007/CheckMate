@@ -10,7 +10,7 @@ val databaseModule =
         single {
             Room
                 .databaseBuilder(get(), AppDatabase::class.java, "app_database")
-                .fallbackToDestructiveMigration(false)
+                .fallbackToDestructiveMigration(true)
                 .build()
         }
 

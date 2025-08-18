@@ -15,11 +15,13 @@ import com.segnities007.ui.bar.FloatingNavigationBar
 @Composable
 fun HomeScreen(
     setNavigationBar: (@Composable () -> Unit) -> Unit,
+    setFab: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
+        setFab {}
         setNavigationBar {
             FloatingNavigationBar(
                 currentHubRoute = HubRoute.Home,

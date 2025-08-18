@@ -1,5 +1,6 @@
 package com.segnities007.templates
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -10,9 +11,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -58,14 +62,18 @@ fun TemplatesScreen(
                 onNavigate = onNavigate,
             )
         }
-        setFab{
-            FloatingActionButton(
-                onClick = { templatesViewModel.sendIntent(TemplatesIntent.ShowBottomSheet) },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Menu",
-                )
+        setFab {
+            if (alpha > 0f) {
+                FloatingActionButton(
+                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.ShowBottomSheet) },
+                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
+                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Menu",
+                    )
+                }
             }
         }
     }
@@ -81,7 +89,7 @@ fun TemplatesScreen(
     if (state.isShowingBottomSheet) {
         CreateWeeklyTemplateBottomSheet(
             onDismiss = { templatesViewModel.sendIntent(TemplatesIntent.HideBottomSheet) },
-            onCreateTemplate = {title, dayOfWeek ->
+            onCreateTemplate = { title, dayOfWeek ->
                 templatesViewModel.sendIntent(TemplatesIntent.AddWeeklyTemplate(title, dayOfWeek))
             },
             sheetState = sheetState,
@@ -94,6 +102,4 @@ private fun TemplatesUi(state: TemplatesState) {
     WeeklyTemplateList(
         templates = state.weeklyTemplates,
     )
-
-
 }

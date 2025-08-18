@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeeklyTemplateDao {
-    @Query("SELECT * FROM weekly_templates WHERE dayOfWeek = :day")
-    fun getTemplatesForDay(day: String): Flow<List<WeeklyTemplateEntity>>
+    @Query("SELECT * FROM weekly_templates WHERE daysOfWeek LIKE '%' || :dayName || '%'")
+    fun getTemplatesForDay(dayName: String): Flow<List<WeeklyTemplateEntity>>
 
     @Query("SELECT * FROM weekly_templates")
     suspend fun getAllTemplates(): List<WeeklyTemplateEntity>

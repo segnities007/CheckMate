@@ -32,6 +32,7 @@ fun SettingScreen(
     innerPadding: PaddingValues,
     userStatus: UserStatus,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
+    setFab: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val settingViewModel: SettingViewModel = koinInject()
@@ -51,6 +52,7 @@ fun SettingScreen(
                 onNavigate = onNavigate,
             )
         }
+        setFab {}
     }
 
     Column(

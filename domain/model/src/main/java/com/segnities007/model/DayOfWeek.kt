@@ -1,6 +1,6 @@
 package com.segnities007.model
 
-enum class WeekDay {
+enum class DayOfWeek {
     MONDAY,
     TUESDAY,
     WEDNESDAY,
@@ -8,5 +8,4 @@ enum class WeekDay {
     FRIDAY,
     SATURDAY,
     SUNDAY,
-    UNSPECIFIED,
 }

@@ -37,6 +37,7 @@ import kotlin.time.ExperimentalTime
 fun ItemsScreen(
     innerPadding: PaddingValues,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
+    setFab: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val itemsViewModel: ItemsViewModel = koinInject()
@@ -62,6 +63,7 @@ fun ItemsScreen(
     }
 
     LaunchedEffect(showCamera) {
+        setFab {}
         if (showCamera) {
             setNavigationBar {}
         } else {

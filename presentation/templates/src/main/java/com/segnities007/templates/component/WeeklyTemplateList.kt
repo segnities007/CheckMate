@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.segnities007.model.WeekDay
+import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 
 @Composable
@@ -75,14 +75,12 @@ fun WeeklyTemplateListPreview() {
             WeeklyTemplate(
                 id = 1,
                 title = "月曜日の忘れ物",
-                dayOfWeek = WeekDay.MONDAY,
                 itemIds = listOf(1, 2, 3),
                 itemCheckStates = mapOf(1 to false, 2 to true, 3 to false),
             ),
             WeeklyTemplate(
                 id = 2,
                 title = "火曜日の忘れ物",
-                dayOfWeek = WeekDay.TUESDAY,
                 itemIds = listOf(4, 5),
                 itemCheckStates = mapOf(4 to true, 5 to false),
             ),

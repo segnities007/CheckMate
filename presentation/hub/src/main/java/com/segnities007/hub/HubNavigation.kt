@@ -51,6 +51,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
         ) {
             composable<HubRoute.Home> {
                 HomeScreen(
+                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
                     onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
                 )
@@ -58,6 +59,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
             composable<HubRoute.Items> {
                 ItemsScreen(
                     innerPadding = innerPadding,
+                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
                     onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
                 )
@@ -80,6 +82,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
                 SettingScreen(
                     innerPadding = innerPadding,
                     userStatus = state.userStatus,
+                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
                     onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
                 )

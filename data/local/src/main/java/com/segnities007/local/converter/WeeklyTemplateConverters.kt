@@ -1,6 +1,7 @@
 package com.segnities007.local.converter
 
 import androidx.room.TypeConverter
+import com.segnities007.model.DayOfWeek
 
 class WeeklyTemplateConverters {
     @TypeConverter
@@ -15,6 +16,17 @@ class WeeklyTemplateConverters {
                 val (key, v) = it.split(":")
                 key.toInt() to v.toBoolean()
             }
+        }
+
+    @TypeConverter
+    fun fromDayOfWeekSetToString(days: Set<DayOfWeek>): String = days.joinToString(",") { it.name }
+
+    @TypeConverter
+    fun toDayOfWeekSet(data: String): Set<DayOfWeek> =
+        if (data.isEmpty()) {
+            emptySet()
+        } else {
+            data.split(',').map { dayString -> DayOfWeek.valueOf(dayString) }.toSet()
         }
 
     @TypeConverter

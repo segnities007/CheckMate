@@ -1,6 +1,6 @@
 package com.segnities007.templates.mvi
 
-import com.segnities007.model.WeekDay
+import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.ui.mvi.MviIntent
 
@@ -9,7 +9,7 @@ sealed interface TemplatesIntent : MviIntent {
 
     data class AddWeeklyTemplate(
         val title: String,
-        val weekDay: WeekDay,
+        val daysOfWeek: Set<DayOfWeek>,
     ) : TemplatesIntent
 
     data class EditWeeklyTemplate(
@@ -21,5 +21,6 @@ sealed interface TemplatesIntent : MviIntent {
     ) : TemplatesIntent
 
     data object ShowBottomSheet : TemplatesIntent
+
     data object HideBottomSheet : TemplatesIntent
 }

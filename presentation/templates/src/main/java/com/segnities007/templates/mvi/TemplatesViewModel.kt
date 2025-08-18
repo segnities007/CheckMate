@@ -46,8 +46,8 @@ class TemplatesViewModel(
             weeklyTemplateRepository.insertTemplate(
                 WeeklyTemplate(
                     title = intent.title,
-                    dayOfWeek = intent.weekDay,
-                )
+                    daysOfWeek = intent.daysOfWeek,
+                ),
             )
             getAllWeeklyTemplates()
         }
