@@ -2,12 +2,14 @@ package com.segnities007.templates.mvi
 
 import androidx.lifecycle.viewModelScope
 import com.segnities007.model.WeeklyTemplate
+import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import kotlinx.coroutines.launch
 
 class TemplatesViewModel(
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
+    private val itemRepository: ItemRepository,
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
         TemplatesState(),
     ) {
@@ -19,11 +21,26 @@ class TemplatesViewModel(
             TemplatesIntent.GetAllWeeklyTemplates -> getAllWeeklyTemplates()
             TemplatesIntent.HideBottomSheet -> hideBottomSheet()
             TemplatesIntent.ShowBottomSheet -> showBottomSheet()
+            is TemplatesIntent.SelectTemplate -> selectTemplate(intent)
+            TemplatesIntent.GetAllItems -> getAllItems()
         }
     }
 
     init {
         getAllWeeklyTemplates()
+        getAllItems()
+    }
+
+    private fun getAllItems() {
+        viewModelScope.launch {
+            val items = itemRepository.getAllItems()
+            setState { copy(allItems = items) }
+        }
+    }
+
+    private fun selectTemplate(intent: TemplatesIntent.SelectTemplate) {
+        setState { copy(selectedTemplate = intent.weeklyTemplate) }
+        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
     }
 
     private fun showBottomSheet() {

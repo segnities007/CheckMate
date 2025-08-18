@@ -31,8 +31,9 @@ import org.koin.compose.koinInject
 fun SettingScreen(
     innerPadding: PaddingValues,
     userStatus: UserStatus,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     setFab: (@Composable () -> Unit) -> Unit,
+    setTopBar: (@Composable () -> Unit) -> Unit,
+    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val settingViewModel: SettingViewModel = koinInject()
@@ -53,6 +54,7 @@ fun SettingScreen(
             )
         }
         setFab {}
+        setTopBar {}
     }
 
     Column(

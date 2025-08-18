@@ -1,89 +1,80 @@
 package com.segnities007.templates
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.TemplatesRoute
 import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
-import com.segnities007.templates.component.WeeklyTemplateList
+import com.segnities007.templates.mvi.TemplatesEffect
 import com.segnities007.templates.mvi.TemplatesIntent
-import com.segnities007.templates.mvi.TemplatesState
 import com.segnities007.templates.mvi.TemplatesViewModel
-import com.segnities007.ui.bar.FloatingNavigationBar
-import com.segnities007.ui.button.SettingFab
+import com.segnities007.templates.page.WeeklyTemplateList
+import com.segnities007.templates.page.WeeklyTemplateSelector
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplatesScreen(
     innerPadding: PaddingValues,
-    setBottomBar: (@Composable () -> Unit) -> Unit,
     setFab: (@Composable () -> Unit) -> Unit,
+    setTopBar: (@Composable () -> Unit) -> Unit,
+    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val templatesViewModel: TemplatesViewModel = koinInject()
     val state by templatesViewModel.state.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val scrollState = rememberScrollState()
-
-    val alpha by remember {
-        derivedStateOf {
-            (1f - scrollState.value / 100f).coerceIn(0f, 1f)
-        }
-    }
+    val navController = rememberNavController()
 
     LaunchedEffect(Unit) {
-        setBottomBar {
-            FloatingNavigationBar(
-                alpha = alpha,
-                currentHubRoute = HubRoute.Templates,
-                onNavigate = onNavigate,
-            )
-        }
-        setFab {
-            if (alpha > 0f) {
-                FloatingActionButton(
-                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.ShowBottomSheet) },
-                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Menu",
-                    )
+        templatesViewModel.effect.collect { effect ->
+            when (effect) {
+                is TemplatesEffect.NavigateToWeeklyTemplateSelector -> {
+                    navController.navigate(TemplatesRoute.WeeklyTemplateSelector)
+                }
+                is TemplatesEffect.ShowToast -> {
+                    // TODO
                 }
             }
         }
     }
 
-    Column(
-        modifier = Modifier.verticalScroll(scrollState),
+    NavHost(
+        navController = navController,
+        startDestination = TemplatesRoute.WeeklyTemplateList,
     ) {
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        TemplatesUi(state)
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        composable<TemplatesRoute.WeeklyTemplateList> {
+            WeeklyTemplateList(
+                innerPadding = innerPadding,
+                setNavigationBar = setNavigationBar,
+                setFab = setFab,
+                onNavigate = onNavigate,
+                sendIntent = templatesViewModel::sendIntent,
+                templates = state.weeklyTemplates,
+                setTopBar = setTopBar,
+                onTemplateClick = { templatesViewModel.sendIntent(TemplatesIntent.SelectTemplate(it)) },
+            )
+        }
+        composable<TemplatesRoute.WeeklyTemplateSelector> {
+            WeeklyTemplateSelector(
+                innerPadding = innerPadding,
+                setNavigationBar = setNavigationBar,
+                setTopBar = setTopBar,
+                setFab = setFab,
+                template = state.selectedTemplate,
+                allItems = state.allItems,
+                onTemplatesNavigate = { navController.navigate(TemplatesRoute.WeeklyTemplateList) },
+            )
+        }
     }
 
     if (state.isShowingBottomSheet) {
@@ -95,11 +86,4 @@ fun TemplatesScreen(
             sheetState = sheetState,
         )
     }
-}
-
-@Composable
-private fun TemplatesUi(state: TemplatesState) {
-    WeeklyTemplateList(
-        templates = state.weeklyTemplates,
-    )
 }
