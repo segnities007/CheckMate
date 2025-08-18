@@ -2,6 +2,9 @@ package com.segnities007.items
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,9 +35,9 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun ItemsScreen(
+    innerPadding: PaddingValues,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
-
 ) {
     val itemsViewModel: ItemsViewModel = koinInject()
     val state by itemsViewModel.state.collectAsStateWithLifecycle()
@@ -52,7 +55,7 @@ fun ItemsScreen(
         itemsViewModel.effect.collect { effect ->
             when (effect) {
                 is ItemsEffect.ShowToast -> {
-                    //TODO
+                    // TODO
                 }
             }
         }
@@ -62,30 +65,35 @@ fun ItemsScreen(
         if (showCamera) {
             setNavigationBar {}
         } else {
-            setNavigationBar{
+            setNavigationBar {
                 FloatingNavigationBar(
                     alpha = alpha,
                     currentHubRoute = HubRoute.Items,
-                    onNavigate = onNavigate
+                    onNavigate = onNavigate,
                 )
             }
         }
     }
 
     Column(
-        modifier = Modifier.then(
-            if (showCamera) Modifier
-            else Modifier.verticalScroll(scrollState)
-        )
-    ){
+        modifier =
+            Modifier.then(
+                if (showCamera) {
+                    Modifier
+                } else {
+                    Modifier.verticalScroll(scrollState)
+                },
+            ),
+    ) {
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         ItemsUi(
             showCamera = showCamera,
             state = state,
             sendIntent = itemsViewModel::sendIntent,
             updateShowCamera = updateShowCamera,
         )
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
@@ -95,14 +103,10 @@ private fun ItemsUi(
     showCamera: Boolean,
     sendIntent: (ItemsIntent) -> Unit,
     updateShowCamera: (Boolean) -> Unit,
-){
-
+) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var capturedImageUriForBottomSheet by remember { mutableStateOf<Uri?>(null) }
     var capturedTempPathForViewModel by remember { mutableStateOf<String?>(null) }
-
-
-
 
     if (showCamera) {
         CameraCapture(

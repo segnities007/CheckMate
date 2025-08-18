@@ -26,18 +26,18 @@ fun DashboardScreen(
     }
 
     LaunchedEffect(Unit) {
-        setNavigationBar{
+        setNavigationBar {
             FloatingNavigationBar(
                 alpha = alpha,
                 currentHubRoute = HubRoute.Dashboard,
-                onNavigate = onNavigate
+                onNavigate = onNavigate,
             )
         }
     }
 
     Column(
-        modifier = Modifier.verticalScroll(scrollState)
-    ){
+        modifier = Modifier.verticalScroll(scrollState),
+    ) {
         DashboardUi()
     }
 }

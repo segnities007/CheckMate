@@ -8,15 +8,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class WeeklyTemplateRepositoryImpl(
-    private val dao: WeeklyTemplateDao
+    private val dao: WeeklyTemplateDao,
 ) : WeeklyTemplateRepository {
-
     override fun getTemplatesForDay(day: String): Flow<List<WeeklyTemplate>> =
         dao.getTemplatesForDay(day).map { list -> list.map { it.toDomain() } }
 
-    override suspend fun getAllTemplates(): List<WeeklyTemplate> {
-        return dao.getAllTemplates().map { it.toDomain() }
-    }
+    override suspend fun getAllTemplates(): List<WeeklyTemplate> = dao.getAllTemplates().map { it.toDomain() }
 
     override suspend fun insertTemplate(template: WeeklyTemplate) {
         dao.insert(template.toEntity())

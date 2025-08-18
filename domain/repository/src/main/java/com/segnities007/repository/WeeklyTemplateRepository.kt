@@ -5,8 +5,12 @@ import kotlinx.coroutines.flow.Flow
 
 interface WeeklyTemplateRepository {
     fun getTemplatesForDay(day: String): Flow<List<WeeklyTemplate>>
+
     suspend fun getAllTemplates(): List<WeeklyTemplate>
+
     suspend fun insertTemplate(template: WeeklyTemplate)
+
     suspend fun updateTemplate(template: WeeklyTemplate)
+
     suspend fun deleteTemplate(template: WeeklyTemplate)
 }

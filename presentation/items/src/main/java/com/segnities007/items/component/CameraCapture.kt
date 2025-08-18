@@ -11,12 +11,14 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -34,10 +38,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
-import androidx.compose.foundation.Canvas
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.platform.LocalContext
 
 private fun createImageFile(context: Context): File {
     val timeStamp =
@@ -65,12 +65,13 @@ fun CameraCapture(
         try {
             cameraProvider.unbindAll()
             preview.surfaceProvider = previewView.surfaceProvider
-            val camera = cameraProvider.bindToLifecycle(
-                lifecycleOwner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
-                preview,
-                imageCapture
-            )
+            val camera =
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    preview,
+                    imageCapture,
+                )
 
             val zoomState = camera.cameraInfo.zoomState.value
             zoomState?.let {
@@ -80,11 +81,12 @@ fun CameraCapture(
                 Log.d("CameraX", "Zoom set to $clampedZoom (range: ${it.minZoomRatio} - ${it.maxZoomRatio})")
             }
         } catch (exc: Exception) {
-            Toast.makeText(
-                context,
-                "カメラの起動に失敗しました: ${exc.message}",
-                Toast.LENGTH_LONG
-            ).show()
+            Toast
+                .makeText(
+                    context,
+                    "カメラの起動に失敗しました: ${exc.message}",
+                    Toast.LENGTH_LONG,
+                ).show()
             onCancel()
         }
     }
@@ -97,7 +99,7 @@ fun CameraCapture(
                     scaleType = PreviewView.ScaleType.FILL_CENTER
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
 
         val backgroundColor = MaterialTheme.colorScheme.primaryContainer
@@ -107,26 +109,28 @@ fun CameraCapture(
             val left = (size.width - boxWidth) / 2
             val top = (size.height - boxHeight) / 2
 
-            val path = Path().apply {
-                addRect(Rect(0f, 0f, size.width, size.height))
-                addRect(Rect(left, top, left + boxWidth, top + boxHeight))
-                fillType = PathFillType.EvenOdd
-            }
+            val path =
+                Path().apply {
+                    addRect(Rect(0f, 0f, size.width, size.height))
+                    addRect(Rect(left, top, left + boxWidth, top + boxHeight))
+                    fillType = PathFillType.EvenOdd
+                }
             drawPath(path, color = backgroundColor)
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Button(
                 onClick = onCancel,
                 modifier = Modifier.size(56.dp),
-                shape = CircleShape
+                shape = CircleShape,
             ) { Text("✕", textAlign = TextAlign.Center) }
 
             Button(
@@ -146,18 +150,19 @@ fun CameraCapture(
                             }
 
                             override fun onError(exception: ImageCaptureException) {
-                                Toast.makeText(
-                                    context,
-                                    "写真撮影に失敗しました: ${exception.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "写真撮影に失敗しました: ${exception.message}",
+                                        Toast.LENGTH_LONG,
+                                    ).show()
                                 Log.e("CameraCapture", "takePicture onError: ${exception.message}", exception)
                             }
-                        }
+                        },
                     )
                 },
                 modifier = Modifier.size(72.dp),
-                shape = CircleShape
+                shape = CircleShape,
             ) { Text("●") }
 
             Spacer(modifier = Modifier.size(56.dp))

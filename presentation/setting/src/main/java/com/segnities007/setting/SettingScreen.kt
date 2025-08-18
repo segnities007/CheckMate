@@ -2,6 +2,10 @@ package com.segnities007.setting
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,6 +29,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun SettingScreen(
+    innerPadding: PaddingValues,
     userStatus: UserStatus,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
@@ -39,19 +44,24 @@ fun SettingScreen(
     }
 
     LaunchedEffect(Unit) {
-        setNavigationBar{
+        setNavigationBar {
             FloatingNavigationBar(
                 alpha = alpha,
                 currentHubRoute = HubRoute.Setting,
-                onNavigate = onNavigate
+                onNavigate = onNavigate,
             )
         }
     }
 
     Column(
-        modifier = Modifier.verticalScroll(scrollState)
-    ){
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
+    ) {
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         SettingUi(userStatus)
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }
 

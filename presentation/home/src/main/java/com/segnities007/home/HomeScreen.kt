@@ -19,25 +19,18 @@ fun HomeScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    val alpha by remember {
-        derivedStateOf {
-            (1f - scrollState.value / 100f).coerceIn(0f, 1f)
-        }
-    }
-
     LaunchedEffect(Unit) {
-        setNavigationBar{
+        setNavigationBar {
             FloatingNavigationBar(
-                alpha = alpha,
                 currentHubRoute = HubRoute.Home,
-                onNavigate = onNavigate
+                onNavigate = onNavigate,
             )
         }
     }
 
     Column(
-        modifier = Modifier.verticalScroll(scrollState)
-    ){
+        modifier = Modifier.verticalScroll(scrollState),
+    ) {
         HomeUi()
     }
 }

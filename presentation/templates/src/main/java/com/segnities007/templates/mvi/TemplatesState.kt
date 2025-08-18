@@ -5,4 +5,5 @@ import com.segnities007.ui.mvi.MviState
 
 data class TemplatesState(
     val weeklyTemplates: List<WeeklyTemplate> = emptyList(),
-): MviState
+    val isShowingBottomSheet: Boolean = false,
+) : MviState

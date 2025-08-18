@@ -116,7 +116,7 @@ private fun NavItemButton(
                         Modifier.clickable(onClick = onClick)
                     } else {
                         Modifier
-                    }
+                    },
                 ),
         contentAlignment = Alignment.Center,
     ) {

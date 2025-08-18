@@ -8,11 +8,22 @@ sealed interface HubIntent : MviIntent {
     data class Navigate(
         val hubRoute: HubRoute,
     ) : HubIntent
+
     data class ShowToast(
         val message: String,
     ) : HubIntent
+
     object Logout : HubIntent
-    data class SetBottomBar(val bottomBar: @Composable () -> Unit ): HubIntent
-    data class SetTopBar(val topBar: @Composable () -> Unit ): HubIntent
-    data class SetFab(val fab: @Composable () -> Unit ): HubIntent
+
+    data class SetBottomBar(
+        val bottomBar: @Composable () -> Unit,
+    ) : HubIntent
+
+    data class SetTopBar(
+        val topBar: @Composable () -> Unit,
+    ) : HubIntent
+
+    data class SetFab(
+        val fab: @Composable () -> Unit,
+    ) : HubIntent
 }
