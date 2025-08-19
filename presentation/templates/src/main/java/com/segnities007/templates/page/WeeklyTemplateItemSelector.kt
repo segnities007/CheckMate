@@ -6,18 +6,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CardDefaults
@@ -30,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -39,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.segnities007.model.Item
 import com.segnities007.model.WeeklyTemplate
+import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.ui.bar.ConfirmBar
+import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,21 +48,31 @@ fun WeeklyTemplateSelector(
     template: WeeklyTemplate,
     allItems: List<Item>,
     innerPadding: PaddingValues,
-    onTemplatesNavigate: () -> Unit,
+    sendIntent: (TemplatesIntent) -> Unit,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
 ) {
+    val selectedStates = remember {
+        mutableStateMapOf<Int, Boolean>().apply {
+            putAll(template.itemStates)
+        }
+    }
+
     LaunchedEffect(Unit) {
         setFab {}
         setTopBar {}
         setNavigationBar {
             ConfirmBar(
                 onConfirm = {
-                    onTemplatesNavigate()
+                    sendIntent(
+                        TemplatesIntent.EditWeeklyTemplate(
+                            template.copy(itemStates = selectedStates.toMap())
+                        )
+                    )
                 },
                 onCancel = {
-                    onTemplatesNavigate()
+                    sendIntent(TemplatesIntent.NavigateToWeeklyTemplateList)
                 },
             )
         }
@@ -70,42 +80,47 @@ fun WeeklyTemplateSelector(
 
     WeeklyTemplateGridContent(
         innerPadding = innerPadding,
-        template = template,
         allItems = allItems,
+        selectedStates = selectedStates
     )
 }
 
 @Composable
 fun WeeklyTemplateGridContent(
     innerPadding: PaddingValues,
-    template: WeeklyTemplate,
+    selectedStates: SnapshotStateMap<Int, Boolean>,
     allItems: List<Item>,
 ) {
-    val checkStates = remember {
-        mutableStateMapOf<Int, Boolean>().apply { putAll(template.itemCheckStates) }
-    }
-
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 160.dp),
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 8.dp),
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = innerPadding, // ← これで上下の余白を安全に確保
+        contentPadding = innerPadding,
     ) {
+        item(span = { GridItemSpan(maxLineSpan) }){
+            HorizontalDividerWithLabel("登録・未登録のアイテム")
+        }
         items(allItems, key = { it.id }) { item ->
-            val checked = checkStates[item.id] ?: false
+            val isInTemplate = selectedStates.containsKey(item.id)
 
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clickable { checkStates[item.id] = !checked },
+                    .clickable {
+                        if (isInTemplate) {
+                            selectedStates.remove(item.id)
+                        } else {
+                            selectedStates[item.id] = false // 初期状態は未チェック
+                        }
+                    },
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                 colors = CardDefaults.cardColors(
                     containerColor =
-                        if (checked) MaterialTheme.colorScheme.primaryContainer
+                        if (isInTemplate) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(16.dp)
@@ -131,7 +146,7 @@ fun WeeklyTemplateGridContent(
                             )
                         }
 
-                        if (checked) {
+                        if (isInTemplate) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = "Selected",
@@ -161,7 +176,6 @@ fun WeeklyTemplateGridContent(
     }
 }
 
-
 @OptIn(ExperimentalTime::class)
 @Preview(showBackground = true)
 @Composable
@@ -177,14 +191,16 @@ fun WeeklyTemplateGridContentPreview() {
         WeeklyTemplate(
             id = 1,
             title = "旅行テンプレート",
-            itemCheckStates = mapOf(1 to true, 2 to false, 3 to true, 4 to false),
+            itemStates = mapOf(1 to false, 3 to true), // 1と3がテンプレートに含まれている
         )
 
     MaterialTheme {
         WeeklyTemplateGridContent(
-            template = dummyTemplate,
             allItems = dummyItems,
             innerPadding = PaddingValues(0.dp),
+            selectedStates = remember {
+                mutableStateMapOf<Int, Boolean>().apply { putAll(dummyTemplate.itemStates) }
+            },
         )
     }
 }

@@ -29,4 +29,7 @@ sealed interface TemplatesIntent : MviIntent {
     data object ShowBottomSheet : TemplatesIntent
 
     data object HideBottomSheet : TemplatesIntent
+
+    data object NavigateToWeeklyTemplateSelector : TemplatesIntent
+    data object NavigateToWeeklyTemplateList : TemplatesIntent
 }

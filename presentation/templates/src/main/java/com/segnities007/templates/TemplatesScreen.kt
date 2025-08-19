@@ -44,6 +44,9 @@ fun TemplatesScreen(
                 is TemplatesEffect.ShowToast -> {
                     // TODO
                 }
+
+                TemplatesEffect.NavigateToWeeklyTemplateList ->
+                    navController.navigate(TemplatesRoute.WeeklyTemplateList)
             }
         }
     }
@@ -66,13 +69,13 @@ fun TemplatesScreen(
         }
         composable<TemplatesRoute.WeeklyTemplateSelector> {
             WeeklyTemplateSelector(
+                sendIntent = templatesViewModel::sendIntent,
                 innerPadding = innerPadding,
                 setNavigationBar = setNavigationBar,
                 setTopBar = setTopBar,
                 setFab = setFab,
                 template = state.selectedTemplate,
                 allItems = state.allItems,
-                onTemplatesNavigate = { navController.navigate(TemplatesRoute.WeeklyTemplateList) },
             )
         }
     }

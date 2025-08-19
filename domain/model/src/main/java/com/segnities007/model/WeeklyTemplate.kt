@@ -4,6 +4,5 @@ data class WeeklyTemplate(
     val id: Int = 0,
     val title: String = "",
     val daysOfWeek: Set<DayOfWeek> = emptySet(),
-    val itemIds: List<Int> = emptyList(),
-    val itemCheckStates: Map<Int, Boolean> = emptyMap(),
+    val itemStates: Map<Int, Boolean> = emptyMap()
 )

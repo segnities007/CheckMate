@@ -23,6 +23,8 @@ class TemplatesViewModel(
             TemplatesIntent.ShowBottomSheet -> showBottomSheet()
             is TemplatesIntent.SelectTemplate -> selectTemplate(intent)
             TemplatesIntent.GetAllItems -> getAllItems()
+            TemplatesIntent.NavigateToWeeklyTemplateList -> navigateToWeeklyTemplateList()
+            TemplatesIntent.NavigateToWeeklyTemplateSelector -> navigateToWeeklyTemplateSelector()
         }
     }
 
@@ -30,6 +32,15 @@ class TemplatesViewModel(
         getAllWeeklyTemplates()
         getAllItems()
     }
+
+    private fun navigateToWeeklyTemplateList() {
+        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+    }
+
+    private fun navigateToWeeklyTemplateSelector() {
+        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
+    }
+
 
     private fun getAllItems() {
         viewModelScope.launch {
@@ -74,6 +85,7 @@ class TemplatesViewModel(
         viewModelScope.launch {
             weeklyTemplateRepository.updateTemplate(intent.weeklyTemplate)
             getAllWeeklyTemplates()
+            navigateToWeeklyTemplateList()
         }
     }
 

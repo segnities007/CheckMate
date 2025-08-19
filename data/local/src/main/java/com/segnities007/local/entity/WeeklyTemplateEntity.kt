@@ -13,8 +13,7 @@ data class WeeklyTemplateEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
     val daysOfWeek: Set<DayOfWeek> = emptySet(),
-    val itemIds: List<Int> = emptyList(),
-    val itemCheckStates: Map<Int, Boolean> = emptyMap(),
+    val itemStates: Map<Int, Boolean> = emptyMap()
 )
 
 fun WeeklyTemplateEntity.toDomain(): WeeklyTemplate =
@@ -22,8 +21,7 @@ fun WeeklyTemplateEntity.toDomain(): WeeklyTemplate =
         id = id,
         title = title,
         daysOfWeek = daysOfWeek,
-        itemIds = this.itemIds,
-        itemCheckStates = this.itemCheckStates,
+        itemStates = itemStates,
     )
 
 fun WeeklyTemplate.toEntity(): WeeklyTemplateEntity =
@@ -31,6 +29,5 @@ fun WeeklyTemplate.toEntity(): WeeklyTemplateEntity =
         id = id,
         title = title,
         daysOfWeek = daysOfWeek,
-        itemIds = this.itemIds,
-        itemCheckStates = this.itemCheckStates,
+        itemStates = itemStates,
     )
