@@ -1,4 +1,4 @@
-package com.segnities007.model
+package com.segnities007.model.item
 
 enum class ItemCategory {
     STUDY_SUPPLIES, // 学業用品

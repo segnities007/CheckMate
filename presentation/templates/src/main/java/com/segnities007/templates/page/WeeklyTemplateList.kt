@@ -116,7 +116,7 @@ fun WeeklyTemplateList(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                "アイテム数: ${template.itemStates.size}",
+                                "アイテム数: ${template.itemIds.size}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray,
                             )
@@ -143,12 +143,14 @@ fun WeeklyTemplateListPreview() {
             WeeklyTemplate(
                 id = 1,
                 title = "月曜日の忘れ物",
-                itemStates = mapOf(1 to false, 2 to true, 3 to false),
+                itemIds =
+                    listOf(1, 2, 3),
             ),
             WeeklyTemplate(
                 id = 2,
                 title = "火曜日の忘れ物",
-                itemStates = mapOf(4 to true, 5 to false),
+                itemIds =
+                    listOf(1, 2, 3),
             ),
         )
 

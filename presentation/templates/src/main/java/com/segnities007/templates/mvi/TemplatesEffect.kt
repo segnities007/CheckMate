@@ -8,5 +8,6 @@ sealed interface TemplatesEffect : MviEffect {
     ) : TemplatesEffect
 
     data object NavigateToWeeklyTemplateSelector : TemplatesEffect
+
     data object NavigateToWeeklyTemplateList : TemplatesEffect
 }

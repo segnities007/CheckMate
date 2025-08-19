@@ -4,7 +4,7 @@ import com.segnities007.model.WeeklyTemplate
 import kotlinx.coroutines.flow.Flow
 
 interface WeeklyTemplateRepository {
-    fun getTemplatesForDay(day: String): Flow<List<WeeklyTemplate>>
+    suspend fun getTemplatesForDay(day: String): List<WeeklyTemplate>
 
     suspend fun getAllTemplates(): List<WeeklyTemplate>
 

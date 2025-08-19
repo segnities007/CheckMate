@@ -1,4 +1,4 @@
-package com.segnities007.model
+package com.segnities007.model.item
 
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -9,8 +9,8 @@ data class Item
     constructor(
         val id: Int = 0,
         val name: String = "",
-        val description: String? = null,
+        val description: String = "",
         val category: ItemCategory = ItemCategory.OTHER_SUPPLIES,
-        val imagePath: String? = null,
+        val imagePath: String = "",
         val createdAt: Instant = Clock.System.now(),
     )

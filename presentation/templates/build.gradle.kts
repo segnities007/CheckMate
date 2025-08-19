@@ -69,6 +69,6 @@ dependencies {
     // coil
     implementation(libs.coil.compose)
 
-    // navigation
-    implementation(libs.androidx.navigation.compose)
+    // datetime
+    implementation(libs.kotlinx.datetime)
 }

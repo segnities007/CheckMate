@@ -1,6 +1,6 @@
 package com.segnities007.repository
 
-import com.segnities007.model.Item
+import com.segnities007.model.item.Item
 
 interface ItemRepository {
     suspend fun getAllItems(): List<Item>

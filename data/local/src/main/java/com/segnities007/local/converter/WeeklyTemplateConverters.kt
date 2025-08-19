@@ -5,20 +5,6 @@ import com.segnities007.model.DayOfWeek
 
 class WeeklyTemplateConverters {
     @TypeConverter
-    fun fromMap(map: Map<Int, Boolean>): String = map.entries.joinToString(",") { "${it.key}:${it.value}" }
-
-    @TypeConverter
-    fun toMap(value: String): Map<Int, Boolean> =
-        if (value.isEmpty()) {
-            emptyMap()
-        } else {
-            value.split(",").associate {
-                val (key, v) = it.split(":")
-                key.toInt() to v.toBoolean()
-            }
-        }
-
-    @TypeConverter
     fun fromDayOfWeekSetToString(days: Set<DayOfWeek>): String = days.joinToString(",") { it.name }
 
     @TypeConverter
@@ -28,4 +14,10 @@ class WeeklyTemplateConverters {
         } else {
             data.split(',').map { dayString -> DayOfWeek.valueOf(dayString) }.toSet()
         }
+
+    @TypeConverter
+    fun fromIntList(list: List<Int>): String = list.joinToString(",")
+
+    @TypeConverter
+    fun toIntList(data: String): List<Int> = if (data.isEmpty()) emptyList() else data.split(",").map { it.toInt() }
 }

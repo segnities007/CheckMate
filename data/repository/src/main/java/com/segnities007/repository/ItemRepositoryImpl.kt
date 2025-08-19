@@ -3,7 +3,7 @@ package com.segnities007.repository
 import com.segnities007.local.dao.ItemDao
 import com.segnities007.local.entity.toDomain
 import com.segnities007.local.entity.toEntity
-import com.segnities007.model.Item
+import com.segnities007.model.item.Item
 
 class ItemRepositoryImpl(
     private val dao: ItemDao,

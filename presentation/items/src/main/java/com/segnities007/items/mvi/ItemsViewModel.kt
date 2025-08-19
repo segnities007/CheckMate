@@ -57,11 +57,10 @@ class ItemsViewModel(
             }
             val newItem =
                 withContext(Dispatchers.IO) {
-                    val savedImagePath =
-                        intent.item.imagePath?.let { path ->
-                            imageRepository.saveImage(path, "${Uuid.random()}.jpg")
-                        }
-                    intent.item.copy(imagePath = savedImagePath)
+                    if (intent.item.imagePath.isNotBlank()) {
+                        imageRepository.saveImage(intent.item.imagePath, "${Uuid.random()}.jpg")
+                    }
+                    intent.item.copy(imagePath = intent.item.imagePath)
                 }
             itemRepository.insertItem(newItem)
             sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }

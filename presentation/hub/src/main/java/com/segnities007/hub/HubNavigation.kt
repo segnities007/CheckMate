@@ -51,6 +51,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
         ) {
             composable<HubRoute.Home> {
                 HomeScreen(
+                    innerPadding = innerPadding,
                     setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },

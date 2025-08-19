@@ -1,6 +1,7 @@
 package com.segnities007.common.module
 
 import com.segnities007.auth.mvi.AuthViewModel
+import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.hub.mvi.HubViewModel
 import com.segnities007.items.mvi.ItemsViewModel
 import com.segnities007.login.mvi.LoginViewModel
@@ -17,4 +18,5 @@ val viewModelModule =
         viewModelOf(::SettingViewModel)
         viewModelOf(::ItemsViewModel)
         viewModelOf(::TemplatesViewModel)
+        viewModelOf(::HomeViewModel)
     }

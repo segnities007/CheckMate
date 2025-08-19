@@ -16,4 +16,5 @@ val databaseModule =
 
         single { get<AppDatabase>().itemDao() }
         single { get<AppDatabase>().weeklyTemplateDao() }
+        single { get<AppDatabase>().itemCheckStateDao() }
     }

@@ -4,14 +4,11 @@ import com.segnities007.local.dao.WeeklyTemplateDao
 import com.segnities007.local.entity.toDomain
 import com.segnities007.local.entity.toEntity
 import com.segnities007.model.WeeklyTemplate
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 class WeeklyTemplateRepositoryImpl(
     private val dao: WeeklyTemplateDao,
 ) : WeeklyTemplateRepository {
-    override fun getTemplatesForDay(day: String): Flow<List<WeeklyTemplate>> =
-        dao.getTemplatesForDay(day).map { list -> list.map { it.toDomain() } }
+    override suspend fun getTemplatesForDay(day: String): List<WeeklyTemplate> = dao.getTemplatesForDay(day).map { it.toDomain() }
 
     override suspend fun getAllTemplates(): List<WeeklyTemplate> = dao.getAllTemplates().map { it.toDomain() }
 

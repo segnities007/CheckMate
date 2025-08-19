@@ -1,26 +1,32 @@
 package com.segnities007.home
 
-import androidx.compose.foundation.layout.Column
+import android.util.Log
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.segnities007.home.component.MonthlyCalendarWithWeeklyTemplate
+import com.segnities007.home.mvi.HomeIntent
+import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
+import org.koin.compose.koinInject
 
 @Composable
 fun HomeScreen(
+    innerPadding: PaddingValues,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
+    val homeViewModel: HomeViewModel = koinInject()
+    val state by homeViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
+    // トップバー・FAB・ナビバー設定
     LaunchedEffect(Unit) {
         setTopBar {}
         setFab {}
@@ -30,15 +36,27 @@ fun HomeScreen(
                 onNavigate = onNavigate,
             )
         }
+        Log.d("HomeScreen", state.toString())
     }
 
     Column(
-        modifier = Modifier.verticalScroll(scrollState),
+        modifier =
+            Modifier
+                .verticalScroll(scrollState)
+                .padding(top = innerPadding.calculateTopPadding()),
     ) {
-        HomeUi()
+        MonthlyCalendarWithWeeklyTemplate(
+            selectedDate = state.selectedDate,
+            templates = state.templatesForToday,
+            allItems = state.itemsForToday,
+            itemCheckStates = state.itemCheckStates,
+            onCheckItem = { itemId, checked ->
+                homeViewModel.sendIntent(HomeIntent.CheckItem(itemId, checked))
+            },
+            onDateSelected = { date ->
+                homeViewModel.sendIntent(HomeIntent.SelectDate(date))
+            },
+        )
+        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
     }
-}
-
-@Composable
-private fun HomeUi() {
 }
