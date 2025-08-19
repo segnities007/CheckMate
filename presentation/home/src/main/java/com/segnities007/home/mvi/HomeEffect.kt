@@ -1,3 +1,5 @@
 package com.segnities007.home.mvi
 
-class HomeEffect
+import com.segnities007.ui.mvi.MviEffect
+
+sealed interface HomeEffect : MviEffect

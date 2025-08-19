@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.segnities007.model.WeeklyTemplate
 import com.segnities007.navigation.HubRoute
 import com.segnities007.navigation.TemplatesRoute
 import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
@@ -74,7 +75,7 @@ fun TemplatesScreen(
                 setNavigationBar = setNavigationBar,
                 setTopBar = setTopBar,
                 setFab = setFab,
-                template = state.selectedTemplate,
+                template = state.selectedTemplate ?: WeeklyTemplate(),
                 allItems = state.allItems,
             )
         }

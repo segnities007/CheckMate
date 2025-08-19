@@ -2,8 +2,8 @@ package com.segnities007.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.segnities007.model.Item
-import com.segnities007.model.ItemCategory
+import com.segnities007.model.item.Item
+import com.segnities007.model.item.ItemCategory
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -11,9 +11,9 @@ import kotlin.time.Instant
 data class ItemEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
-    val description: String?,
+    val description: String,
     val category: String,
-    val imagePath: String?,
+    val imagePath: String,
     val createdAt: String,
 )
 

@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.segnities007.model.Item
+import com.segnities007.model.item.Item
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)

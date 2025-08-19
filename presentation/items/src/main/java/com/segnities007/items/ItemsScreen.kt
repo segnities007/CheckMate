@@ -26,7 +26,7 @@ import com.segnities007.items.mvi.ItemsEffect
 import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsState
 import com.segnities007.items.mvi.ItemsViewModel
-import com.segnities007.model.Item
+import com.segnities007.model.item.Item
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
 import org.koin.compose.koinInject
@@ -110,7 +110,7 @@ private fun ItemsUi(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var capturedImageUriForBottomSheet by remember { mutableStateOf<Uri?>(null) }
-    var capturedTempPathForViewModel by remember { mutableStateOf<String?>(null) }
+    var capturedTempPathForViewModel by remember { mutableStateOf("") }
 
     if (showCamera) {
         CameraCapture(
@@ -130,7 +130,7 @@ private fun ItemsUi(
             state = state,
             onAddItem = {
                 capturedImageUriForBottomSheet = null
-                capturedTempPathForViewModel = null
+                capturedTempPathForViewModel = ""
                 showBottomSheet = true
             },
             onDeleteItem = { itemToDelete ->
@@ -155,7 +155,7 @@ private fun ItemsUi(
                     sendIntent(ItemsIntent.InsertItems(newItem))
                     showBottomSheet = false
                     capturedImageUriForBottomSheet = null
-                    capturedTempPathForViewModel = null
+                    capturedTempPathForViewModel = ""
                 },
                 capturedImageUriFromParent = capturedImageUriForBottomSheet,
                 onRequestLaunchCamera = {

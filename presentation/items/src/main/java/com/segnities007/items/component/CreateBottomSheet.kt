@@ -48,21 +48,21 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.segnities007.model.ItemCategory
+import com.segnities007.model.item.ItemCategory
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateBottomSheet(
     onDismiss: () -> Unit,
-    onCreateItem: (name: String, description: String?, category: ItemCategory, imageUriForCallback: Uri?) -> Unit,
+    onCreateItem: (name: String, description: String, category: ItemCategory, imageUriForCallback: Uri?) -> Unit,
     sheetState: SheetState,
     capturedImageUriFromParent: Uri?,
     onRequestLaunchCamera: () -> Unit,
     isLoadingFromParent: Boolean = false,
 ) {
     var itemName by remember { mutableStateOf("") }
-    var itemDescription by remember { mutableStateOf<String?>(null) }
+    var itemDescription by remember { mutableStateOf<String>("") }
     var expandedDropdown by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<ItemCategory?>(null) }
     var imageUriForPreview by remember(capturedImageUriFromParent) { mutableStateOf(capturedImageUriFromParent) }
@@ -165,8 +165,8 @@ fun CreateBottomSheet(
 
             // 説明
             OutlinedTextField(
-                value = itemDescription ?: "",
-                onValueChange = { itemDescription = it.ifEmpty { null } },
+                value = itemDescription,
+                onValueChange = { itemDescription = it },
                 label = { Text("説明") },
                 minLines = 3,
                 enabled = !isLoadingFromParent,

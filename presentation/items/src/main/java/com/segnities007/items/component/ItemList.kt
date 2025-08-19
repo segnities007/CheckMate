@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.segnities007.items.mvi.ItemsState
-import com.segnities007.model.Item
+import com.segnities007.model.item.Item
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

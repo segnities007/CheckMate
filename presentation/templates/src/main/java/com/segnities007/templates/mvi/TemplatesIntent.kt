@@ -1,3 +1,4 @@
+// TemplatesIntent.kt
 package com.segnities007.templates.mvi
 
 import com.segnities007.model.DayOfWeek
@@ -5,10 +6,6 @@ import com.segnities007.model.WeeklyTemplate
 import com.segnities007.ui.mvi.MviIntent
 
 sealed interface TemplatesIntent : MviIntent {
-    data object GetAllWeeklyTemplates : TemplatesIntent
-
-    data object GetAllItems : TemplatesIntent
-
     data class AddWeeklyTemplate(
         val title: String,
         val daysOfWeek: Set<DayOfWeek>,
@@ -26,10 +23,15 @@ sealed interface TemplatesIntent : MviIntent {
         val weeklyTemplate: WeeklyTemplate,
     ) : TemplatesIntent
 
+    data object GetAllWeeklyTemplates : TemplatesIntent
+
+    data object GetAllItems : TemplatesIntent
+
     data object ShowBottomSheet : TemplatesIntent
 
     data object HideBottomSheet : TemplatesIntent
 
-    data object NavigateToWeeklyTemplateSelector : TemplatesIntent
     data object NavigateToWeeklyTemplateList : TemplatesIntent
+
+    data object NavigateToWeeklyTemplateSelector : TemplatesIntent
 }

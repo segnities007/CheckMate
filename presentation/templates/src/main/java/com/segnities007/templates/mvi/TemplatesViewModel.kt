@@ -1,3 +1,4 @@
+// TemplatesViewModel.kt
 package com.segnities007.templates.mvi
 
 import androidx.lifecycle.viewModelScope
@@ -11,55 +12,46 @@ class TemplatesViewModel(
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val itemRepository: ItemRepository,
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
-        TemplatesState(),
+        initialState = TemplatesState(),
     ) {
+    init {
+        // 初期ロード
+        viewModelScope.launch { handleIntent(TemplatesIntent.GetAllWeeklyTemplates) }
+        viewModelScope.launch { handleIntent(TemplatesIntent.GetAllItems) }
+    }
+
     override suspend fun handleIntent(intent: TemplatesIntent) {
         when (intent) {
-            is TemplatesIntent.AddWeeklyTemplate -> addWeeklyTemplate(intent)
-            is TemplatesIntent.DeleteWeeklyTemplate -> deleteWeeklyTemplate(intent)
-            is TemplatesIntent.EditWeeklyTemplate -> editWeeklyTemplate(intent)
+            is TemplatesIntent.AddWeeklyTemplate ->
+                addWeeklyTemplate(
+                    title = intent.title,
+                    daysOfWeek = intent.daysOfWeek,
+                )
+
+            is TemplatesIntent.EditWeeklyTemplate -> editWeeklyTemplate(intent.weeklyTemplate)
+            is TemplatesIntent.DeleteWeeklyTemplate -> deleteWeeklyTemplate(intent.weeklyTemplate)
+            is TemplatesIntent.SelectTemplate ->
+                setState { copy(selectedTemplate = intent.weeklyTemplate) }
+                    .also { sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector } }
+
             TemplatesIntent.GetAllWeeklyTemplates -> getAllWeeklyTemplates()
-            TemplatesIntent.HideBottomSheet -> hideBottomSheet()
-            TemplatesIntent.ShowBottomSheet -> showBottomSheet()
-            is TemplatesIntent.SelectTemplate -> selectTemplate(intent)
             TemplatesIntent.GetAllItems -> getAllItems()
-            TemplatesIntent.NavigateToWeeklyTemplateList -> navigateToWeeklyTemplateList()
-            TemplatesIntent.NavigateToWeeklyTemplateSelector -> navigateToWeeklyTemplateSelector()
+
+            TemplatesIntent.ShowBottomSheet -> setState { copy(isShowingBottomSheet = true) }
+            TemplatesIntent.HideBottomSheet -> setState { copy(isShowingBottomSheet = false) }
+
+            TemplatesIntent.NavigateToWeeklyTemplateList ->
+                sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+            TemplatesIntent.NavigateToWeeklyTemplateSelector ->
+                sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
         }
     }
-
-    init {
-        getAllWeeklyTemplates()
-        getAllItems()
-    }
-
-    private fun navigateToWeeklyTemplateList() {
-        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
-    }
-
-    private fun navigateToWeeklyTemplateSelector() {
-        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
-    }
-
 
     private fun getAllItems() {
         viewModelScope.launch {
             val items = itemRepository.getAllItems()
             setState { copy(allItems = items) }
         }
-    }
-
-    private fun selectTemplate(intent: TemplatesIntent.SelectTemplate) {
-        setState { copy(selectedTemplate = intent.weeklyTemplate) }
-        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
-    }
-
-    private fun showBottomSheet() {
-        setState { copy(isShowingBottomSheet = true) }
-    }
-
-    private fun hideBottomSheet() {
-        setState { copy(isShowingBottomSheet = false) }
     }
 
     private fun getAllWeeklyTemplates() {
@@ -69,29 +61,33 @@ class TemplatesViewModel(
         }
     }
 
-    private fun addWeeklyTemplate(intent: TemplatesIntent.AddWeeklyTemplate) {
+    private fun addWeeklyTemplate(
+        title: String,
+        daysOfWeek: Set<com.segnities007.model.DayOfWeek>,
+    ) {
         viewModelScope.launch {
             weeklyTemplateRepository.insertTemplate(
                 WeeklyTemplate(
-                    title = intent.title,
-                    daysOfWeek = intent.daysOfWeek,
+                    title = title,
+                    daysOfWeek = daysOfWeek,
+                    itemIds = emptyList(), // 追加時は空で作成し、後から編集で詰める
                 ),
             )
             getAllWeeklyTemplates()
         }
     }
 
-    private fun editWeeklyTemplate(intent: TemplatesIntent.EditWeeklyTemplate) {
+    private fun editWeeklyTemplate(template: WeeklyTemplate) {
         viewModelScope.launch {
-            weeklyTemplateRepository.updateTemplate(intent.weeklyTemplate)
+            weeklyTemplateRepository.updateTemplate(template)
             getAllWeeklyTemplates()
-            navigateToWeeklyTemplateList()
+            sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
         }
     }
 
-    private fun deleteWeeklyTemplate(intent: TemplatesIntent.DeleteWeeklyTemplate) {
+    private fun deleteWeeklyTemplate(template: WeeklyTemplate) {
         viewModelScope.launch {
-            weeklyTemplateRepository.deleteTemplate(intent.weeklyTemplate)
+            weeklyTemplateRepository.deleteTemplate(template)
             getAllWeeklyTemplates()
         }
     }

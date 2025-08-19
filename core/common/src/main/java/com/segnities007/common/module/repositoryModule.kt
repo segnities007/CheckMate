@@ -2,6 +2,8 @@ package com.segnities007.common.module
 
 import com.segnities007.repository.ImageRepository
 import com.segnities007.repository.ImageRepositoryImpl
+import com.segnities007.repository.ItemCheckStateRepository
+import com.segnities007.repository.ItemCheckStateRepositoryImpl
 import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.ItemRepositoryImpl
 import com.segnities007.repository.UserRepository
@@ -16,4 +18,5 @@ val repositoryModule =
         single<ItemRepository> { ItemRepositoryImpl(get()) }
         single<ImageRepository> { ImageRepositoryImpl(get()) }
         single<WeeklyTemplateRepository> { WeeklyTemplateRepositoryImpl(get()) }
+        single<ItemCheckStateRepository> { ItemCheckStateRepositoryImpl(get()) }
     }
