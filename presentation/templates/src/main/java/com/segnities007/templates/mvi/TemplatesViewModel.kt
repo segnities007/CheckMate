@@ -2,12 +2,14 @@ package com.segnities007.templates.mvi
 
 import androidx.lifecycle.viewModelScope
 import com.segnities007.model.WeeklyTemplate
+import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import kotlinx.coroutines.launch
 
 class TemplatesViewModel(
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
+    private val itemRepository: ItemRepository,
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
         TemplatesState(),
     ) {
@@ -19,11 +21,37 @@ class TemplatesViewModel(
             TemplatesIntent.GetAllWeeklyTemplates -> getAllWeeklyTemplates()
             TemplatesIntent.HideBottomSheet -> hideBottomSheet()
             TemplatesIntent.ShowBottomSheet -> showBottomSheet()
+            is TemplatesIntent.SelectTemplate -> selectTemplate(intent)
+            TemplatesIntent.GetAllItems -> getAllItems()
+            TemplatesIntent.NavigateToWeeklyTemplateList -> navigateToWeeklyTemplateList()
+            TemplatesIntent.NavigateToWeeklyTemplateSelector -> navigateToWeeklyTemplateSelector()
         }
     }
 
     init {
         getAllWeeklyTemplates()
+        getAllItems()
+    }
+
+    private fun navigateToWeeklyTemplateList() {
+        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+    }
+
+    private fun navigateToWeeklyTemplateSelector() {
+        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
+    }
+
+
+    private fun getAllItems() {
+        viewModelScope.launch {
+            val items = itemRepository.getAllItems()
+            setState { copy(allItems = items) }
+        }
+    }
+
+    private fun selectTemplate(intent: TemplatesIntent.SelectTemplate) {
+        setState { copy(selectedTemplate = intent.weeklyTemplate) }
+        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
     }
 
     private fun showBottomSheet() {
@@ -57,6 +85,7 @@ class TemplatesViewModel(
         viewModelScope.launch {
             weeklyTemplateRepository.updateTemplate(intent.weeklyTemplate)
             getAllWeeklyTemplates()
+            navigateToWeeklyTemplateList()
         }
     }
 

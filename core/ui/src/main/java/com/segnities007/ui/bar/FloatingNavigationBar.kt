@@ -74,7 +74,7 @@ private fun FloatingActionBarUi(
         modifier =
             Modifier
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = alpha))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
                 .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -106,7 +106,7 @@ private fun NavItemButton(
                 .background(
                     color =
                         if (selected) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha)
                         } else {
                             androidx.compose.ui.graphics.Color.Transparent
                         },
@@ -128,7 +128,7 @@ private fun NavItemButton(
                 modifier = Modifier.size(42.dp),
                 imageVector = if (selected) selectedIcon else unselectedIcon,
                 contentDescription = "",
-                tint = MaterialTheme.colorScheme.background.copy(alpha),
+                tint = MaterialTheme.colorScheme.onBackground.copy(alpha),
             )
         }
     }

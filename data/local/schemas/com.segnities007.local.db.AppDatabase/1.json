@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "08377ba19daed8f3775eadd67fb751f1",
+    "identityHash": "209470ceee27e9b10df5507edbffcb07",
     "entities": [
       {
         "tableName": "items",
@@ -52,7 +52,7 @@
       },
       {
         "tableName": "weekly_templates",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `daysOfWeek` TEXT NOT NULL, `itemIds` TEXT NOT NULL, `itemCheckStates` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `daysOfWeek` TEXT NOT NULL, `itemStates` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -73,14 +73,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "itemIds",
-            "columnName": "itemIds",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "itemCheckStates",
-            "columnName": "itemCheckStates",
+            "fieldPath": "itemStates",
+            "columnName": "itemStates",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -95,7 +89,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '08377ba19daed8f3775eadd67fb751f1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '209470ceee27e9b10df5507edbffcb07')"
     ]
   }
 }

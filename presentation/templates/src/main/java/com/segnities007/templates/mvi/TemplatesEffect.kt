@@ -6,4 +6,7 @@ sealed interface TemplatesEffect : MviEffect {
     data class ShowToast(
         val message: String,
     ) : TemplatesEffect
+
+    data object NavigateToWeeklyTemplateSelector : TemplatesEffect
+    data object NavigateToWeeklyTemplateList : TemplatesEffect
 }

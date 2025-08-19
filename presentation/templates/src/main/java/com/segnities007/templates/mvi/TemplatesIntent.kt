@@ -7,6 +7,8 @@ import com.segnities007.ui.mvi.MviIntent
 sealed interface TemplatesIntent : MviIntent {
     data object GetAllWeeklyTemplates : TemplatesIntent
 
+    data object GetAllItems : TemplatesIntent
+
     data class AddWeeklyTemplate(
         val title: String,
         val daysOfWeek: Set<DayOfWeek>,
@@ -20,7 +22,14 @@ sealed interface TemplatesIntent : MviIntent {
         val weeklyTemplate: WeeklyTemplate,
     ) : TemplatesIntent
 
+    data class SelectTemplate(
+        val weeklyTemplate: WeeklyTemplate,
+    ) : TemplatesIntent
+
     data object ShowBottomSheet : TemplatesIntent
 
     data object HideBottomSheet : TemplatesIntent
+
+    data object NavigateToWeeklyTemplateSelector : TemplatesIntent
+    data object NavigateToWeeklyTemplateList : TemplatesIntent
 }
