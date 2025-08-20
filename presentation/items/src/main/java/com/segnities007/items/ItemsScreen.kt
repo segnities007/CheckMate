@@ -16,8 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -106,24 +108,28 @@ fun ItemsScreen(
             }
             setTopBar {}
             setFab {
-                FloatingActionButton(
-                    onClick = {
-                        when {
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA,
-                            ) == PackageManager.PERMISSION_GRANTED -> {
-                                granted()
-                            }else -> {
+                if(alpha>0){
+                    FloatingActionButton(
+                        containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
+                        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+                        onClick = {
+                            when {
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA,
+                                ) == PackageManager.PERMISSION_GRANTED -> {
+                                    granted()
+                                }else -> {
                                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                             }
-                        }
-                    },
-                ){
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add",
-                    )
+                            }
+                        },
+                    ){
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Add",
+                        )
+                    }
                 }
             }
         }
