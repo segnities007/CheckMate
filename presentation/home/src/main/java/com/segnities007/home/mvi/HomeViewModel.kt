@@ -19,7 +19,7 @@ class HomeViewModel(
     private val templateRepo: WeeklyTemplateRepository,
     private val checkStateRepo: ItemCheckStateRepository,
 ) : BaseViewModel<HomeIntent, HomeState, HomeEffect>(HomeState()) {
-    // 日付ごとの Compose 用 StateMap
+
     private val itemCheckStatesByDate = mutableMapOf<LocalDate, MutableMap<Int, Boolean>>()
 
     override suspend fun handleIntent(intent: HomeIntent) {
@@ -33,7 +33,39 @@ class HomeViewModel(
 
     init {
         getAllItems()
+        ensureCheckHistoryForToday()
         viewModelScope.launch { handleIntent(HomeIntent.LoadTodayData) }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun ensureCheckHistoryForToday() {
+        viewModelScope.launch {
+            val today = Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+            val templatesForToday = templateRepo.getTemplatesForDay(today.dayOfWeek.name)
+            val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
+            val allItems = itemRepo.getAllItems()
+            val itemsScheduledForToday = allItems.filter { itemIdsForToday.contains(it.id) }
+
+            for (item in itemsScheduledForToday) {
+                val existingState = checkStateRepo.getCheckStateForItem(item.id)
+                if (existingState == null) {
+                    val newCheckState = ItemCheckState(
+                        itemId = item.id,
+                        history = mutableListOf(ItemCheckRecord(date = today, isChecked = false))
+                    )
+                    checkStateRepo.saveCheckState(newCheckState)
+                } else {
+                    val todayRecord = existingState.history.find { it.date == today }
+                    if (todayRecord == null) {
+                        val updatedHistory = existingState.history.toMutableList().apply {
+                            add(ItemCheckRecord(date = today, isChecked = false))
+                        }
+                        val updatedCheckState = existingState.copy(history = updatedHistory)
+                        checkStateRepo.saveCheckState(updatedCheckState)
+                    }
+                }
+            }
+        }
     }
 
     private fun getAllItems() {
@@ -60,7 +92,6 @@ class HomeViewModel(
         val itemIdsForToday = templates.flatMap { it.itemIds }.distinct()
         val itemsForToday = itemRepo.getAllItems().filter { itemIdsForToday.contains(it.id) }
 
-        // DB からチェック状態取得
         val checkStates =
             checkStateRepo
                 .getCheckStatesForItems(itemIdsForToday)
@@ -69,7 +100,6 @@ class HomeViewModel(
                     state.itemId to (recordForDate?.isChecked ?: false)
                 }
 
-        // 日付ごとのマップに保存
         val stateMap = itemCheckStatesByDate.getOrPut(date) { mutableStateMapOf() }
         stateMap.clear()
         stateMap.putAll(checkStates)
@@ -91,12 +121,10 @@ class HomeViewModel(
         viewModelScope.launch {
             val currentDate = state.value.selectedDate
 
-            // Compose 用 StateMap を更新
             val stateMap = itemCheckStatesByDate.getOrPut(currentDate) { mutableStateMapOf() }
             stateMap[itemId] = checked
             setState { copy(itemCheckStates = stateMap.toMap()) }
 
-            // DB 保存
             val existingState = checkStateRepo.getCheckStateForItem(itemId)
             val newHistory = existingState?.history?.toMutableList() ?: mutableListOf()
             val index = newHistory.indexOfFirst { it.date == currentDate }

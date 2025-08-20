@@ -40,12 +40,12 @@ class ItemRepositoryImpl(
             val checkState = checkStateEntity?.toDomain()
             if (checkState != null) {
                 val todayRecord = checkState.history.find { it.date == today }
-                if (todayRecord == null || !todayRecord.isChecked) {
+                // 今日の記録があり、かつチェックされていない場合のみ追加
+                if (todayRecord != null && !todayRecord.isChecked) {
                     uncheckedItems.add(item)
                 }
-            } else {
-                uncheckedItems.add(item)
             }
+            // checkState が null の場合は、今日のチェック記録がないので追加しない
         }
         return uncheckedItems
     }
