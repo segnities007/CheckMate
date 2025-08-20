@@ -1,15 +1,24 @@
 package com.segnities007.home
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.segnities007.home.component.MonthlyCalendarWithWeeklyTemplate
 import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.home.mvi.HomeViewModel
+import com.segnities007.home.page.MonthlyCalendarWithWeeklyTemplate
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
 import org.koin.compose.koinInject
@@ -26,12 +35,18 @@ fun HomeScreen(
     val state by homeViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    // トップバー・FAB・ナビバー設定
+    val alpha by remember {
+        derivedStateOf {
+            (1f - scrollState.value / 50f).coerceIn(0f, 1f)
+        }
+    }
+
     LaunchedEffect(Unit) {
         setTopBar {}
         setFab {}
         setNavigationBar {
             FloatingNavigationBar(
+                alpha = alpha,
                 currentHubRoute = HubRoute.Home,
                 onNavigate = onNavigate,
             )
@@ -43,8 +58,9 @@ fun HomeScreen(
         modifier =
             Modifier
                 .verticalScroll(scrollState)
-                .padding(top = innerPadding.calculateTopPadding()),
+                .padding(horizontal = 16.dp),
     ) {
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         MonthlyCalendarWithWeeklyTemplate(
             selectedDate = state.selectedDate,
             templates = state.templatesForToday,
@@ -57,6 +73,6 @@ fun HomeScreen(
                 homeViewModel.sendIntent(HomeIntent.SelectDate(date))
             },
         )
-        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }

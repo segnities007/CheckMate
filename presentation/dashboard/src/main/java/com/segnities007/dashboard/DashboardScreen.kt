@@ -73,9 +73,10 @@ fun DashboardScreen(
         setTopBar {
             TopAppBar(
                 title = { Text("ダッシュボード") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                    ),
             )
         }
         setNavigationBar {
@@ -88,11 +89,12 @@ fun DashboardScreen(
     }
 
     DashboardUi(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
         state = state,
-        innerPadding = innerPadding
+        innerPadding = innerPadding,
     )
 }
 
@@ -102,30 +104,30 @@ private fun DashboardUi(
     modifier: Modifier = Modifier,
     state: DashboardState,
 ) {
-            Column(
-                modifier = modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Spacer(Modifier.height(innerPadding.calculateTopPadding()))
-                StatCard(
-                    title = "総アイテム数",
-                    value = state.itemCount.toString(),
-                    icon = Icons.Filled.Dns,
-                    iconTint = MaterialTheme.colorScheme.primary
-                )
-                StatCard(
-                    title = "総テンプレート数",
-                    value = state.templateCount.toString(),
-                    icon = Icons.AutoMirrored.Filled.Assignment,
-                    iconTint = MaterialTheme.colorScheme.secondary
-                )
-                UncheckedItemsCard(
-                    title = "本日の未チェックアイテム",
-                    items = state.uncheckedItemsToday,
-                    icon = Icons.AutoMirrored.Filled.ListAlt,
-                    iconTint = MaterialTheme.colorScheme.tertiary
-                )
-                Spacer(modifier = Modifier.height(80.dp))
+    Column(
+        modifier = modifier.padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Spacer(Modifier.height(innerPadding.calculateTopPadding()))
+        StatCard(
+            title = "総アイテム数",
+            value = state.itemCount.toString(),
+            icon = Icons.Filled.Dns,
+            iconTint = MaterialTheme.colorScheme.primary,
+        )
+        StatCard(
+            title = "総テンプレート数",
+            value = state.templateCount.toString(),
+            icon = Icons.AutoMirrored.Filled.Assignment,
+            iconTint = MaterialTheme.colorScheme.secondary,
+        )
+        UncheckedItemsCard(
+            title = "本日の未チェックアイテム",
+            items = state.uncheckedItemsToday,
+            icon = Icons.AutoMirrored.Filled.ListAlt,
+            iconTint = MaterialTheme.colorScheme.tertiary,
+        )
+        Spacer(modifier = Modifier.height(80.dp))
     }
 }
 
@@ -134,35 +136,36 @@ private fun StatCard(
     title: String,
     value: String,
     icon: ImageVector,
-    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
                 modifier = Modifier.size(40.dp),
-                tint = iconTint
+                tint = iconTint,
             )
             Column {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineMedium,
                 )
             }
         }
@@ -174,30 +177,30 @@ private fun UncheckedItemsCard(
     title: String,
     items: List<Item>,
     icon: ImageVector,
-    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
                     modifier = Modifier.size(40.dp),
-                    tint = iconTint
+                    tint = iconTint,
                 )
                 Text(
                     text = "$title (${items.size}件)",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -205,18 +208,18 @@ private fun UncheckedItemsCard(
                 Text(
                     text = "全てのアイテムがチェック済みです！",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 56.dp) // Icon + Space width
+                    modifier = Modifier.padding(start = 56.dp), // Icon + Space width
                 )
             } else {
                 Column(
                     modifier = Modifier.padding(start = 56.dp), // Icon + Space width
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items.forEach { item ->
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
                                 text = "・${item.name}",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
                             )
                         }
                     }

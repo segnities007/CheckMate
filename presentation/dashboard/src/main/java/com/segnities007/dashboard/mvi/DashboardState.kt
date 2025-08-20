@@ -9,5 +9,5 @@ data class DashboardState(
     val templateCount: Int = 0,
     val uncheckedItemsToday: List<Item> = emptyList(),
     // TODO: 「忘れ物の統計」に関する状態を後で追加
-    val error: String? = null
-): MviState
+    val error: String? = null,
+) : MviState
