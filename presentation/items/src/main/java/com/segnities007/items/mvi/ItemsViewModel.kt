@@ -27,7 +27,22 @@ class ItemsViewModel(
             is ItemsIntent.GetItemsById -> getItemById(intent)
             is ItemsIntent.InsertItems -> insertItem(intent)
             is ItemsIntent.DeleteItems -> deleteItem(intent)
+            is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> updateCapturedImageUriForBottomSheet(intent)
+            is ItemsIntent.UpdateCapturedTempPathForViewModel -> updateCapturedTempPathForViewModel(intent)
+            is ItemsIntent.UpdateIsShowBottomSheet -> updateIsShowBottomSheet(intent)
         }
+    }
+
+    private fun updateIsShowBottomSheet(intent: ItemsIntent.UpdateIsShowBottomSheet) {
+        setState { copy(isShowBottomSheet = intent.isShowBottomSheet) }
+    }
+
+    private fun updateCapturedImageUriForBottomSheet(intent: ItemsIntent.UpdateCapturedImageUriForBottomSheet) {
+        setState { copy(capturedImageUriForBottomSheet = intent.capturedImageUriForBottomSheet) }
+    }
+
+    private fun updateCapturedTempPathForViewModel(intent: ItemsIntent.UpdateCapturedTempPathForViewModel) {
+        setState { copy(capturedTempPathForViewModel = intent.capturedTempPathForViewModel) }
     }
 
     private fun getAllItems() {
