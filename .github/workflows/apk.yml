@@ -32,20 +32,12 @@ jobs:
           new_tag="v$major.$minor.$patch"
           echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        id: create_release
+      - name: Create GitHub Release & Upload APK
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_version.outputs.new_tag }}
           name: "Debug APK ${{ steps.get_version.outputs.new_tag }}"
           body: "Debug build of the app."
+          files: app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-      - name: Upload APK
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: app/build/outputs/apk/debug/app-debug.apk
-          asset_name: app-debug.apk
-          asset_content_type: application/vnd.android.package-archive
