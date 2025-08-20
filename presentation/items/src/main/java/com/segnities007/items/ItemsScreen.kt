@@ -132,7 +132,6 @@ fun ItemsScreen(
     Column(
         modifier =
             Modifier
-                .padding(horizontal = 16.dp)
                 .then(
                 if (showCamera) {
                     Modifier
@@ -176,6 +175,7 @@ private fun ItemsUi(
 
     if (!showCamera) {
         Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ){
             HorizontalDividerWithLabel("アイテム一覧")

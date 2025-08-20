@@ -92,7 +92,7 @@ fun WeeklyTemplateList(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             HorizontalDividerWithLabel("テンプレート一覧")
