@@ -8,6 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -17,7 +19,6 @@ import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 @Composable
 fun ItemCard(
     item: Item,
@@ -49,54 +50,67 @@ fun ItemCard(
                     .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // 画像表示
-            if (!item.imagePath.isNullOrEmpty()) {
-                AsyncImage(
-                    model = item.imagePath,
-                    contentDescription = item.name,
-                    modifier =
-                        Modifier
-                            .size(80.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp)),
-                )
-            } else {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(80.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("No Image", textAlign = TextAlign.Center)
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // 名前・カテゴリ・説明
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    fontSize = 16.sp,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                item.description?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 2,
-                    )
-                }
-            }
-
-            // チェックボックス
+            ItemImage(item.imagePath, item.name)
+            Spacer(Modifier.width(12.dp))
+            ItemTexts(item.name, item.description)
+            Spacer(Modifier.weight(1f))
             Checkbox(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemImage(
+    imagePath: String,
+    name: String,
+) {
+    if (imagePath.isNotEmpty()) {
+        AsyncImage(
+            model = imagePath,
+            contentDescription = name,
+            modifier =
+                Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentScale = ContentScale.Crop,
+        )
+    } else {
+        Box(
+            modifier =
+                Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("No Image", textAlign = TextAlign.Center)
+        }
+    }
+}
+
+@Composable
+private fun ItemTexts(
+    name: String,
+    description: String?,
+) {
+    Column {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            fontSize = 16.sp,
+        )
+        if (!description.isNullOrEmpty()) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
             )
         }
     }

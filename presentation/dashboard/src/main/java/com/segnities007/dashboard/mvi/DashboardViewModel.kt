@@ -8,9 +8,8 @@ import kotlinx.coroutines.launch
 
 class DashboardViewModel(
     private val itemRepository: ItemRepository,
-    private val weeklyTemplateRepository: WeeklyTemplateRepository
+    private val weeklyTemplateRepository: WeeklyTemplateRepository,
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
-
     init {
         viewModelScope.launch {
             handleIntent(DashboardIntent.LoadDashboardData)
@@ -35,7 +34,7 @@ class DashboardViewModel(
                     isLoading = false,
                     itemCount = itemCount,
                     templateCount = templateCount,
-                    uncheckedItemsToday = uncheckedItems
+                    uncheckedItemsToday = uncheckedItems,
                 )
             }
         } catch (e: Exception) {
