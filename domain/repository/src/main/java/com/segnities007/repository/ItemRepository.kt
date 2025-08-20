@@ -10,4 +10,6 @@ interface ItemRepository {
     suspend fun insertItem(item: Item)
 
     suspend fun deleteItem(id: Int)
+
+    suspend fun getUncheckedItemsForToday(): List<Item>
 }

@@ -1,4 +1,5 @@
 package com.segnities007.dashboard.mvi
 
-class DashboardEffect {
-}
+import com.segnities007.ui.mvi.MviEffect
+
+sealed interface DashboardEffect: MviEffect{}
