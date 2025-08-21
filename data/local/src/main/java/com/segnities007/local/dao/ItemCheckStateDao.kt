@@ -17,6 +17,9 @@ interface ItemCheckStateDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(state: ItemCheckStateEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(states: List<ItemCheckStateEntity>)
+
     @Update
     suspend fun update(state: ItemCheckStateEntity)
 
@@ -25,4 +28,7 @@ interface ItemCheckStateDao {
 
     @Query("DELETE FROM item_check_states WHERE id = :id")
     suspend fun deleteById(id: Int)
+
+    @Query("DELETE FROM item_check_states")
+    suspend fun clearAll()
 }

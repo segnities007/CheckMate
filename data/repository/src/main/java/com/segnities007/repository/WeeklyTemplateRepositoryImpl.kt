@@ -10,7 +10,7 @@ class WeeklyTemplateRepositoryImpl(
 ) : WeeklyTemplateRepository {
     override suspend fun getTemplatesForDay(day: String): List<WeeklyTemplate> = dao.getTemplatesForDay(day).map { it.toDomain() }
 
-    override suspend fun getAllTemplates(): List<WeeklyTemplate> = dao.getAllTemplates().map { it.toDomain() }
+    override suspend fun getAllTemplates(): List<WeeklyTemplate> = dao.getAll().map { it.toDomain() }
 
     override suspend fun insertTemplate(template: WeeklyTemplate) {
         dao.insert(template.toEntity())
