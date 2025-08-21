@@ -42,7 +42,7 @@ fun MonthlyCalendarCard(
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             CalendarHeader(year = year, month = month)

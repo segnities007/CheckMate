@@ -2,6 +2,7 @@ package com.segnities007.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Dns
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -87,23 +89,49 @@ private fun DashboardUi(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             HorizontalDividerWithLabel("統計")
-            StatCard(
-                title = "総アイテム数",
-                value = state.itemCount.toString(),
-                icon = Icons.Filled.Dns,
-                iconTint = MaterialTheme.colorScheme.primary,
-            )
-            StatCard(
-                title = "総テンプレート数",
-                value = state.templateCount.toString(),
-                icon = Icons.AutoMirrored.Filled.Assignment,
-                iconTint = MaterialTheme.colorScheme.secondary,
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StatCard(
+                    title = "総アイテム数",
+                    value = state.itemCount.toString(),
+                    icon = Icons.Filled.Dns,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                StatCard(
+                    title = "総テンプレート数",
+                    value = state.templateCount.toString(),
+                    icon = Icons.AutoMirrored.Filled.Assignment,
+                    iconTint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StatCard(
+                    title = "本日の完了率",
+                    value = "${state.completionRateToday}% (${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
+                    icon = Icons.Filled.CheckCircle,
+                    iconTint = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.weight(1f),
+                )
+                StatCard(
+                    title = "累計完了率",
+                    value = "${state.historicalCompletionRate}% (${state.totalCheckedRecordsCount}/${state.totalRecordsCount})",
+                    icon = Icons.Filled.CheckCircle,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+            }
             UncheckedItemsCard(
                 title = "本日の未チェックアイテム",
                 items = state.uncheckedItemsToday,
                 icon = Icons.AutoMirrored.Filled.ListAlt,
                 iconTint = MaterialTheme.colorScheme.tertiary,
+            )
+            UncheckedItemsCard(
+                title = "明日の未チェックアイテム",
+                items = state.uncheckedItemsTomorrow,
+                icon = Icons.AutoMirrored.Filled.ListAlt,
+                iconTint = MaterialTheme.colorScheme.secondary,
             )
         }
     }

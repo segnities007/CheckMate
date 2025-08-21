@@ -45,7 +45,7 @@ internal fun UncheckedItemsCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(28.dp),
                     tint = iconTint,
                 )
                 Text(
@@ -59,11 +59,11 @@ internal fun UncheckedItemsCard(
                 Text(
                     text = "全てのアイテムがチェック済みです！",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 56.dp), // Icon + Space width
+                    modifier = Modifier.padding(start = 44.dp), // Icon(28dp) + Space(16dp)
                 )
             } else {
                 Column(
-                    modifier = Modifier.padding(start = 56.dp), // Icon + Space width
+                    modifier = Modifier.padding(start = 44.dp), // Icon(28dp) + Space(16dp)
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items.forEach { item ->

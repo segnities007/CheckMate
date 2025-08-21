@@ -41,7 +41,7 @@ fun ItemCard(
                         MaterialTheme.colorScheme.surface
                     },
             ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
     ) {
         Row(
             modifier =
