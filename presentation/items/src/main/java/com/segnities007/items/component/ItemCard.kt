@@ -7,15 +7,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.segnities007.model.item.Item
+import com.segnities007.model.item.ItemCategory
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -32,21 +38,78 @@ fun ItemCard(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
     ) {
-        Column(modifier = Modifier.clickable { expanded = !expanded }) {
-            ItemCardImage(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            // 左側: アイコンまたは画像
+            ItemCardIcon(
                 imagePath = item.imagePath,
                 name = item.name,
-                onDeleteClick = { showDeleteDialog = true }
             )
 
-            ItemCardTitle(title = item.name)
+            // 中央: テキスト情報
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 24.sp
+                )
+                
+                Text(
+                    text = getCategoryDisplayName(item.category),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 12.sp
+                )
 
-            ItemCardDetails(expanded = expanded, item = item)
+                AnimatedVisibility(visible = expanded) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "登録日時: ${item.createdAt}",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        if (item.description.isNotBlank()) {
+                            Text(
+                                text = "詳細: ${item.description}",
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 右側: 削除ボタン
+            IconButton(
+                onClick = { showDeleteDialog = true },
+                modifier = Modifier.align(Alignment.CenterVertically),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Delete Item",
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     }
 
@@ -62,76 +125,37 @@ fun ItemCard(
 }
 
 @Composable
-private fun ItemCardImage(
+private fun ItemCardIcon(
     imagePath: String,
     name: String,
-    onDeleteClick: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxWidth().height(150.dp)) {
+    Box(
+        modifier = Modifier
+            .size(60.dp)
+            .clip(RoundedCornerShape(8.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
         if (imagePath.isNotEmpty()) {
             AsyncImage(
                 model = imagePath,
                 contentDescription = name,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                modifier = Modifier.fillMaxSize(),
             )
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)),
-                contentAlignment = Alignment.Center
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center,
             ) {
-                Text("No Image", style = MaterialTheme.typography.bodySmall)
-            }
-        }
-
-        IconButton(
-            onClick = onDeleteClick,
-            modifier = Modifier.align(Alignment.TopEnd)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = "Delete Item",
-                tint = MaterialTheme.colorScheme.error,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ItemCardTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(12.dp)
-    )
-}
-
-@OptIn(ExperimentalTime::class)
-@Composable
-private fun ItemCardDetails(expanded: Boolean, item: Item) {
-    AnimatedVisibility(visible = expanded) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-        ) {
-            Text("カテゴリ: ${item.category}", style = MaterialTheme.typography.bodyMedium)
-            if (item.description.isNotBlank()) {
-                Text(
-                    text = item.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 4.dp)
+                Icon(
+                    imageVector = Icons.Filled.Inventory,
+                    contentDescription = "Item Icon",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp),
                 )
             }
-            Text(
-                text = "登録日時: ${item.createdAt}",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp)
-            )
         }
     }
 }
@@ -155,4 +179,22 @@ private fun DeleteItemDialog(
             TextButton(onClick = onDismiss) { Text("キャンセル") }
         }
     )
+}
+
+private fun getCategoryDisplayName(category: ItemCategory): String {
+    return when (category) {
+        ItemCategory.STUDY_SUPPLIES -> "学業用品"
+        ItemCategory.DAILY_SUPPLIES -> "生活用品"
+        ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
+        ItemCategory.FOOD_SUPPLIES -> "食事用品"
+        ItemCategory.HEALTH_SUPPLIES -> "健康用品"
+        ItemCategory.BEAUTY_SUPPLIES -> "美容用品"
+        ItemCategory.EVENT_SUPPLIES -> "イベント用品"
+        ItemCategory.HOBBY_SUPPLIES -> "趣味用品"
+        ItemCategory.TRANSPORT_SUPPLIES -> "交通用品"
+        ItemCategory.CHARGING_SUPPLIES -> "充電用品"
+        ItemCategory.WEATHER_SUPPLIES -> "天候対策用品"
+        ItemCategory.ID_SUPPLIES -> "証明用品"
+        ItemCategory.OTHER_SUPPLIES -> "その他用品"
+    }
 }

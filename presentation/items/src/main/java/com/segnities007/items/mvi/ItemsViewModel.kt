@@ -30,6 +30,11 @@ class ItemsViewModel(
             is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> updateCapturedImageUriForBottomSheet(intent)
             is ItemsIntent.UpdateCapturedTempPathForViewModel -> updateCapturedTempPathForViewModel(intent)
             is ItemsIntent.UpdateIsShowBottomSheet -> updateIsShowBottomSheet(intent)
+            ItemsIntent.NavigateToItemsList -> sendEffect { ItemsEffect.NavigateToItemsList }
+            ItemsIntent.NavigateToCameraCapture -> sendEffect { ItemsEffect.NavigateToCameraCapture }
+            is ItemsIntent.UpdateSearchQuery -> updateSearchQuery(intent)
+            is ItemsIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
+            is ItemsIntent.UpdateSortOrder -> updateSortOrder(intent)
         }
     }
 
@@ -45,10 +50,59 @@ class ItemsViewModel(
         setState { copy(capturedTempPathForViewModel = intent.capturedTempPathForViewModel) }
     }
 
+    private fun updateSearchQuery(intent: ItemsIntent.UpdateSearchQuery) {
+        setState { copy(searchQuery = intent.query) }
+        applyFilters()
+    }
+
+    private fun updateSelectedCategory(intent: ItemsIntent.UpdateSelectedCategory) {
+        setState { copy(selectedCategory = intent.category) }
+        applyFilters()
+    }
+
+    private fun updateSortOrder(intent: ItemsIntent.UpdateSortOrder) {
+        setState { copy(sortOrder = intent.sortOrder) }
+        applyFilters()
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun applyFilters() {
+        val currentState = state.value
+        var filteredItems = currentState.items
+
+        // 検索フィルタ
+        if (currentState.searchQuery.isNotBlank()) {
+            filteredItems = filteredItems.filter { item ->
+                item.name.contains(currentState.searchQuery, ignoreCase = true) ||
+                item.description.contains(currentState.searchQuery, ignoreCase = true)
+            }
+        }
+
+        // カテゴリフィルタ
+        if (currentState.selectedCategory != null) {
+            filteredItems = filteredItems.filter { item ->
+                item.category == currentState.selectedCategory
+            }
+        }
+
+        // 並び替え
+        filteredItems = when (currentState.sortOrder) {
+            SortOrder.NAME_ASC -> filteredItems.sortedBy { it.name }
+            SortOrder.NAME_DESC -> filteredItems.sortedByDescending { it.name }
+            SortOrder.CREATED_ASC -> filteredItems.sortedBy { it.createdAt }
+            SortOrder.CREATED_DESC -> filteredItems.sortedByDescending { it.createdAt }
+            SortOrder.CATEGORY_ASC -> filteredItems.sortedBy { it.category.name }
+            SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
+        }
+
+        setState { copy(filteredItems = filteredItems) }
+    }
+
     private fun getAllItems() {
         viewModelScope.launch(Dispatchers.IO) {
             val items = itemRepository.getAllItems()
             setState { copy(items = items) }
+            applyFilters()
         }
     }
 
@@ -57,6 +111,7 @@ class ItemsViewModel(
             val item = itemRepository.getItemById(intent.id)
             if (item != null) {
                 setState { copy(items = listOf(item)) }
+                applyFilters()
             } else {
                 sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
             }
