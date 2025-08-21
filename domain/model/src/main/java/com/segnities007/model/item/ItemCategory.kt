@@ -1,5 +1,8 @@
 package com.segnities007.model.item
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class ItemCategory {
     STUDY_SUPPLIES, // 学業用品
     DAILY_SUPPLIES, // 生活用品

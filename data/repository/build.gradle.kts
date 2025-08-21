@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -47,4 +48,8 @@ dependencies {
 
     // datetime
     implementation(libs.kotlinx.datetime)
+
+    // serialization
+    implementation(libs.kotlinx.serialization.json)
+
 }

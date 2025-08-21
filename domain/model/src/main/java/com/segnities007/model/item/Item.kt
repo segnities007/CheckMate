@@ -1,9 +1,11 @@
 package com.segnities007.model.item
 
+import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+@Serializable
 data class Item
     @OptIn(ExperimentalTime::class)
     constructor(

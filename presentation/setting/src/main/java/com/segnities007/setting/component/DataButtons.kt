@@ -1,5 +1,6 @@
 package com.segnities007.setting.component
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +13,12 @@ import com.segnities007.ui.button.RectangleButton
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
 
 @Composable
-internal fun DataButtons() {
+internal fun DataButtons(
+    onExport: () -> Unit,
+    onImport: () -> Unit,
+    onBackUp: () -> Unit,
+    onRestore: () -> Unit,
+) {
     val modifier = Modifier.fillMaxWidth()
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -23,7 +29,8 @@ internal fun DataButtons() {
             text = "Export",
             endIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {
-                // TODO
+                Log.d("DataButtons", "Export")
+                onExport()
             },
         )
         RectangleButton(
@@ -31,7 +38,7 @@ internal fun DataButtons() {
             text = "Import",
             endIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             onClick = {
-                // TODO
+                onImport()
             },
         )
         RectangleButton(
