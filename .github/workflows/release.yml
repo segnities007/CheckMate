@@ -3,27 +3,46 @@ name: Build and Release APK
 on:
   push:
     branches:
-      - main  # main にマージされたときだけ発動
+      - main  # main に push されたときだけ発動
+
+permissions:
+  contents: write   # ← Release 作成に必要
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug
+
+      # 最新タグを取得してパッチバージョンを +1
       - name: Get version from tag
         id: get_version
         run: |
+          # 全タグを取得（checkout直後はタグが無い場合がある）
+          git fetch --tags
+
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           IFS='.' read -r major minor patch <<<"${latest_tag#v}"
           patch=$((patch + 1))
           new_tag="v$major.$minor.$patch"
+
           echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
+
+      # タグを push（リリースと合わせる）
+      - name: Push new tag
+        run: |
+          git tag ${{ steps.get_version.outputs.new_tag }}
+          git push origin ${{ steps.get_version.outputs.new_tag }}
+
+      # Release 作成
       - name: Create GitHub Release & Upload APK
         uses: softprops/action-gh-release@v1
         with:
