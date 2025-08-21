@@ -81,29 +81,31 @@ private fun DashboardUi(
 ) {
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Spacer(Modifier.height(innerPadding.calculateTopPadding()))
-        HorizontalDividerWithLabel("統計")
-        StatCard(
-            title = "総アイテム数",
-            value = state.itemCount.toString(),
-            icon = Icons.Filled.Dns,
-            iconTint = MaterialTheme.colorScheme.primary,
-        )
-        StatCard(
-            title = "総テンプレート数",
-            value = state.templateCount.toString(),
-            icon = Icons.AutoMirrored.Filled.Assignment,
-            iconTint = MaterialTheme.colorScheme.secondary,
-        )
-        UncheckedItemsCard(
-            title = "本日の未チェックアイテム",
-            items = state.uncheckedItemsToday,
-            icon = Icons.AutoMirrored.Filled.ListAlt,
-            iconTint = MaterialTheme.colorScheme.tertiary,
-        )
-        Spacer(modifier = Modifier.height(80.dp))
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            HorizontalDividerWithLabel("統計")
+            StatCard(
+                title = "総アイテム数",
+                value = state.itemCount.toString(),
+                icon = Icons.Filled.Dns,
+                iconTint = MaterialTheme.colorScheme.primary,
+            )
+            StatCard(
+                title = "総テンプレート数",
+                value = state.templateCount.toString(),
+                icon = Icons.AutoMirrored.Filled.Assignment,
+                iconTint = MaterialTheme.colorScheme.secondary,
+            )
+            UncheckedItemsCard(
+                title = "本日の未チェックアイテム",
+                items = state.uncheckedItemsToday,
+                icon = Icons.AutoMirrored.Filled.ListAlt,
+                iconTint = MaterialTheme.colorScheme.tertiary,
+            )
+        }
     }
 }
 
