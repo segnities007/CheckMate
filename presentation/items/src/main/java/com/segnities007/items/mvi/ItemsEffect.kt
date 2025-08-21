@@ -6,4 +6,8 @@ sealed interface ItemsEffect : MviEffect {
     data class ShowToast(
         val message: String,
     ) : ItemsEffect
+
+    data object NavigateToItemsList : ItemsEffect
+
+    data object NavigateToCameraCapture : ItemsEffect
 }

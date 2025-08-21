@@ -1,4 +1,4 @@
-package com.segnities007.items.page
+package com.segnities007.items.component
 
 import android.content.Context
 import android.net.Uri
