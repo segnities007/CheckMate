@@ -102,6 +102,7 @@ fun WeeklyTemplateList(
                         Modifier
                             .fillMaxWidth()
                             .clickable { onTemplateClick(template) }, // クリックでコールバック
+                    elevation = androidx.compose.material3.CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
                 ) {
                     Row(
                         modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
