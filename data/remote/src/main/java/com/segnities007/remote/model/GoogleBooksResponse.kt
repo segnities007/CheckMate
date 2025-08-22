@@ -24,6 +24,7 @@ data class VolumeInfo(
 
 @Serializable
 data class ImageLinks(
+    val smallThumbnail: String? = null,
     val thumbnail: String? = null
 )
 

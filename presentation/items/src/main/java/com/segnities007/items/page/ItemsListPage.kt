@@ -107,43 +107,19 @@ fun ItemsListPage(
         setTopBar {}
         setFab {
             if (alpha > 0) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                FloatingActionButton(
+                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
+                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+                    onClick = {
+                        sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
+                        sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
+                        sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+                    },
                 ) {
-                    FloatingActionButton(
-                        containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                        onClick = {
-                            sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
-                            sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
-                            sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "アイテムを追加",
-                        )
-                    }
-                    
-                    FloatingActionButton(
-                        containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                        onClick = {
-                            if (ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA,
-                                ) == PackageManager.PERMISSION_GRANTED) {
-                                onNavigateToBarcodeScanner()
-                            } else {
-                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.QrCodeScanner,
-                            contentDescription = "バーコードスキャン",
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "アイテムを追加",
+                    )
                 }
             }
         }
@@ -195,14 +171,22 @@ fun ItemsListPage(
             sheetState = bottomSheetState,
             onDismiss = {
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
+                sendIntent(ItemsIntent.ClearProductInfo)
             },
             onCreateItem = { name, description, category, _ ->
+                // バーコードスキャンで取得した表紙画像URLがある場合はそれを使用、ない場合は撮影した画像を使用
+                val imagePath = state.productInfo?.imageUrl ?: state.capturedTempPathForViewModel
+                
+                android.util.Log.d("ItemsListPage", "Creating item with imagePath: $imagePath")
+                android.util.Log.d("ItemsListPage", "productInfo.imageUrl: ${state.productInfo?.imageUrl}")
+                android.util.Log.d("ItemsListPage", "capturedTempPathForViewModel: ${state.capturedTempPathForViewModel}")
+                
                 val newItem =
                     Item(
                         name = name,
                         description = description,
                         category = category,
-                        imagePath = state.capturedTempPathForViewModel,
+                        imagePath = imagePath,
                         barcodeInfo = state.scannedBarcodeInfo,
                         productInfo = state.productInfo,
                     )
@@ -210,13 +194,26 @@ fun ItemsListPage(
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
                 sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
                 sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+                sendIntent(ItemsIntent.ClearProductInfo)
             },
             capturedImageUriFromParent = state.capturedImageUriForBottomSheet,
             onRequestLaunchCamera = {
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
                 sendIntent(ItemsIntent.NavigateToCameraCapture)
             },
+            onRequestBarcodeScan = {
+                sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA,
+                    ) == PackageManager.PERMISSION_GRANTED) {
+                    onNavigateToBarcodeScanner()
+                } else {
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+            },
             productInfo = state.productInfo,
+            shouldClearForm = state.shouldClearForm,
         )
     }
 }
