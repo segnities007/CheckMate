@@ -35,6 +35,7 @@ class ItemsViewModel(
             ItemsIntent.NavigateToBarcodeScanner -> sendEffect { ItemsEffect.NavigateToBarcodeScanner }
             is ItemsIntent.BarcodeDetected -> handleBarcodeDetected(intent)
             is ItemsIntent.GetProductInfo -> getProductInfo(intent)
+            ItemsIntent.ClearProductInfo -> clearProductInfo()
             is ItemsIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is ItemsIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
             is ItemsIntent.UpdateSortOrder -> updateSortOrder(intent)
@@ -130,10 +131,19 @@ class ItemsViewModel(
             }
             val newItem =
                 withContext(Dispatchers.IO) {
-                    if (intent.item.imagePath.isNotBlank()) {
-                        imageRepository.saveImage(intent.item.imagePath, "${Uuid.random()}.jpg")
+                    val finalImagePath = if (intent.item.imagePath.isNotBlank()) {
+                        // URLの場合はそのまま使用、ローカルファイルパスの場合は保存
+                        if (intent.item.imagePath.startsWith("http://") || intent.item.imagePath.startsWith("https://")) {
+                            android.util.Log.d("ItemsViewModel", "Using URL as imagePath: ${intent.item.imagePath}")
+                            intent.item.imagePath
+                        } else {
+                            android.util.Log.d("ItemsViewModel", "Saving local image: ${intent.item.imagePath}")
+                            imageRepository.saveImage(intent.item.imagePath, "${Uuid.random()}.jpg")
+                        }
+                    } else {
+                        ""
                     }
-                    intent.item.copy(imagePath = intent.item.imagePath)
+                    intent.item.copy(imagePath = finalImagePath)
                 }
             itemRepository.insertItem(newItem)
             sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }
@@ -179,12 +189,18 @@ class ItemsViewModel(
                         copy(
                             isShowBottomSheet = false,
                             capturedImageUriForBottomSheet = null,
-                            capturedTempPathForViewModel = ""
+                            capturedTempPathForViewModel = "",
+                            shouldClearForm = true
                         ) 
                     }
+                    
                     // 少し遅延を入れてからボトムシートを表示（状態リセットのため）
                     kotlinx.coroutines.delay(100)
                     setState { copy(isShowBottomSheet = true) }
+                    
+                    // フォームクリアフラグをリセット（productInfoは保持）
+                    kotlinx.coroutines.delay(200)
+                    setState { copy(shouldClearForm = false) }
                 } else {
                     sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
                 }
@@ -192,6 +208,15 @@ class ItemsViewModel(
                 setState { copy(isLoadingProductInfo = false) }
                 sendEffect { ItemsEffect.ShowToast("商品情報の取得に失敗しました: ${e.message}") }
             }
+        }
+    }
+    
+    private fun clearProductInfo() {
+        setState { 
+            copy(
+                productInfo = null,
+                scannedBarcodeInfo = null
+            ) 
         }
     }
 }

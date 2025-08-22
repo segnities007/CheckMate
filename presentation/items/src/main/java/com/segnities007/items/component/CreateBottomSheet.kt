@@ -84,6 +84,7 @@ fun CreateBottomSheet(
     onRequestBarcodeScan: () -> Unit,
     isLoadingFromParent: Boolean = false,
     productInfo: ProductInfo? = null,
+    shouldClearForm: Boolean = false,
 ) {
     var itemName by remember { mutableStateOf("") }
     var itemDescription by remember { mutableStateOf<String>("") }
@@ -94,11 +95,26 @@ fun CreateBottomSheet(
     }
     var showProductCover by remember { mutableStateOf(true) }
 
+    // フォームクリアフラグが設定された場合、フォームをクリア
+    LaunchedEffect(shouldClearForm) {
+        Log.d("CreateBottomSheet", "shouldClearForm changed to: $shouldClearForm")
+        if (shouldClearForm) {
+            Log.d("CreateBottomSheet", "Clearing form due to shouldClearForm flag")
+            itemName = ""
+            itemDescription = ""
+            selectedCategory = null
+            imageUriForPreview = null
+            showProductCover = false
+        }
+    }
+
     // 商品情報が提供された場合、自動的に入力
-    LaunchedEffect(productInfo) {
-        if (productInfo != null) {
-            Log.d("CreateBottomSheet", "ProductInfo received - Name: ${productInfo.name}")
-            Log.d("CreateBottomSheet", "ProductInfo received - ImageURL: ${productInfo.imageUrl}")
+    LaunchedEffect(productInfo, shouldClearForm) {
+        Log.d("CreateBottomSheet", "LaunchedEffect triggered - productInfo: ${productInfo?.name}, shouldClearForm: $shouldClearForm")
+        if (productInfo != null && !shouldClearForm) {
+            Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Name: ${productInfo.name}")
+            Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Description: ${productInfo.description}")
+            Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Category: ${productInfo.category}")
             
             itemName = productInfo.name
             itemDescription = productInfo.description
@@ -107,6 +123,8 @@ fun CreateBottomSheet(
             imageUriForPreview = null
             // 表紙画像を表示する
             showProductCover = true
+        } else {
+            Log.d("CreateBottomSheet", "Not setting form fields - productInfo: ${productInfo?.name}, shouldClearForm: $shouldClearForm")
         }
     }
 

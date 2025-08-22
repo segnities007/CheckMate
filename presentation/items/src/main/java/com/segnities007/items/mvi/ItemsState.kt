@@ -23,6 +23,7 @@ data class ItemsState(
     val scannedBarcodeInfo: BarcodeInfo? = null,
     val productInfo: ProductInfo? = null,
     val isLoadingProductInfo: Boolean = false,
+    val shouldClearForm: Boolean = false,
 ) : MviState
 
 enum class SortOrder {

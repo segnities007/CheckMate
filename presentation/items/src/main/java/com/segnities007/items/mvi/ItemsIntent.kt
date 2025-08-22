@@ -58,4 +58,6 @@ sealed interface ItemsIntent : MviIntent {
     data class GetProductInfo(
         val barcodeInfo: BarcodeInfo,
     ) : ItemsIntent
+    
+    data object ClearProductInfo : ItemsIntent
 }

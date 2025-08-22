@@ -171,14 +171,22 @@ fun ItemsListPage(
             sheetState = bottomSheetState,
             onDismiss = {
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
+                sendIntent(ItemsIntent.ClearProductInfo)
             },
             onCreateItem = { name, description, category, _ ->
+                // バーコードスキャンで取得した表紙画像URLがある場合はそれを使用、ない場合は撮影した画像を使用
+                val imagePath = state.productInfo?.imageUrl ?: state.capturedTempPathForViewModel
+                
+                android.util.Log.d("ItemsListPage", "Creating item with imagePath: $imagePath")
+                android.util.Log.d("ItemsListPage", "productInfo.imageUrl: ${state.productInfo?.imageUrl}")
+                android.util.Log.d("ItemsListPage", "capturedTempPathForViewModel: ${state.capturedTempPathForViewModel}")
+                
                 val newItem =
                     Item(
                         name = name,
                         description = description,
                         category = category,
-                        imagePath = state.capturedTempPathForViewModel,
+                        imagePath = imagePath,
                         barcodeInfo = state.scannedBarcodeInfo,
                         productInfo = state.productInfo,
                     )
@@ -186,6 +194,7 @@ fun ItemsListPage(
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
                 sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
                 sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+                sendIntent(ItemsIntent.ClearProductInfo)
             },
             capturedImageUriFromParent = state.capturedImageUriForBottomSheet,
             onRequestLaunchCamera = {
@@ -204,6 +213,7 @@ fun ItemsListPage(
                 }
             },
             productInfo = state.productInfo,
+            shouldClearForm = state.shouldClearForm,
         )
     }
 }
