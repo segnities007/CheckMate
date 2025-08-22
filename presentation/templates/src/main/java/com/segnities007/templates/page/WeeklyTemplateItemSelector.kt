@@ -217,7 +217,7 @@ fun WeeklyTemplateSelector(
                         // アイテム画像
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(64.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(
                                     Brush.verticalGradient(
@@ -241,7 +241,7 @@ fun WeeklyTemplateSelector(
                                     imageVector = Icons.Filled.Inventory,
                                     contentDescription = "Item Icon",
                                     tint = getCategoryColor(item.category),
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(32.dp)
                                 )
                             }
                         }
@@ -258,11 +258,7 @@ fun WeeklyTemplateSelector(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             
-                            Text(
-                                text = getCategoryDisplayName(item.category),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            CategoryTag(category = item.category)
                         }
 
                         // 選択状態インジケーター
@@ -299,13 +295,13 @@ fun WeeklyTemplateSelector(
 
 private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
     return when (dayOfWeek) {
-        DayOfWeek.MONDAY -> "月曜日"
-        DayOfWeek.TUESDAY -> "火曜日"
-        DayOfWeek.WEDNESDAY -> "水曜日"
-        DayOfWeek.THURSDAY -> "木曜日"
-        DayOfWeek.FRIDAY -> "金曜日"
-        DayOfWeek.SATURDAY -> "土曜日"
-        DayOfWeek.SUNDAY -> "日曜日"
+        DayOfWeek.MONDAY -> "月"
+        DayOfWeek.TUESDAY -> "火"
+        DayOfWeek.WEDNESDAY -> "水"
+        DayOfWeek.THURSDAY -> "木"
+        DayOfWeek.FRIDAY -> "金"
+        DayOfWeek.SATURDAY -> "土"
+        DayOfWeek.SUNDAY -> "日"
     }
 }
 
@@ -324,6 +320,26 @@ private fun getCategoryColor(category: ItemCategory): Color {
         ItemCategory.WEATHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - 天候対策用品
         ItemCategory.ID_SUPPLIES -> Color(0xFF8BC34A) // Light Green - 証明用品
         ItemCategory.OTHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - その他用品
+    }
+}
+
+@Composable
+private fun CategoryTag(
+    category: ItemCategory
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(getCategoryColor(category).copy(alpha = 0.1f))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = getCategoryDisplayName(category),
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium,
+            color = getCategoryColor(category),
+            fontSize = 12.sp
+        )
     }
 }
 

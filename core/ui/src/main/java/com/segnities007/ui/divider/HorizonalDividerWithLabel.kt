@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,13 +24,18 @@ fun HorizontalDividerWithLabel(label: String) {
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        HorizontalDivider(Modifier.weight(2f))
+        HorizontalDivider(
+            Modifier.weight(2f),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         Text(
             text = label,
             fontSize = 20.sp,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurface,
         )
-        HorizontalDivider(Modifier.weight(8f))
+        HorizontalDivider(
+            Modifier.weight(8f),
+            color = MaterialTheme.colorScheme.onSurface,)
     }
 }
 

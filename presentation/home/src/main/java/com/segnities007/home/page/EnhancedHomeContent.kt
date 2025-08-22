@@ -17,6 +17,7 @@ import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import kotlinx.datetime.LocalDate
 
 @Composable
@@ -84,21 +85,15 @@ private fun CategoryBasedItemList(
     val itemsByCategory = selectedItems.groupBy { it.category }
     
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // セクションヘッダー
-        Text(
-            text = "今日のアイテム",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        HorizontalDividerWithLabel("今日のアイテム")
         
         if (selectedItems.isEmpty()) {
             // アイテムがない場合の表示
-            EmptyStateCard(
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+            EmptyStateCard()
         } else {
             // カテゴリ別にアイテムを表示
             itemsByCategory.forEach { (category, items) ->
@@ -121,7 +116,6 @@ private fun CategoryBasedItemList(
                             onCheckedChange = { checked ->
                                 onCheckItem(item.id, checked)
                             },
-                            modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
                 }
