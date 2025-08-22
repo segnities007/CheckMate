@@ -7,6 +7,8 @@ import kotlinx.datetime.LocalDate
 
 data class HomeState(
     val selectedDate: LocalDate = LocalDate.parse("1970-01-01"), // デフォルト値
+    val currentYear: Int = 2024,
+    val currentMonth: Int = 1,
     val templatesForToday: List<WeeklyTemplate> = emptyList(),
     val itemsForToday: List<Item> = emptyList(),
     val itemCheckStates: Map<Int, Boolean> = emptyMap(), // Compose に渡すチェック状態

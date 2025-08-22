@@ -14,6 +14,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class HomeViewModel(
     private val itemRepo: ItemRepository,
     private val templateRepo: WeeklyTemplateRepository,
@@ -28,10 +29,20 @@ class HomeViewModel(
             is HomeIntent.SelectDate -> selectDate(intent.date)
             is HomeIntent.CheckItem -> checkItem(intent.itemId, intent.checked)
             HomeIntent.GetAllItem -> getAllItems()
+            is HomeIntent.ChangeMonth -> changeMonth(intent.year, intent.month)
         }
     }
 
     init {
+        // 現在の年月を設定
+        val today = Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+        setState { 
+            copy(
+                currentYear = today.year,
+                currentMonth = today.monthNumber
+            )
+        }
+        
         getAllItems()
         ensureCheckHistoryForToday()
         viewModelScope.launch { handleIntent(HomeIntent.LoadTodayData) }
@@ -109,6 +120,15 @@ class HomeViewModel(
                 templatesForToday = templates,
                 itemsForToday = itemsForToday,
                 itemCheckStates = stateMap.toMap(),
+            )
+        }
+    }
+
+    private fun changeMonth(year: Int, month: Int) {
+        setState { 
+            copy(
+                currentYear = year,
+                currentMonth = month
             )
         }
     }

@@ -66,4 +66,7 @@ dependencies {
 
     // datetime
     implementation(libs.kotlinx.datetime)
+
+    // icon
+    implementation(libs.androidx.material.icons.extended)
 }
