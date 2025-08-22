@@ -51,6 +51,24 @@ import coil3.compose.AsyncImage
 import com.segnities007.model.item.ItemCategory
 import kotlin.time.ExperimentalTime
 
+private fun getCategoryDisplayName(category: ItemCategory): String {
+    return when (category) {
+        ItemCategory.STUDY_SUPPLIES -> "学業用品"
+        ItemCategory.DAILY_SUPPLIES -> "生活用品"
+        ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
+        ItemCategory.FOOD_SUPPLIES -> "食事用品"
+        ItemCategory.HEALTH_SUPPLIES -> "健康用品"
+        ItemCategory.BEAUTY_SUPPLIES -> "美容用品"
+        ItemCategory.EVENT_SUPPLIES -> "イベント用品"
+        ItemCategory.HOBBY_SUPPLIES -> "趣味用品"
+        ItemCategory.TRANSPORT_SUPPLIES -> "交通用品"
+        ItemCategory.CHARGING_SUPPLIES -> "充電用品"
+        ItemCategory.WEATHER_SUPPLIES -> "天候対策用品"
+        ItemCategory.ID_SUPPLIES -> "証明用品"
+        ItemCategory.OTHER_SUPPLIES -> "その他用品"
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateBottomSheet(
@@ -179,7 +197,7 @@ fun CreateBottomSheet(
                 onExpandedChange = { if (!isLoadingFromParent) expandedDropdown = !expandedDropdown },
             ) {
                 OutlinedTextField(
-                    value = selectedCategory?.name ?: "",
+                    value = selectedCategory?.let { getCategoryDisplayName(it) } ?: "",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("カテゴリ*") },
@@ -194,7 +212,7 @@ fun CreateBottomSheet(
                 ) {
                     ItemCategory.entries.forEach { category ->
                         DropdownMenuItem(
-                            text = { Text(category.name) },
+                            text = { Text(getCategoryDisplayName(category)) },
                             onClick = {
                                 selectedCategory = category
                                 expandedDropdown = false

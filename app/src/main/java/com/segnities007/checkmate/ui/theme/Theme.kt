@@ -10,12 +10,16 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme =
     darkColorScheme(
         primary = Purple80,
         secondary = PurpleGrey80,
         tertiary = Pink80,
+        background = Color(0xFF000000), // 純黒背景色
+        surface = Color(0xFF1E1E1E), // Cardの背景色
+        surfaceVariant = Color(0xFF2D2D2D), // セカンダリカードの背景色
     )
 
 private val LightColorScheme =
@@ -23,15 +27,9 @@ private val LightColorScheme =
         primary = Purple40,
         secondary = PurpleGrey40,
         tertiary = Pink40,
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-     */
+        background = Color(0xFFCCCCCC), // より濃いグレー背景色
+        surface = Color(0xFFFFFFFF), // Cardの背景色
+        surfaceVariant = Color(0xFFF8F8F8), // セカンダリカードの背景色
     )
 
 @Composable

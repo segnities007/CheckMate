@@ -1,5 +1,8 @@
 package com.segnities007.dashboard
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,11 +50,20 @@ fun DashboardScreen(
     val state by dashboardViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    val alpha by remember {
+    val targetAlpha by remember {
         derivedStateOf {
-            (1f - scrollState.value / 100f).coerceIn(0f, 1f)
+            when {
+                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
+                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
+            }
         }
     }
+    
+    val alpha by animateFloatAsState(
+        targetValue = targetAlpha,
+        animationSpec = tween(durationMillis = 200),
+        label = "navigationBarAlpha"
+    )
 
     LaunchedEffect(Unit) {
         setFab {}
@@ -69,6 +81,7 @@ fun DashboardScreen(
         modifier =
             Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .verticalScroll(scrollState),
         state = state,
         innerPadding = innerPadding,

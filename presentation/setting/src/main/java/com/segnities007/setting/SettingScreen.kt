@@ -4,6 +4,9 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -47,11 +51,20 @@ fun SettingScreen(
     val settingViewModel: SettingViewModel = koinInject()
     val scrollState = rememberScrollState()
 
-    val alpha by remember {
+    val targetAlpha by remember {
         derivedStateOf {
-            (1f - scrollState.value / 50f).coerceIn(0f, 1f)
+            when {
+                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
+                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
+            }
         }
     }
+    
+    val alpha by animateFloatAsState(
+        targetValue = targetAlpha,
+        animationSpec = tween(durationMillis = 200),
+        label = "navigationBarAlpha"
+    )
 
     LaunchedEffect(Unit) {
         setNavigationBar {
@@ -81,6 +94,7 @@ fun SettingScreen(
         modifier =
             Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))

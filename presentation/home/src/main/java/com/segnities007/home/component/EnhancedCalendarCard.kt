@@ -74,7 +74,20 @@ fun EnhancedCalendarCard(
                 }
             )
 
-            // 今日ボタン
+            // 曜日ヘッダー
+            CalendarWeekdayRow()
+
+            // カレンダーグリッド
+            EnhancedCalendarDateGrid(
+                year = year,
+                month = month,
+                selectedDate = selectedDate,
+                today = today,
+                templates = templates,
+                onDateSelected = onDateSelected,
+            )
+
+            // 今日ボタン（カレンダー下部に配置）
             if (selectedDate != today) {
                 OutlinedButton(
                     onClick = { onDateSelected(today) },
@@ -104,19 +117,6 @@ fun EnhancedCalendarCard(
                     )
                 }
             }
-
-            // 曜日ヘッダー
-            CalendarWeekdayRow()
-
-            // カレンダーグリッド
-            EnhancedCalendarDateGrid(
-                year = year,
-                month = month,
-                selectedDate = selectedDate,
-                today = today,
-                templates = templates,
-                onDateSelected = onDateSelected,
-            )
         }
     }
 }
@@ -172,7 +172,10 @@ private fun CalendarHeader(
 
 @Composable
 private fun CalendarWeekdayRow() {
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         listOf("日", "月", "火", "水", "木", "金", "土").forEach { day ->
             val textColor =
                 when (day) {
@@ -180,15 +183,19 @@ private fun CalendarWeekdayRow() {
                     "土" -> Color.Blue
                     else -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
-            Text(
-                text = day,
+            Box(
                 modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                color = textColor,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = day,
+                    textAlign = TextAlign.Center,
+                    color = textColor,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }
@@ -204,7 +211,19 @@ private fun EnhancedCalendarDateGrid(
 ) {
     val firstOfMonth = LocalDate(year, month, 1)
     val totalDays = firstOfMonth.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY).dayOfMonth
-    val firstWeekday = (firstOfMonth.dayOfWeek.isoDayNumber % 7)
+    // 日曜日を0、月曜日を1、...、土曜日を6とする
+    val firstWeekday = when (firstOfMonth.dayOfWeek) {
+        KDayOfWeek.SUNDAY -> 0
+        KDayOfWeek.MONDAY -> 1
+        KDayOfWeek.TUESDAY -> 2
+        KDayOfWeek.WEDNESDAY -> 3
+        KDayOfWeek.THURSDAY -> 4
+        KDayOfWeek.FRIDAY -> 5
+        KDayOfWeek.SATURDAY -> 6
+    }
+    
+    // 必要な行数を計算（最大6行）
+    val requiredRows = minOf(6, ((totalDays + firstWeekday - 1) / 7) + 1)
 
     // テンプレートがある日付を取得
     val datesWithTemplates = templates.flatMap { template ->
@@ -233,31 +252,40 @@ private fun EnhancedCalendarDateGrid(
         }.flatten()
     }.distinct()
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(7),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(320.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(firstWeekday) {
-            Box(modifier = Modifier.size(40.dp)) // 空白セル
-        }
-
-        items(totalDays) { index ->
-            val day = index + 1
-            val date = LocalDate(year, month, day)
-            val hasTemplates = datesWithTemplates.contains(date)
-            
-            EnhancedCalendarDateCell(
-                date = date,
-                day = day,
-                isSelected = date == selectedDate,
-                isToday = date == today,
-                hasTemplates = hasTemplates,
-                onDateSelected = onDateSelected,
-            )
+        repeat(requiredRows) { rowIndex ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                repeat(7) { columnIndex ->
+                    val cellIndex = rowIndex * 7 + columnIndex
+                    val day = cellIndex - firstWeekday + 1
+                    
+                    if (cellIndex < firstWeekday || day > totalDays) {
+                        // 空白セル
+                        Box(modifier = Modifier.weight(1f))
+                    } else {
+                        // 日付セル
+                        val date = LocalDate(year, month, day)
+                        val hasTemplates = datesWithTemplates.contains(date)
+                        
+                        Box(modifier = Modifier.weight(1f)) {
+                            EnhancedCalendarDateCell(
+                                date = date,
+                                day = day,
+                                isSelected = date == selectedDate,
+                                isToday = date == today,
+                                hasTemplates = hasTemplates,
+                                onDateSelected = onDateSelected,
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -286,7 +314,8 @@ private fun EnhancedCalendarDateCell(
 
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .fillMaxWidth()
+            .aspectRatio(1f) // 正方形を維持
             .clip(CircleShape)
             .background(backgroundColor)
             .clickable { onDateSelected(date) },
