@@ -94,14 +94,12 @@ private fun DashboardUi(
                     title = "総アイテム数",
                     value = state.itemCount.toString(),
                     icon = Icons.Filled.Dns,
-                    iconTint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
                 StatCard(
                     title = "総テンプレート数",
                     value = state.templateCount.toString(),
                     icon = Icons.AutoMirrored.Filled.Assignment,
-                    iconTint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -110,28 +108,22 @@ private fun DashboardUi(
                     title = "本日の完了率",
                     value = "${state.completionRateToday}% (${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
                     icon = Icons.Filled.CheckCircle,
-                    iconTint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.weight(1f),
                 )
                 StatCard(
                     title = "累計完了率",
                     value = "${state.historicalCompletionRate}% (${state.totalCheckedRecordsCount}/${state.totalRecordsCount})",
                     icon = Icons.Filled.CheckCircle,
-                    iconTint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
             }
             UncheckedItemsCard(
                 title = "本日の未チェックアイテム",
                 items = state.uncheckedItemsToday,
-                icon = Icons.AutoMirrored.Filled.ListAlt,
-                iconTint = MaterialTheme.colorScheme.tertiary,
             )
             UncheckedItemsCard(
                 title = "明日の未チェックアイテム",
                 items = state.uncheckedItemsTomorrow,
-                icon = Icons.AutoMirrored.Filled.ListAlt,
-                iconTint = MaterialTheme.colorScheme.secondary,
             )
         }
     }

@@ -25,7 +25,7 @@ fun ItemsList(
             ItemCard(
                 item = item,
                 modifier = Modifier.fillMaxWidth(),
-                onDeleteItem = onDeleteItem,
+                onDelete = { onDeleteItem(item) },
             )
         }
     }

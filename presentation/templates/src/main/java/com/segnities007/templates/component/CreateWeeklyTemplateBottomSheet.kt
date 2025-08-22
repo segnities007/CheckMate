@@ -10,11 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.DayOfWeek
@@ -34,7 +39,7 @@ import com.segnities007.model.DayOfWeek
 @Composable
 fun CreateWeeklyTemplateBottomSheet(
     onDismiss: () -> Unit,
-    onCreateTemplate: (name: String, daysOfWeek: Set<DayOfWeek>) -> Unit, // Changed signature
+    onCreateTemplate: (name: String, daysOfWeek: Set<DayOfWeek>) -> Unit,
     sheetState: SheetState,
 ) {
     var templateName by remember { mutableStateOf("") }
@@ -43,40 +48,53 @@ fun CreateWeeklyTemplateBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 20.dp),
-            // Added vertical padding too
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // ヘッダー
             Text(
-                "テンプレートを作成",
+                text = "テンプレートを作成",
                 style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
+            // テンプレート名入力
             OutlinedTextField(
                 value = templateName,
                 onValueChange = { templateName = it },
-                label = { Text("テンプレート名*") },
+                label = { Text("テンプレート名") },
+                placeholder = { Text("例: 月曜日の忘れ物") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
 
-            Column(modifier = Modifier.fillMaxWidth()) {
+            // 曜日選択
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Text(
-                    "曜日*",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = "適用する曜日",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                // Use FlowRow to allow chips to wrap to the next line
+                
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp), // Spacing between rows of chips
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     DayOfWeek.entries.forEach { day ->
                         val isSelected = selectedDaysOfWeek.value.contains(day)
@@ -90,18 +108,37 @@ fun CreateWeeklyTemplateBottomSheet(
                                         selectedDaysOfWeek.value + day
                                     }
                             },
-                            label = { Text(day.name) }, // Consider using a display name if available
+                            label = { 
+                                Text(
+                                    text = getDayOfWeekDisplayName(day),
+                                    style = MaterialTheme.typography.bodyMedium
+                                ) 
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         )
                     }
                 }
             }
 
+            // アクションボタン
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(onClick = onDismiss) { Text("キャンセル") }
-                Spacer(Modifier.width(12.dp))
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    Text("キャンセル")
+                }
+                
                 Button(
                     onClick = {
                         if (templateName.isNotBlank() && selectedDaysOfWeek.value.isNotEmpty()) {
@@ -109,13 +146,29 @@ fun CreateWeeklyTemplateBottomSheet(
                             onDismiss()
                         }
                     },
-                    // Enable button only if name is not blank and at least one day is selected
+                    modifier = Modifier.weight(1f),
                     enabled = templateName.isNotBlank() && selectedDaysOfWeek.value.isNotEmpty(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text("作成")
                 }
             }
         }
+    }
+}
+
+private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
+    return when (dayOfWeek) {
+        DayOfWeek.MONDAY -> "月曜日"
+        DayOfWeek.TUESDAY -> "火曜日"
+        DayOfWeek.WEDNESDAY -> "水曜日"
+        DayOfWeek.THURSDAY -> "木曜日"
+        DayOfWeek.FRIDAY -> "金曜日"
+        DayOfWeek.SATURDAY -> "土曜日"
+        DayOfWeek.SUNDAY -> "日曜日"
     }
 }
 
