@@ -63,9 +63,12 @@ fun TemplatesScreen(
                 setFab = setFab,
                 onNavigate = onNavigate,
                 sendIntent = templatesViewModel::sendIntent,
-                templates = state.weeklyTemplates,
+                templates = state.filteredTemplates,
                 setTopBar = setTopBar,
                 onTemplateClick = { templatesViewModel.sendIntent(TemplatesIntent.SelectTemplate(it)) },
+                templateSearchQuery = state.templateSearchQuery,
+                templateSortOrder = state.templateSortOrder,
+                selectedDayOfWeek = state.selectedDayOfWeek,
             )
         }
         composable<TemplatesRoute.WeeklyTemplateSelector> {
@@ -76,7 +79,7 @@ fun TemplatesScreen(
                 setTopBar = setTopBar,
                 setFab = setFab,
                 template = state.selectedTemplate ?: WeeklyTemplate(),
-                allItems = state.allItems,
+                allItems = state.filteredItems.ifEmpty { state.allItems },
             )
         }
     }
