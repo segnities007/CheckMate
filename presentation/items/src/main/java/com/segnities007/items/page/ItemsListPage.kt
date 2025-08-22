@@ -40,6 +40,8 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.segnities007.items.component.ItemsList
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
@@ -72,11 +74,20 @@ fun ItemsListPage(
             }
         }
 
-    val alpha by remember {
+    val targetAlpha by remember {
         derivedStateOf {
-            (1f - scrollState.value / 100f).coerceIn(0f, 1f)
+            when {
+                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
+                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
+            }
         }
     }
+    
+    val alpha by animateFloatAsState(
+        targetValue = targetAlpha,
+        animationSpec = tween(durationMillis = 200),
+        label = "navigationBarAlpha"
+    )
 
     LaunchedEffect(Unit) {
         setNavigationBar {

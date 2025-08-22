@@ -27,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +59,7 @@ import coil3.compose.AsyncImage
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.model.DayOfWeek
 import com.segnities007.templates.mvi.SortOrder
 import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.ui.bar.ConfirmBar
@@ -83,6 +86,13 @@ fun WeeklyTemplateSelector(
             }
         }
 
+    val scrollState = rememberScrollState()
+    val alpha by remember {
+        derivedStateOf {
+            (1f - scrollState.value / 100f).coerceIn(0f, 1f)
+        }
+    }
+
     LaunchedEffect(Unit) {
         setFab {}
         setTopBar {}
@@ -100,400 +110,225 @@ fun WeeklyTemplateSelector(
                 onCancel = {
                     sendIntent(TemplatesIntent.NavigateToWeeklyTemplateList)
                 },
+                alpha = alpha
             )
         }
     }
 
-    WeeklyTemplateSelectorContent(
-        innerPadding = innerPadding,
-        allItems = allItems,
-        selectedStates = selectedStates,
-    )
-}
-
-@OptIn(ExperimentalTime::class)
-@Composable
-fun WeeklyTemplateSelectorContent(
-    innerPadding: PaddingValues,
-    selectedStates: MutableMap<Int, Boolean>,
-    allItems: List<Item>,
-) {
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<ItemCategory?>(null) }
-    var sortOrder by remember { mutableStateOf(SortOrder.NAME_ASC) }
-
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // 検索・フィルタ・ソートバー
-            SearchFilterBar(
-                searchQuery = searchQuery,
-                selectedCategory = selectedCategory,
-                sortOrder = sortOrder,
-                onSearchQueryChange = { query ->
-                    searchQuery = query
-                },
-                onCategoryChange = { category ->
-                    selectedCategory = category
-                },
-                onSortOrderChange = { order ->
-                    sortOrder = order
-                },
-            )
-
-            HorizontalDividerWithLabel("登録・未登録のアイテム")
-
-            // フィルタリングされたアイテムリスト
-            val filteredItems = allItems.filter { item ->
-                val matchesSearch = searchQuery.isEmpty() || 
-                    item.name.contains(searchQuery, ignoreCase = true) ||
-                    item.description.contains(searchQuery, ignoreCase = true)
-                val matchesCategory = selectedCategory == null || item.category == selectedCategory
-                matchesSearch && matchesCategory
-            }.let { items ->
-                when (sortOrder) {
-                    SortOrder.NAME_ASC -> items.sortedBy { it.name }
-                    SortOrder.NAME_DESC -> items.sortedByDescending { it.name }
-                    SortOrder.CREATED_ASC -> items.sortedBy { it.createdAt }
-                    SortOrder.CREATED_DESC -> items.sortedByDescending { it.createdAt }
-                    SortOrder.CATEGORY_ASC -> items.sortedBy { it.category.name }
-                    SortOrder.CATEGORY_DESC -> items.sortedByDescending { it.category.name }
-                }
-            }
-
-            ItemsList(
-                items = filteredItems,
-                selectedStates = selectedStates,
-                onItemClick = { item ->
-                    // アイテムの選択状態を切り替え
-                    val currentState = selectedStates[item.id] ?: false
-                    selectedStates[item.id] = !currentState
-                },
-            )
-        }
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SearchFilterBar(
-    searchQuery: String,
-    selectedCategory: ItemCategory?,
-    sortOrder: SortOrder,
-    onSearchQueryChange: (String) -> Unit,
-    onCategoryChange: (ItemCategory?) -> Unit,
-    onSortOrderChange: (SortOrder) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var showCategoryMenu by remember { mutableStateOf(false) }
-    var showSortMenu by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        // 検索バー
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp),
-                )
-                TextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    placeholder = { Text("アイテムを検索", style = MaterialTheme.typography.bodyMedium) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                    ),
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
-
-        // フィルタとソートボタン
-        Row(
+        
+        // テンプレート情報
+        ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 1.dp,
+                pressedElevation = 2.dp,
+                focusedElevation = 1.dp,
+                hoveredElevation = 1.dp
+            ),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
-            // カテゴリフィルタ
-            Box(
-                modifier = Modifier.weight(1f),
-            ) {
-                OutlinedButton(
-                    onClick = { showCategoryMenu = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
-                            )
-                        )
-                    ),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.FilterList,
-                            contentDescription = "Filter",
-                            modifier = Modifier.size(16.dp),
-                        )
-                        Text(
-                            text = getCategoryDisplayName(selectedCategory),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                        )
-                    }
-                }
-
-                DropdownMenu(
-                    expanded = showCategoryMenu,
-                    onDismissRequest = { showCategoryMenu = false },
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clip(RoundedCornerShape(12.dp)),
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("全カテゴリ", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onCategoryChange(null)
-                            showCategoryMenu = false
-                        },
-                    )
-                    ItemCategory.entries.forEach { category ->
-                        DropdownMenuItem(
-                            text = { Text(getCategoryDisplayName(category), style = MaterialTheme.typography.bodySmall) },
-                            onClick = {
-                                onCategoryChange(category)
-                                showCategoryMenu = false
-                            },
-                        )
-                    }
-                }
-            }
-
-            // 並び替え
-            Box(
-                modifier = Modifier.weight(1f),
-            ) {
-                OutlinedButton(
-                    onClick = { showSortMenu = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
-                            )
-                        )
-                    ),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Sort,
-                            contentDescription = "Sort",
-                            modifier = Modifier.size(16.dp),
-                        )
-                        Text(
-                            text = getSortOrderShortName(sortOrder),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                        )
-                    }
-                }
-
-                DropdownMenu(
-                    expanded = showSortMenu,
-                    onDismissRequest = { showSortMenu = false },
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clip(RoundedCornerShape(12.dp)),
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("名前順", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onSortOrderChange(SortOrder.NAME_ASC)
-                            showSortMenu = false
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("日時順", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onSortOrderChange(SortOrder.CREATED_DESC)
-                            showSortMenu = false
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("カテゴリ順", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onSortOrderChange(SortOrder.CATEGORY_ASC)
-                            showSortMenu = false
-                        },
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ItemsList(
-    items: List<Item>,
-    selectedStates: MutableMap<Int, Boolean>,
-    onItemClick: (Item) -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items.forEach { item ->
-            val isSelected = selectedStates[item.id] ?: false
-            
-            Card(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onItemClick(item) },
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isSelected) 
-                        MaterialTheme.colorScheme.primaryContainer 
-                    else 
-                        MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = if (isSelected) 
-                        MaterialTheme.colorScheme.onPrimaryContainer 
-                    else 
-                        MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-                shape = RoundedCornerShape(12.dp),
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                Text(
+                    text = template.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                // 曜日タグ
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // 左側: アイコンまたは画像
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (item.imagePath.isNotEmpty()) {
-                            AsyncImage(
-                                model = item.imagePath,
-                                contentDescription = item.name,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize(),
+                    template.daysOfWeek.forEach { dayOfWeek ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = getDayOfWeekDisplayName(dayOfWeek),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary
                             )
+                        }
+                    }
+                }
+            }
+        }
+
+        // アイテム選択リスト
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "アイテムを選択",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            allItems.forEach { item ->
+                val isSelected = selectedStates[item.id] ?: false
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.elevatedCardElevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 1.dp,
+                        focusedElevation = 0.dp,
+                        hoveredElevation = 0.dp
+                    ),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                         } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center,
-                            ) {
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        }
+                    ),
+                    onClick = {
+                        selectedStates[item.id] = !isSelected
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // アイテム画像
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            getCategoryColor(item.category).copy(alpha = 0.1f),
+                                            getCategoryColor(item.category).copy(alpha = 0.05f)
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (item.imagePath.isNotEmpty()) {
+                                AsyncImage(
+                                    model = item.imagePath,
+                                    contentDescription = item.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
                                 Icon(
                                     imageVector = Icons.Filled.Inventory,
                                     contentDescription = "Item Icon",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp),
+                                    tint = getCategoryColor(item.category),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
+                        // アイテム情報
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = item.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            
+                            Text(
+                                text = getCategoryDisplayName(item.category),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // 選択状態インジケーター
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
                     }
-
-                    // 中央: テキスト情報
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text(
-                            text = item.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            fontSize = 24.sp
-                        )
-
-                        Text(
-                            text = getCategoryDisplayName(item.category),
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            fontSize = 12.sp
-                        )
-                    }
-
-                    // 右側: チェックアイコン
-                    if (isSelected) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = "Selected",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
                 }
             }
         }
+        
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }
 
-private fun getSortOrderShortName(sortOrder: SortOrder): String {
-    return when (sortOrder) {
-        SortOrder.NAME_ASC -> "名前順"
-        SortOrder.NAME_DESC -> "名前順"
-        SortOrder.CREATED_ASC -> "日時順"
-        SortOrder.CREATED_DESC -> "日時順"
-        SortOrder.CATEGORY_ASC -> "カテゴリ順"
-        SortOrder.CATEGORY_DESC -> "カテゴリ順"
+private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
+    return when (dayOfWeek) {
+        DayOfWeek.MONDAY -> "月曜日"
+        DayOfWeek.TUESDAY -> "火曜日"
+        DayOfWeek.WEDNESDAY -> "水曜日"
+        DayOfWeek.THURSDAY -> "木曜日"
+        DayOfWeek.FRIDAY -> "金曜日"
+        DayOfWeek.SATURDAY -> "土曜日"
+        DayOfWeek.SUNDAY -> "日曜日"
     }
 }
 
-private fun getCategoryDisplayName(category: ItemCategory?): String {
+private fun getCategoryColor(category: ItemCategory): Color {
     return when (category) {
-        null -> "全カテゴリ"
+        ItemCategory.STUDY_SUPPLIES -> Color(0xFF2196F3) // Blue - 学業用品
+        ItemCategory.DAILY_SUPPLIES -> Color(0xFF4CAF50) // Green - 生活用品
+        ItemCategory.CLOTHING_SUPPLIES -> Color(0xFF9C27B0) // Purple - 衣類用品
+        ItemCategory.FOOD_SUPPLIES -> Color(0xFFFF9800) // Orange - 食事用品
+        ItemCategory.HEALTH_SUPPLIES -> Color(0xFFF44336) // Red - 健康用品
+        ItemCategory.BEAUTY_SUPPLIES -> Color(0xFFE91E63) // Pink - 美容用品
+        ItemCategory.EVENT_SUPPLIES -> Color(0xFF673AB7) // Deep Purple - イベント用品
+        ItemCategory.HOBBY_SUPPLIES -> Color(0xFF3F51B5) // Indigo - 趣味用品
+        ItemCategory.TRANSPORT_SUPPLIES -> Color(0xFF009688) // Teal - 交通用品
+        ItemCategory.CHARGING_SUPPLIES -> Color(0xFF795548) // Brown - 充電用品
+        ItemCategory.WEATHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - 天候対策用品
+        ItemCategory.ID_SUPPLIES -> Color(0xFF8BC34A) // Light Green - 証明用品
+        ItemCategory.OTHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - その他用品
+    }
+}
+
+private fun getCategoryDisplayName(category: ItemCategory): String {
+    return when (category) {
         ItemCategory.STUDY_SUPPLIES -> "学業用品"
         ItemCategory.DAILY_SUPPLIES -> "生活用品"
         ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
@@ -513,30 +348,21 @@ private fun getCategoryDisplayName(category: ItemCategory?): String {
 @OptIn(ExperimentalTime::class)
 @Preview(showBackground = true)
 @Composable
-fun WeeklyTemplateSelectorContentPreview() {
-    val dummyItems =
-        listOf(
-            Item(id = 1, name = "歯ブラシ", description = "旅行用", imagePath = "https://placehold.co/100x100"),
-            Item(id = 2, name = "ノート", description = "大学の授業用", imagePath = "https://placehold.co/100x100"),
-            Item(id = 3, name = "充電器", description = "スマホ用", imagePath = ""),
-            Item(id = 4, name = "マスク", description = "予備", imagePath = ""),
-        )
-    val dummyTemplate =
-        WeeklyTemplate(
-            id = 1,
-            title = "旅行テンプレート",
-            itemIds = listOf(1, 2),
-        )
+fun WeeklyTemplateSelectorPreview() {
+    val dummyTemplate = WeeklyTemplate(
+        id = 1,
+        title = "月曜日の忘れ物",
+        itemIds = listOf(1, 2, 3),
+    )
+    val dummyItems = listOf<Item>()
 
-    MaterialTheme {
-        WeeklyTemplateSelectorContent(
-            allItems = dummyItems,
-            innerPadding = PaddingValues(0.dp),
-            selectedStates = remember {
-                mutableStateMapOf<Int, Boolean>().apply {
-                    dummyTemplate.itemIds.forEach { put(it, true) }
-                }
-            },
-        )
-    }
+    WeeklyTemplateSelector(
+        template = dummyTemplate,
+        allItems = dummyItems,
+        innerPadding = PaddingValues(0.dp),
+        sendIntent = {},
+        setFab = {},
+        setTopBar = {},
+        setNavigationBar = {},
+    )
 }

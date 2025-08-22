@@ -30,183 +30,185 @@ fun SearchFilterBar(
     onSortOrderChange: (SortOrder) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showCategoryMenu by remember { mutableStateOf(false) }
-    var showSortMenu by remember { mutableStateOf(false) }
-
-    Column(
+    ElevatedCard(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 1.dp,
+            pressedElevation = 2.dp,
+            focusedElevation = 1.dp,
+            hoveredElevation = 1.dp
+        ),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        // 検索バー
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .padding(horizontal = 16.dp, vertical = 8.dp), // 12dp → 8dpに変更
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // 検索バー
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = {
+                    Text(
+                        text = "アイテムを検索...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "検索",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                ),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                singleLine = true
+            )
+
+            // フィルタ・ソート行
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp),
-                )
-                TextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    placeholder = { Text("アイテムを検索", style = MaterialTheme.typography.bodyMedium) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                    ),
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
-
-        // フィルタとソートボタン
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            // カテゴリフィルタ
-            Box(
-                modifier = Modifier.weight(1f), // 1:1の比率を保つ
-            ) {
-                OutlinedButton(
-                    onClick = { showCategoryMenu = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+                // カテゴリフィルタ
+                var categoryExpanded by remember { mutableStateOf(false) }
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    OutlinedButton(
+                        onClick = { categoryExpanded = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                )
                             )
                         )
-                    ),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.FilterList,
-                            contentDescription = "Filter",
-                            modifier = Modifier.size(16.dp),
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "カテゴリ",
+                            modifier = Modifier.size(16.dp)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = getCategoryDisplayName(selectedCategory),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
+                            text = selectedCategory?.let { getCategoryDisplayName(it) } ?: "カテゴリ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
                         )
                     }
-                }
 
-                DropdownMenu(
-                    expanded = showCategoryMenu,
-                    onDismissRequest = { showCategoryMenu = false },
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clip(RoundedCornerShape(12.dp)),
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("全カテゴリ", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onCategoryChange(null)
-                            showCategoryMenu = false
-                        },
-                    )
-                    ItemCategory.entries.forEach { category ->
+                    DropdownMenu(
+                        expanded = categoryExpanded,
+                        onDismissRequest = { categoryExpanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                    ) {
                         DropdownMenuItem(
-                            text = { Text(getCategoryDisplayName(category), style = MaterialTheme.typography.bodySmall) },
+                            text = { Text("すべて") },
                             onClick = {
-                                onCategoryChange(category)
-                                showCategoryMenu = false
-                            },
+                                onCategoryChange(null)
+                                categoryExpanded = false
+                            }
                         )
+                        ItemCategory.values().forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(getCategoryDisplayName(category)) },
+                                onClick = {
+                                    onCategoryChange(category)
+                                    categoryExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
-            }
 
-            // 並び替え
-            Box(
-                modifier = Modifier.weight(1f), // 1:1の比率を保つ
-            ) {
-                OutlinedButton(
-                    onClick = { showSortMenu = true },
-                    modifier = Modifier.fillMaxWidth(), // 幅を最大に
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+                // ソート
+                var sortExpanded by remember { mutableStateOf(false) }
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    OutlinedButton(
+                        onClick = { sortExpanded = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                )
                             )
                         )
-                    ),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Sort,
-                            contentDescription = "Sort",
-                            modifier = Modifier.size(16.dp),
+                            imageVector = Icons.Default.Sort,
+                            contentDescription = "ソート",
+                            modifier = Modifier.size(16.dp)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = getSortOrderShortName(sortOrder),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
+                            text = when (sortOrder) {
+                                SortOrder.NAME_ASC -> "名前順"
+                                SortOrder.NAME_DESC -> "名前順"
+                                SortOrder.CREATED_ASC -> "登録日順"
+                                SortOrder.CREATED_DESC -> "登録日順"
+                                SortOrder.CATEGORY_ASC -> "カテゴリ順"
+                                SortOrder.CATEGORY_DESC -> "カテゴリ順"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
                         )
                     }
-                }
 
-                DropdownMenu(
-                    expanded = showSortMenu,
-                    onDismissRequest = { showSortMenu = false },
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clip(RoundedCornerShape(12.dp)),
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("名前順", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onSortOrderChange(SortOrder.NAME_ASC)
-                            showSortMenu = false
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("日時順", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onSortOrderChange(SortOrder.CREATED_DESC)
-                            showSortMenu = false
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("カテゴリ順", style = MaterialTheme.typography.bodySmall) },
-                        onClick = {
-                            onSortOrderChange(SortOrder.CATEGORY_ASC)
-                            showSortMenu = false
-                        },
-                    )
+                    DropdownMenu(
+                        expanded = sortExpanded,
+                        onDismissRequest = { sortExpanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("名前順") },
+                            onClick = {
+                                onSortOrderChange(SortOrder.NAME_ASC)
+                                sortExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("カテゴリ順") },
+                            onClick = {
+                                onSortOrderChange(SortOrder.CATEGORY_ASC)
+                                sortExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("登録日順") },
+                            onClick = {
+                                onSortOrderChange(SortOrder.CREATED_ASC)
+                                sortExpanded = false
+                            }
+                        )
+                    }
                 }
             }
         }

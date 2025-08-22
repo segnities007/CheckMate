@@ -110,17 +110,28 @@ private fun SettingUi(
         UserStatusCard(userStatus)
         
         DataButtons(
-            onExport = {
+            onExportData = {
                 sendIntent(SettingIntent.ExportData)
             },
-            onImport = {
+            onImportData = {
                 launcher.launch(arrayOf("application/json"))
             },
-            onBackUp = {},
-            onRestore = {}
+            onDeleteAllData = {
+                // TODO: 全データ削除の実装
+            }
         )
         
-        AccountButtons()
+        AccountButtons(
+            onEditProfile = {
+                // TODO: プロフィール編集の実装
+            },
+            onChangePassword = {
+                // TODO: パスワード変更の実装
+            },
+            onLogout = {
+                // TODO: ログアウトの実装
+            }
+        )
     }
 }
 
