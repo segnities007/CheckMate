@@ -1,7 +1,10 @@
 package com.segnities007.templates
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +23,7 @@ import com.segnities007.templates.mvi.TemplatesViewModel
 import com.segnities007.templates.page.WeeklyTemplateList
 import com.segnities007.templates.page.WeeklyTemplateSelector
 import org.koin.compose.koinInject
+import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +59,9 @@ fun TemplatesScreen(
     NavHost(
         navController = navController,
         startDestination = TemplatesRoute.WeeklyTemplateList,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         composable<TemplatesRoute.WeeklyTemplateList> {
             WeeklyTemplateList(

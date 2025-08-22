@@ -200,7 +200,7 @@ fun WeeklyTemplateSelector(
                         containerColor = if (isSelected) {
                             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                         } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                            MaterialTheme.colorScheme.surface
                         }
                     ),
                     onClick = {
@@ -274,7 +274,7 @@ fun WeeklyTemplateSelector(
                                     if (isSelected) {
                                         MaterialTheme.colorScheme.primary
                                     } else {
-                                        MaterialTheme.colorScheme.surfaceVariant
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                                     }
                                 ),
                             contentAlignment = Alignment.Center

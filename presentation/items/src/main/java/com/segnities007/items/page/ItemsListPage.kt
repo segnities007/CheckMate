@@ -42,6 +42,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.segnities007.items.component.ItemsList
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.fillMaxSize
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
@@ -126,7 +129,10 @@ fun ItemsListPage(
     }
 
     Column(
-        modifier = Modifier.verticalScroll(scrollState),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         Column(
