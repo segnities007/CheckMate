@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.home.mvi.HomeViewModel
-import com.segnities007.home.page.MonthlyCalendarWithWeeklyTemplate
+import com.segnities007.home.page.EnhancedHomeContent
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
 import org.koin.compose.koinInject
@@ -37,7 +36,7 @@ fun HomeScreen(
 
     val alpha by remember {
         derivedStateOf {
-            (1f - scrollState.value / 50f).coerceIn(0f, 1f)
+            (1f - scrollState.value / 100f).coerceIn(0f, 1f)
         }
     }
 
@@ -55,14 +54,15 @@ fun HomeScreen(
     }
 
     Column(
-        modifier =
-            Modifier
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp),
+        modifier = Modifier.padding(horizontal = 0.dp),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        MonthlyCalendarWithWeeklyTemplate(
+        
+        EnhancedHomeContent(
+            innerPadding = innerPadding,
             selectedDate = state.selectedDate,
+            currentYear = state.currentYear,
+            currentMonth = state.currentMonth,
             templates = state.templatesForToday,
             allItems = state.itemsForToday,
             itemCheckStates = state.itemCheckStates,
@@ -72,7 +72,13 @@ fun HomeScreen(
             onDateSelected = { date ->
                 homeViewModel.sendIntent(HomeIntent.SelectDate(date))
             },
+            onMonthChanged = { year, month ->
+                // 月が変更されたときの処理はEnhancedCalendarCard内で行われる
+            },
+            sendIntent = homeViewModel::sendIntent,
+            scrollState = scrollState
         )
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        
+        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
     }
 }

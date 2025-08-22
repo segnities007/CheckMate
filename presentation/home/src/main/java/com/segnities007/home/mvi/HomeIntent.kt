@@ -20,4 +20,10 @@ sealed interface HomeIntent : MviIntent {
 
     /** 今日のタスクを取得 */
     data object LoadTodayData : HomeIntent
+
+    /** 月間ナビゲーション */
+    data class ChangeMonth(
+        val year: Int,
+        val month: Int,
+    ) : HomeIntent
 }
