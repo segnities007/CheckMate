@@ -1,13 +1,6 @@
 package com.segnities007.remote
 
 import com.segnities007.remote.model.GoogleBooksResponse
-import com.segnities007.remote.model.GoogleBookItem
-import com.segnities007.remote.model.VolumeInfo
-import com.segnities007.remote.model.ImageLinks
-import com.segnities007.remote.model.IndustryIdentifier
-import com.segnities007.remote.model.OpenLibraryResponse
-import com.segnities007.remote.model.Author
-import com.segnities007.remote.model.Publisher
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.model.item.ProductInfo
 import io.ktor.client.*
@@ -16,12 +9,11 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.client.statement.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import android.util.Log
 
 class ProductApiService {
     private val httpClient = HttpClient(CIO) {
@@ -39,15 +31,19 @@ class ProductApiService {
 
     suspend fun getProductInfo(barcode: String): ProductInfo? = withContext(Dispatchers.IO) {
         try {
+            Log.d("ProductApiService", "getProductInfo called with barcode: $barcode")
+
             // ISBNの場合（10桁または13桁）
             if (isIsbn(barcode)) {
+                Log.d("ProductApiService", "Barcode is ISBN, calling getBookInfo")
                 return@withContext getBookInfo(barcode)
             }
-            
-            // その他のバーコード形式の場合
+
+            // その他のバーコード形式
+            Log.d("ProductApiService", "Barcode is not ISBN, calling getGenericProductInfo")
             return@withContext getGenericProductInfo(barcode)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("ProductApiService", "Error in getProductInfo: ${e.message}", e)
             null
         }
     }
@@ -58,14 +54,8 @@ class ProductApiService {
     }
 
     private suspend fun getBookInfo(isbn: String): ProductInfo? {
+        Log.d("ProductApiService", "=== getBookInfo START for ISBN: $isbn ===")
         try {
-            // OpenLibrary APIを試行
-            val openLibraryInfo = getOpenLibraryInfo(isbn)
-            if (openLibraryInfo != null) {
-                return openLibraryInfo
-            }
-
-            // Google Books APIを試行
             val googleBooksInfo = getGoogleBooksInfo(isbn)
             if (googleBooksInfo != null) {
                 return googleBooksInfo
@@ -80,92 +70,47 @@ class ProductApiService {
                 isbn = isbn
             )
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("ProductApiService", "Error in getBookInfo: ${e.message}", e)
             return null
         }
     }
 
-    private suspend fun getOpenLibraryInfo(isbn: String): ProductInfo? {
-        try {
-            val response = httpClient.get("https://openlibrary.org/api/books") {
-                parameter("bibkeys", "ISBN:$isbn")
-                parameter("format", "json")
-                parameter("jscmd", "data")
-            }
-            
-            // OpenLibraryのレスポンスをパース
-            val responseText = response.body<String>()
-            val jsonObject = org.json.JSONObject(responseText)
-            val bookKey = "ISBN:$isbn"
-            
-            if (jsonObject.has(bookKey)) {
-                val bookData = jsonObject.getJSONObject(bookKey)
-                val title = bookData.optString("title", "")
-                val authors = bookData.optJSONArray("authors")
-                val publishers = bookData.optJSONArray("publishers")
-                val description = bookData.optString("description", "")
-                val coverUrl = bookData.optJSONObject("cover")?.optString("large", null)
-
-                val authorNames = if (authors != null) {
-                    (0 until authors.length()).mapNotNull { i ->
-                        val name = authors.getJSONObject(i).optString("name", null)
-                        if (name != null && name != "null") name else null
-                    }
-                } else emptyList()
-
-                val publisherNames = if (publishers != null) {
-                    (0 until publishers.length()).mapNotNull { i ->
-                        val name = publishers.getJSONObject(i).optString("name", null)
-                        if (name != null && name != "null") name else null
-                    }
-                } else emptyList()
-
-                return ProductInfo(
-                    barcode = isbn,
-                    name = title.ifEmpty { "書籍 (ISBN: $isbn)" },
-                    description = description.ifEmpty { "ISBN: $isbn の書籍" },
-                    category = ItemCategory.STUDY_SUPPLIES,
-                    imageUrl = coverUrl,
-                    isbn = isbn,
-                    publisher = publisherNames.firstOrNull(),
-                    author = authorNames.firstOrNull()
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return null
-    }
-
     private suspend fun getGoogleBooksInfo(isbn: String): ProductInfo? {
+        Log.d("ProductApiService", "=== getGoogleBooksInfo START for ISBN: $isbn ===")
         try {
             val response = httpClient.get("https://www.googleapis.com/books/v1/volumes") {
                 parameter("q", "isbn:$isbn")
             }
-            
+
             val googleBooksResponse = response.body<GoogleBooksResponse>()
             val book = googleBooksResponse.items?.firstOrNull()?.volumeInfo
-            
+
             if (book != null) {
+                // smallThumbnail を優先、なければ thumbnail
+                val imageUrl = (book.imageLinks?.smallThumbnail ?: book.imageLinks?.thumbnail)
+                    ?.replace("http://", "https://")
+
+                Log.d("ProductApiService", "Google Books - Title: ${book.title}")
+                Log.d("ProductApiService", "Google Books - ImageURL (final): $imageUrl")
+
                 return ProductInfo(
                     barcode = isbn,
                     name = book.title ?: "書籍 (ISBN: $isbn)",
                     description = book.description ?: "ISBN: $isbn の書籍",
                     category = ItemCategory.STUDY_SUPPLIES,
-                    imageUrl = book.imageLinks?.thumbnail,
+                    imageUrl = imageUrl,
                     isbn = isbn,
                     publisher = book.publisher,
                     author = book.authors?.firstOrNull()
                 )
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("ProductApiService", "Google Books API error: ${e.message}", e)
         }
         return null
     }
 
-    private suspend fun getGenericProductInfo(barcode: String): ProductInfo? {
-        // 一般的な商品の場合、バーコードから基本的な情報のみ提供
+    private fun getGenericProductInfo(barcode: String): ProductInfo? {
         return ProductInfo(
             barcode = barcode,
             name = "商品 (バーコード: $barcode)",
@@ -173,7 +118,7 @@ class ProductApiService {
             category = ItemCategory.OTHER_SUPPLIES
         )
     }
-    
+
     fun close() {
         httpClient.close()
     }

@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +53,7 @@ import coil3.compose.AsyncImage
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.model.item.ProductInfo
 import kotlin.time.ExperimentalTime
+import android.util.Log
 
 private fun getCategoryDisplayName(category: ItemCategory): String {
     return when (category) {
@@ -78,6 +81,7 @@ fun CreateBottomSheet(
     sheetState: SheetState,
     capturedImageUriFromParent: Uri?,
     onRequestLaunchCamera: () -> Unit,
+    onRequestBarcodeScan: () -> Unit,
     isLoadingFromParent: Boolean = false,
     productInfo: ProductInfo? = null,
 ) {
@@ -85,14 +89,24 @@ fun CreateBottomSheet(
     var itemDescription by remember { mutableStateOf<String>("") }
     var expandedDropdown by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<ItemCategory?>(null) }
-    var imageUriForPreview by remember(capturedImageUriFromParent) { mutableStateOf(capturedImageUriFromParent) }
+    var imageUriForPreview by remember(capturedImageUriFromParent) { 
+        mutableStateOf(capturedImageUriFromParent) 
+    }
+    var showProductCover by remember { mutableStateOf(true) }
 
     // 商品情報が提供された場合、自動的に入力
     LaunchedEffect(productInfo) {
         if (productInfo != null) {
+            Log.d("CreateBottomSheet", "ProductInfo received - Name: ${productInfo.name}")
+            Log.d("CreateBottomSheet", "ProductInfo received - ImageURL: ${productInfo.imageUrl}")
+            
             itemName = productInfo.name
             itemDescription = productInfo.description
             selectedCategory = productInfo.category
+            // バーコードスキャン後の場合は、画像プレビューをリセット
+            imageUriForPreview = null
+            // 表紙画像を表示する
+            showProductCover = true
         }
     }
 
@@ -107,10 +121,34 @@ fun CreateBottomSheet(
                     .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text(
-                "アイテムを追加",
-                style = MaterialTheme.typography.headlineSmall,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "アイテムを追加",
+                    style = MaterialTheme.typography.headlineSmall,
+                )
+                
+                IconButton(
+                    onClick = onRequestBarcodeScan,
+                    enabled = !isLoadingFromParent,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.QrCodeScanner,
+                        contentDescription = "バーコードスキャン",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
 
             // 写真エリア
             Column(
@@ -150,6 +188,105 @@ fun CreateBottomSheet(
                             Icon(
                                 Icons.Default.Close,
                                 contentDescription = "画像を削除",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                } else if (productInfo?.imageUrl != null && showProductCover) {
+                    // バーコードスキャンで取得した表紙画像を表示
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AsyncImage(
+                            model = productInfo.imageUrl,
+                            contentDescription = "商品表紙",
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp)),
+                            contentScale = ContentScale.Crop,
+                            onError = { state ->
+                                Log.e("CreateBottomSheet", "Failed to load image: ${productInfo.imageUrl}")
+                                Log.e("CreateBottomSheet", "Error: ${state.result}")
+                                // 画像読み込みに失敗した場合、表紙画像を非表示にする
+                                showProductCover = false
+                            },
+                            onSuccess = { state ->
+                                Log.d("CreateBottomSheet", "Successfully loaded image: ${productInfo.imageUrl}")
+                                Log.d("CreateBottomSheet", "Image size: ${state.painter.intrinsicSize}")
+                            }
+                        )
+
+                        // 削除ボタンを画像右上に重ねる
+                        IconButton(
+                            onClick = { showProductCover = false },
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(12.dp)
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "表紙画像を削除",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+                } else if (productInfo != null && productInfo.imageUrl == null && showProductCover) {
+                    // 表紙画像が利用できない場合の代替表示
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Icon(
+                                Icons.Default.Book,
+                                contentDescription = "書籍アイコン",
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "表紙画像は利用できません",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "写真を撮影してください",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            )
+                        }
+
+                        // 削除ボタンを右上に重ねる
+                        IconButton(
+                            onClick = { showProductCover = false },
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(12.dp)
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "表紙画像を削除",
                                 tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
@@ -267,6 +404,7 @@ fun CreateBottomSheetPreview() {
             onCreateItem = { _, _, _, _ -> },
             capturedImageUriFromParent = null,
             onRequestLaunchCamera = {},
+            onRequestBarcodeScan = {},
         )
         if (LocalInspectionMode.current) {
             LaunchedEffect(sheetState) { sheetState.show() }

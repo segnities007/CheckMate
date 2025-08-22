@@ -174,7 +174,16 @@ class ItemsViewModel(
                 }
                 
                 if (productInfo != null) {
-                    // 商品情報が取得できた場合、自動的にボトムシートを表示
+                    // 商品情報が取得できた場合、ボトムシートの状態をリセットしてから表示
+                    setState { 
+                        copy(
+                            isShowBottomSheet = false,
+                            capturedImageUriForBottomSheet = null,
+                            capturedTempPathForViewModel = ""
+                        ) 
+                    }
+                    // 少し遅延を入れてからボトムシートを表示（状態リセットのため）
+                    kotlinx.coroutines.delay(100)
                     setState { copy(isShowBottomSheet = true) }
                 } else {
                     sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }

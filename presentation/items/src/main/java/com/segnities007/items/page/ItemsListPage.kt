@@ -107,43 +107,19 @@ fun ItemsListPage(
         setTopBar {}
         setFab {
             if (alpha > 0) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                FloatingActionButton(
+                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
+                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+                    onClick = {
+                        sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
+                        sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
+                        sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+                    },
                 ) {
-                    FloatingActionButton(
-                        containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                        onClick = {
-                            sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
-                            sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
-                            sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "アイテムを追加",
-                        )
-                    }
-                    
-                    FloatingActionButton(
-                        containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                        onClick = {
-                            if (ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA,
-                                ) == PackageManager.PERMISSION_GRANTED) {
-                                onNavigateToBarcodeScanner()
-                            } else {
-                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.QrCodeScanner,
-                            contentDescription = "バーコードスキャン",
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "アイテムを追加",
+                    )
                 }
             }
         }
@@ -215,6 +191,17 @@ fun ItemsListPage(
             onRequestLaunchCamera = {
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
                 sendIntent(ItemsIntent.NavigateToCameraCapture)
+            },
+            onRequestBarcodeScan = {
+                sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA,
+                    ) == PackageManager.PERMISSION_GRANTED) {
+                    onNavigateToBarcodeScanner()
+                } else {
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
             },
             productInfo = state.productInfo,
         )

@@ -68,6 +68,7 @@ dependencies {
 
     // coil
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor3)
 
     // navigation
     implementation(libs.androidx.navigation.compose)
