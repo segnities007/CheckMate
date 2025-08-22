@@ -4,8 +4,11 @@ import com.segnities007.local.dao.ItemCheckStateDao // ItemCheckStateDaoをイ�
 import com.segnities007.local.dao.ItemDao
 import com.segnities007.local.entity.toDomain
 import com.segnities007.local.entity.toEntity
+import com.segnities007.model.item.BarcodeInfo
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCheckRecord
+import com.segnities007.model.item.ProductInfo
+import com.segnities007.remote.ProductApiService
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -14,6 +17,7 @@ import kotlin.time.ExperimentalTime
 class ItemRepositoryImpl(
     private val itemDao: ItemDao,
     private val itemCheckStateDao: ItemCheckStateDao, // ItemCheckStateDaoをコンストラクタに追加
+    private val productApiService: ProductApiService,
 ) : ItemRepository {
     override suspend fun getAllItems(): List<Item> = itemDao.getAll().map { it.toDomain() }
 
@@ -48,5 +52,9 @@ class ItemRepositoryImpl(
             // checkState が null の場合は、今日のチェック記録がないので追加しない
         }
         return uncheckedItems
+    }
+    
+    override suspend fun getProductInfoByBarcode(barcodeInfo: BarcodeInfo): ProductInfo? {
+        return productApiService.getProductInfo(barcodeInfo.barcode)
     }
 }

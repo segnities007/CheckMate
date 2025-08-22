@@ -9,4 +9,7 @@ sealed interface ItemsRoute {
 
     @Serializable
     data object CameraCapture : ItemsRoute
+    
+    @Serializable
+    data object BarcodeScanner : ItemsRoute
 }

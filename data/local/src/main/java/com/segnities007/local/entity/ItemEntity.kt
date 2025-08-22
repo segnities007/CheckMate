@@ -14,6 +14,8 @@ data class ItemEntity(
     val description: String,
     val category: String,
     val imagePath: String,
+    val barcodeInfo: String?, // JSON文字列として保存
+    val productInfo: String?, // JSON文字列として保存
     val createdAt: String,
 )
 
@@ -25,6 +27,8 @@ fun Item.toEntity(): ItemEntity =
         description = description,
         category = category.name,
         imagePath = imagePath,
+        barcodeInfo = barcodeInfo?.let { kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.serializer(), it) },
+        productInfo = productInfo?.let { kotlinx.serialization.json.Json.encodeToString(kotlinx.serialization.serializer(), it) },
         createdAt = createdAt.toString(),
     )
 
@@ -36,5 +40,7 @@ fun ItemEntity.toDomain(): Item =
         description = description,
         category = ItemCategory.valueOf(category),
         imagePath = imagePath,
+        barcodeInfo = barcodeInfo?.let { kotlinx.serialization.json.Json.decodeFromString(kotlinx.serialization.serializer(), it) },
+        productInfo = productInfo?.let { kotlinx.serialization.json.Json.decodeFromString(kotlinx.serialization.serializer(), it) },
         createdAt = Instant.parse(createdAt),
     )

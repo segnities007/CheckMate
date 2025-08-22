@@ -9,7 +9,10 @@ import com.segnities007.local.entity.ItemCheckStateEntity
 import com.segnities007.local.entity.ItemEntity
 import com.segnities007.local.entity.WeeklyTemplateEntity
 
-@Database(entities = [ItemEntity::class, WeeklyTemplateEntity::class, ItemCheckStateEntity::class], version = 2)
+@Database(
+    entities = [ItemEntity::class, WeeklyTemplateEntity::class, ItemCheckStateEntity::class], 
+    version = 3
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemDao(): ItemDao
 
