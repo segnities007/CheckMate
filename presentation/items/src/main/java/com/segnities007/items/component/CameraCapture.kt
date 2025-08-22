@@ -12,20 +12,27 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -88,6 +95,7 @@ fun CameraCapture(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // カメラプレビュー
         AndroidView(
             factory = {
                 previewView.apply {
@@ -98,70 +106,118 @@ fun CameraCapture(
             modifier = Modifier.fillMaxSize(),
         )
 
-        val backgroundColor = MaterialTheme.colorScheme.primaryContainer
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val boxWidth = size.width * 0.8f
-            val boxHeight = boxWidth
-            val left = (size.width - boxWidth) / 2
-            val top = (size.height - boxHeight) / 2
-
-            val path =
-                Path().apply {
-                    addRect(Rect(0f, 0f, size.width, size.height))
-                    addRect(Rect(left, top, left + boxWidth, top + boxHeight))
-                    fillType = PathFillType.EvenOdd
+        // オーバーレイUI
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 上部のヘッダー
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .padding(top = 48.dp, start = 16.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // キャンセルボタン
+                IconButton(
+                    onClick = onCancel,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            color = Color.Black.copy(alpha = 0.5f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "キャンセル",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
-            drawPath(path, color = backgroundColor)
-        }
 
-        Row(
-            modifier =
-                Modifier
+                // タイトル
+                Text(
+                    text = "写真を撮影",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                        .background(
+                            color = Color.Black.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                // 右側のスペーサー（バランス用）
+                Spacer(modifier = Modifier.size(48.dp))
+            }
+
+
+
+            // 下部のコントロールエリア
+            Column(
+                modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Button(
-                onClick = onCancel,
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-            ) { Text("✕", textAlign = TextAlign.Center) }
+                    .padding(bottom = 48.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 撮影ボタン
+                FloatingActionButton(
+                    onClick = {
+                        val photoFile = createImageFile(context)
+                        val authorityString = "${context.packageName}.provider"
+                        val photoUri = FileProvider.getUriForFile(context, authorityString, photoFile)
+                        val outputFileOptions =
+                            ImageCapture.OutputFileOptions.Builder(photoFile).build()
+                        imageCapture.takePicture(
+                            outputFileOptions,
+                            cameraExecutor,
+                            object : ImageCapture.OnImageSavedCallback {
+                                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                    val savedUri = outputFileResults.savedUri ?: photoUri
+                                    onImageCaptured(savedUri, photoFile.absolutePath)
+                                }
 
-            Button(
-                onClick = {
-                    val photoFile = createImageFile(context)
-                    val authorityString = "${context.packageName}.provider"
-                    val photoUri = FileProvider.getUriForFile(context, authorityString, photoFile)
-                    val outputFileOptions =
-                        ImageCapture.OutputFileOptions.Builder(photoFile).build()
-                    imageCapture.takePicture(
-                        outputFileOptions,
-                        cameraExecutor,
-                        object : ImageCapture.OnImageSavedCallback {
-                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                val savedUri = outputFileResults.savedUri ?: photoUri
-                                onImageCaptured(savedUri, photoFile.absolutePath)
-                            }
-
-                            override fun onError(exception: ImageCaptureException) {
-                                Toast
-                                    .makeText(
-                                        context,
-                                        "写真撮影に失敗しました: ${exception.message}",
-                                        Toast.LENGTH_LONG,
-                                    ).show()
-                                Log.e("CameraCapture", "takePicture onError: ${exception.message}", exception)
-                            }
-                        },
+                                override fun onError(exception: ImageCaptureException) {
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "写真撮影に失敗しました: ${exception.message}",
+                                            Toast.LENGTH_LONG,
+                                        ).show()
+                                    Log.e("CameraCapture", "takePicture onError: ${exception.message}", exception)
+                                }
+                            },
+                        )
+                    },
+                    modifier = Modifier.size(80.dp),
+                    containerColor = Color.White,
+                    contentColor = Color.Black
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = "撮影",
+                        modifier = Modifier.size(32.dp)
                     )
-                },
-                modifier = Modifier.size(72.dp),
-                shape = CircleShape,
-            ) { Text("●") }
+                }
 
-            Spacer(modifier = Modifier.size(56.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 撮影ガイドテキスト
+                Text(
+                    text = "アイテムを撮影してください",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .background(
+                            color = Color.Black.copy(alpha = 0.6f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
         }
     }
 }

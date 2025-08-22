@@ -16,6 +16,7 @@ import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsViewModel
 import com.segnities007.items.page.ItemsListPage
 import com.segnities007.items.page.CameraCapturePage
+import com.segnities007.items.page.BarcodeScannerPage
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +46,9 @@ fun ItemsScreen(
                 ItemsEffect.NavigateToCameraCapture -> {
                     navController.navigate(ItemsRoute.CameraCapture)
                 }
+                ItemsEffect.NavigateToBarcodeScanner -> {
+                    navController.navigate(ItemsRoute.BarcodeScanner)
+                }
             }
         }
     }
@@ -63,6 +67,9 @@ fun ItemsScreen(
                 setTopBar = setTopBar,
                 onNavigateToCameraCapture = {
                     itemsViewModel.sendIntent(ItemsIntent.NavigateToCameraCapture)
+                },
+                onNavigateToBarcodeScanner = {
+                    itemsViewModel.sendIntent(ItemsIntent.NavigateToBarcodeScanner)
                 },
                 onNavigateToItemsList = {
                     itemsViewModel.sendIntent(ItemsIntent.NavigateToItemsList)
@@ -84,6 +91,21 @@ fun ItemsScreen(
                 onNavigateToItemsList = {
                     itemsViewModel.sendIntent(ItemsIntent.NavigateToItemsList)
                 },
+                setFab = setFab,
+                setTopBar = setTopBar,
+                setNavigationBar = setNavigationBar,
+            )
+        }
+        composable<ItemsRoute.BarcodeScanner> {
+            BarcodeScannerPage(
+                onBarcodeDetected = { barcodeInfo ->
+                    itemsViewModel.sendIntent(ItemsIntent.BarcodeDetected(barcodeInfo))
+                    itemsViewModel.sendIntent(ItemsIntent.NavigateToItemsList)
+                },
+                onCancel = {
+                    itemsViewModel.sendIntent(ItemsIntent.NavigateToItemsList)
+                },
+                sendIntent = itemsViewModel::sendIntent,
                 setFab = setFab,
                 setTopBar = setTopBar,
                 setNavigationBar = setNavigationBar,

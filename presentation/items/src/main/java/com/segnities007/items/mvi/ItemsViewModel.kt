@@ -32,6 +32,9 @@ class ItemsViewModel(
             is ItemsIntent.UpdateIsShowBottomSheet -> updateIsShowBottomSheet(intent)
             ItemsIntent.NavigateToItemsList -> sendEffect { ItemsEffect.NavigateToItemsList }
             ItemsIntent.NavigateToCameraCapture -> sendEffect { ItemsEffect.NavigateToCameraCapture }
+            ItemsIntent.NavigateToBarcodeScanner -> sendEffect { ItemsEffect.NavigateToBarcodeScanner }
+            is ItemsIntent.BarcodeDetected -> handleBarcodeDetected(intent)
+            is ItemsIntent.GetProductInfo -> getProductInfo(intent)
             is ItemsIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is ItemsIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
             is ItemsIntent.UpdateSortOrder -> updateSortOrder(intent)
@@ -149,6 +152,37 @@ class ItemsViewModel(
                 sendEffect { ItemsEffect.ShowToast("削除対象のアイテムが見つかりません") }
             }
             getAllItems()
+        }
+    }
+    
+    private fun handleBarcodeDetected(intent: ItemsIntent.BarcodeDetected) {
+        setState { copy(scannedBarcodeInfo = intent.barcodeInfo) }
+        // バーコード検出後、自動的に商品情報を取得
+        sendIntent(ItemsIntent.GetProductInfo(intent.barcodeInfo))
+    }
+    
+    private fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
+        viewModelScope.launch {
+            setState { copy(isLoadingProductInfo = true) }
+            try {
+                val productInfo = itemRepository.getProductInfoByBarcode(intent.barcodeInfo)
+                setState { 
+                    copy(
+                        productInfo = productInfo,
+                        isLoadingProductInfo = false
+                    ) 
+                }
+                
+                if (productInfo != null) {
+                    // 商品情報が取得できた場合、自動的にボトムシートを表示
+                    setState { copy(isShowBottomSheet = true) }
+                } else {
+                    sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
+                }
+            } catch (e: Exception) {
+                setState { copy(isLoadingProductInfo = false) }
+                sendEffect { ItemsEffect.ShowToast("商品情報の取得に失敗しました: ${e.message}") }
+            }
         }
     }
 }

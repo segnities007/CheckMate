@@ -5,8 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.segnities007.model.item.BarcodeInfo
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.model.item.ProductInfo
 import com.segnities007.ui.mvi.MviState
 
 data class ItemsState(
@@ -18,6 +20,9 @@ data class ItemsState(
     val selectedCategory: ItemCategory? = null,
     val sortOrder: SortOrder = SortOrder.NAME_ASC,
     val filteredItems: List<Item> = emptyList(),
+    val scannedBarcodeInfo: BarcodeInfo? = null,
+    val productInfo: ProductInfo? = null,
+    val isLoadingProductInfo: Boolean = false,
 ) : MviState
 
 enum class SortOrder {

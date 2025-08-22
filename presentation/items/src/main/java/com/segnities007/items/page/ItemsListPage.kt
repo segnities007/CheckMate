@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -45,6 +46,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.FloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
@@ -56,6 +61,7 @@ fun ItemsListPage(
     onNavigate: (HubRoute) -> Unit,
     sendIntent: (ItemsIntent) -> Unit,
     onNavigateToCameraCapture: () -> Unit,
+    onNavigateToBarcodeScanner: () -> Unit,
     onNavigateToItemsList: () -> Unit,
     state: ItemsState,
 ) {
@@ -63,9 +69,7 @@ fun ItemsListPage(
     val context = LocalContext.current
 
     val granted = {
-        sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
-        sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
-        sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+        // カメラ権限が許可された時の処理は何もしない
     }
 
     val cameraPermissionLauncher =
@@ -103,26 +107,43 @@ fun ItemsListPage(
         setTopBar {}
         setFab {
             if (alpha > 0) {
-                FloatingActionButton(
-                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                    onClick = {
-                        when {
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA,
-                            ) == PackageManager.PERMISSION_GRANTED -> {
-                                granted()
-                            } else -> {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FloatingActionButton(
+                        containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
+                        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+                        onClick = {
+                            sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
+                            sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
+                            sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "アイテムを追加",
+                        )
+                    }
+                    
+                    FloatingActionButton(
+                        containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
+                        contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+                        onClick = {
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA,
+                                ) == PackageManager.PERMISSION_GRANTED) {
+                                onNavigateToBarcodeScanner()
+                            } else {
                                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                             }
-                        }
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add",
-                    )
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.QrCodeScanner,
+                            contentDescription = "バーコードスキャン",
+                        )
+                    }
                 }
             }
         }
@@ -182,6 +203,8 @@ fun ItemsListPage(
                         description = description,
                         category = category,
                         imagePath = state.capturedTempPathForViewModel,
+                        barcodeInfo = state.scannedBarcodeInfo,
+                        productInfo = state.productInfo,
                     )
                 sendIntent(ItemsIntent.InsertItems(newItem))
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
@@ -193,6 +216,7 @@ fun ItemsListPage(
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
                 sendIntent(ItemsIntent.NavigateToCameraCapture)
             },
+            productInfo = state.productInfo,
         )
     }
 }

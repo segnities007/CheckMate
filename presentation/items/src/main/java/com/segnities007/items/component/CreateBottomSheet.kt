@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.model.item.ProductInfo
 import kotlin.time.ExperimentalTime
 
 private fun getCategoryDisplayName(category: ItemCategory): String {
@@ -78,12 +79,22 @@ fun CreateBottomSheet(
     capturedImageUriFromParent: Uri?,
     onRequestLaunchCamera: () -> Unit,
     isLoadingFromParent: Boolean = false,
+    productInfo: ProductInfo? = null,
 ) {
     var itemName by remember { mutableStateOf("") }
     var itemDescription by remember { mutableStateOf<String>("") }
     var expandedDropdown by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<ItemCategory?>(null) }
     var imageUriForPreview by remember(capturedImageUriFromParent) { mutableStateOf(capturedImageUriFromParent) }
+
+    // 商品情報が提供された場合、自動的に入力
+    LaunchedEffect(productInfo) {
+        if (productInfo != null) {
+            itemName = productInfo.name
+            itemDescription = productInfo.description
+            selectedCategory = productInfo.category
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

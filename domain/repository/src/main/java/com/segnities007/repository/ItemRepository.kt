@@ -1,6 +1,8 @@
 package com.segnities007.repository
 
+import com.segnities007.model.item.BarcodeInfo
 import com.segnities007.model.item.Item
+import com.segnities007.model.item.ProductInfo
 
 interface ItemRepository {
     suspend fun getAllItems(): List<Item>
@@ -12,4 +14,6 @@ interface ItemRepository {
     suspend fun deleteItem(id: Int)
 
     suspend fun getUncheckedItemsForToday(): List<Item>
+    
+    suspend fun getProductInfoByBarcode(barcodeInfo: BarcodeInfo): ProductInfo?
 }

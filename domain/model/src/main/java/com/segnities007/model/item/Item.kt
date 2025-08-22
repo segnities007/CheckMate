@@ -14,5 +14,7 @@ data class Item
         val description: String = "",
         val category: ItemCategory = ItemCategory.OTHER_SUPPLIES,
         val imagePath: String = "",
+        val barcodeInfo: BarcodeInfo? = null,
+        val productInfo: ProductInfo? = null,
         val createdAt: Instant = Clock.System.now(),
     )

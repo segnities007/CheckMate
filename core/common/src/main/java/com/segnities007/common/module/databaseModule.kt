@@ -2,6 +2,7 @@ package com.segnities007.common.module
 
 import androidx.room.Room
 import com.segnities007.local.db.AppDatabase
+import com.segnities007.local.db.MIGRATION_2_3
 import org.koin.dsl.module
 
 val databaseModule =
@@ -10,7 +11,7 @@ val databaseModule =
         single {
             Room
                 .databaseBuilder(get(), AppDatabase::class.java, "app_database")
-                .fallbackToDestructiveMigration(true)
+                .addMigrations(MIGRATION_2_3)
                 .build()
         }
 
