@@ -104,10 +104,11 @@ private fun SettingUi(
 
     Column(
         modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UserStatusCard(userStatus)
+        
         DataButtons(
             onExport = {
                 sendIntent(SettingIntent.ExportData)
@@ -118,13 +119,8 @@ private fun SettingUi(
             onBackUp = {},
             onRestore = {}
         )
+        
         AccountButtons()
-        DataButtons(
-            onExport = {},
-            onImport = {},
-            onBackUp = {},
-            onRestore = {}
-        )
     }
 }
 
