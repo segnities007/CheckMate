@@ -81,7 +81,7 @@ private fun FloatingActionBarUi(
         ) {
             Row(
                 modifier = Modifier.padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 info.forEach { (route, icons) ->
