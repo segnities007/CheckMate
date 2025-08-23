@@ -73,24 +73,26 @@ private fun FloatingActionBarUi(
             HubRoute.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
         )
 
-    Surface(
-        shape = CircleShape,
-        shadowElevation = 8.dp,
-        color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
-    ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    if (alpha > 0f) {
+        Surface(
+            shape = CircleShape,
+            shadowElevation = 8.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
         ) {
-            info.forEach { (route, icons) ->
-                NavItemButton(
-                    alpha = alpha,
-                    selectedIcon = icons[0],
-                    unselectedIcon = icons[1],
-                    selected = currentHubRoute == route,
-                    onClick = { onNavigate(route) },
-                )
+            Row(
+                modifier = Modifier.padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                info.forEach { (route, icons) ->
+                    NavItemButton(
+                        alpha = alpha,
+                        selectedIcon = icons[0],
+                        unselectedIcon = icons[1],
+                        selected = currentHubRoute == route,
+                        onClick = { onNavigate(route) },
+                    )
+                }
             }
         }
     }
@@ -110,7 +112,7 @@ private fun NavItemButton(
         containerColor = if (selected) {
             MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha)
         } else {
-            MaterialTheme.colorScheme.surface.copy(alpha = alpha)
+            MaterialTheme.colorScheme.surface.copy(alpha = alpha * 0.3f)
         },
         contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
         elevation = FloatingActionButtonDefaults.elevation(
