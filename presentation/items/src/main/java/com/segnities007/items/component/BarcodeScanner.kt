@@ -70,6 +70,7 @@ fun BarcodeScanner(
 
             imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                 if (isScanning) {
+                    @OptIn(ExperimentalGetImage::class)
                     val mediaImage = imageProxy.image
                     if (mediaImage != null) {
                         val image = InputImage.fromMediaImage(

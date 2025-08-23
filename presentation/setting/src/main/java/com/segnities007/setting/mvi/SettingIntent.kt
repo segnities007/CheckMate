@@ -9,9 +9,13 @@ sealed interface SettingIntent : MviIntent {
         val message: String,
     ) : SettingIntent
 
-    data object ExportData: SettingIntent
-    data class ImportData(val uri: Uri): SettingIntent
-    data object DeleteAllData: SettingIntent
-    data object ConfirmDeleteAllData: SettingIntent
-    data object CancelDeleteAllData: SettingIntent
+    data object ExportData : SettingIntent
+    data class ImportData(
+        val uri: Uri
+    ) : SettingIntent
+    data object DeleteAllData : SettingIntent
+    data object ConfirmDeleteAllData : SettingIntent
+    data object CancelDeleteAllData : SettingIntent
+    data object LinkWithGoogle : SettingIntent
+    data object ChangeGoogleAccount : SettingIntent
 }

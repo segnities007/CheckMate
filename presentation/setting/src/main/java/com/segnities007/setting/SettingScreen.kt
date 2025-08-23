@@ -46,7 +46,6 @@ import org.koin.compose.koinInject
 @Composable
 fun SettingScreen(
     innerPadding: PaddingValues,
-    userStatus: UserStatus,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -104,7 +103,7 @@ fun SettingScreen(
                 .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        SettingUi(userStatus, settingViewModel::sendIntent)
+        SettingUi(settingViewModel::sendIntent)
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 
@@ -134,7 +133,6 @@ fun SettingScreen(
 
 @Composable
 private fun SettingUi(
-    userStatus: UserStatus,
     sendIntent: (SettingIntent) -> Unit,
 ) {
 
@@ -144,13 +142,15 @@ private fun SettingUi(
         uri?.let { sendIntent(SettingIntent.ImportData(it)) }
     }
 
+    val settingViewModel: SettingViewModel = koinInject()
+    val state by settingViewModel.state.collectAsState()
 
     Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        UserStatusCard(userStatus)
+        UserStatusCard(state.userStatus)
         
         // データ管理セクション
         HorizontalDividerWithLabel("データ管理")
@@ -169,15 +169,13 @@ private fun SettingUi(
         // アカウント設定セクション
         HorizontalDividerWithLabel("アカウント設定")
         AccountButtons(
-            onEditProfile = {
-                // TODO: プロフィール編集の実装
+            onGoogleLink = {
+                sendIntent(SettingIntent.LinkWithGoogle)
             },
-            onChangePassword = {
-                // TODO: パスワード変更の実装
+            onGoogleUnlink = {
+                sendIntent(SettingIntent.ChangeGoogleAccount)
             },
-            onLogout = {
-                // TODO: ログアウトの実装
-            }
+            isGoogleLinked = state.userStatus.id.isNotEmpty()
         )
     }
 }
@@ -186,7 +184,6 @@ private fun SettingUi(
 @Composable
 private fun SettingScreenPreview() {
     SettingUi(
-        userStatus = UserStatus(),
         sendIntent = {},
     )
 }

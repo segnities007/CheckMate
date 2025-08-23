@@ -17,6 +17,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import com.segnities007.repository.UserRepository
 
 class SettingViewModel(
     private val backupRepository: BackupRepository,
@@ -24,16 +25,34 @@ class SettingViewModel(
     private val itemRepository: ItemRepository,
     private val itemCheckStateRepository: ItemCheckStateRepository,
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
+    private val userRepository: UserRepository,
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
+
+    init {
+        loadUserStatus()
+    }
+
+    private fun loadUserStatus() {
+        viewModelScope.launch {
+            try {
+                val userStatus = userRepository.getUserStatus()
+                setState { copy(userStatus = userStatus) }
+            } catch (e: Exception) {
+                Log.e("SettingViewModel", "Failed to load user status", e)
+            }
+        }
+    }
 
     override suspend fun handleIntent(intent: SettingIntent) {
         when (intent) {
-            is SettingIntent.ShowToast -> showToast(intent)
-            SettingIntent.ExportData -> exportData()
+            is SettingIntent.ExportData -> exportData()
             is SettingIntent.ImportData -> importData(intent)
-            SettingIntent.DeleteAllData -> showDeleteAllDataConfirmation()
-            SettingIntent.ConfirmDeleteAllData -> confirmDeleteAllData()
-            SettingIntent.CancelDeleteAllData -> cancelDeleteAllData()
+            is SettingIntent.DeleteAllData -> showDeleteAllDataConfirmation()
+            is SettingIntent.ConfirmDeleteAllData -> confirmDeleteAllData()
+            is SettingIntent.CancelDeleteAllData -> cancelDeleteAllData()
+            is SettingIntent.LinkWithGoogle -> linkWithGoogle()
+            is SettingIntent.ChangeGoogleAccount -> changeGoogleAccount()
+            is SettingIntent.ShowToast -> showToast(intent)
         }
     }
 
@@ -93,6 +112,32 @@ class SettingViewModel(
 
     private fun cancelDeleteAllData() {
         setState { copy(showDeleteAllDataDialog = false) }
+    }
+
+    private fun linkWithGoogle() {
+        viewModelScope.launch {
+            try {
+                userRepository.loginWithGoogle()
+                val updatedUserStatus = userRepository.getUserStatus()
+                setState { copy(userStatus = updatedUserStatus) }
+                sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
+            } catch (e: Exception) {
+                sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
+            }
+        }
+    }
+
+    private fun changeGoogleAccount() {
+        viewModelScope.launch {
+            try {
+                userRepository.loginWithGoogle()
+                val updatedUserStatus = userRepository.getUserStatus()
+                setState { copy(userStatus = updatedUserStatus) }
+                sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
+            } catch (e: Exception) {
+                sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
+            }
+        }
     }
 
     private suspend fun saveToDownloads(fileName: String, jsonString: String) {
