@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -106,13 +101,11 @@ private fun DashboardUi(
                 StatCard(
                     title = "総アイテム数",
                     value = state.itemCount.toString(),
-                    icon = Icons.Filled.Dns,
                     modifier = Modifier.weight(1f),
                 )
                 StatCard(
                     title = "総テンプレート数",
                     value = state.templateCount.toString(),
-                    icon = Icons.AutoMirrored.Filled.Assignment,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -120,13 +113,11 @@ private fun DashboardUi(
                 StatCard(
                     title = "本日の完了率",
                     value = "${state.completionRateToday}% (${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
-                    icon = Icons.Filled.CheckCircle,
                     modifier = Modifier.weight(1f),
                 )
                 StatCard(
                     title = "累計完了率",
                     value = "${state.historicalCompletionRate}% (${state.totalCheckedRecordsCount}/${state.totalRecordsCount})",
-                    icon = Icons.Filled.CheckCircle,
                     modifier = Modifier.weight(1f),
                 )
             }

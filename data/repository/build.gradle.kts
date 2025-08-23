@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -13,6 +16,14 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        
+        // local.propertiesからAPIキーを読み込む
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(FileInputStream(localPropertiesFile))
+        }
+        buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY", "")}\"")
     }
 
     buildTypes {
@@ -30,6 +41,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -51,5 +66,14 @@ dependencies {
 
     // serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // datetime
+    implementation(libs.kotlinx.datetime)
+
+    // Gemini AI
+    implementation(libs.google.ai.client)
+    
+    // datetime (GeminiAiService用)
+    implementation(libs.kotlinx.datetime)
 
 }

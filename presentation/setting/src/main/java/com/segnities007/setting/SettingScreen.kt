@@ -40,12 +40,12 @@ import com.segnities007.setting.mvi.SettingIntent
 import com.segnities007.setting.mvi.SettingViewModel
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UserStatusCard
+import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import org.koin.compose.koinInject
 
 @Composable
 fun SettingScreen(
     innerPadding: PaddingValues,
-    userStatus: UserStatus,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -91,6 +91,13 @@ fun SettingScreen(
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                is SettingEffect.ShowIcsImportResult -> {
+                    Toast.makeText(
+                        localContext,
+                        "${effect.successCount}個のテンプレートを作成しました",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
@@ -103,7 +110,7 @@ fun SettingScreen(
                 .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        SettingUi(userStatus, settingViewModel::sendIntent)
+        SettingUi(settingViewModel::sendIntent)
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 
@@ -129,50 +136,72 @@ fun SettingScreen(
             }
         )
     }
+
+    // ICSインポート中ダイアログ
+    if (state.isImportingIcs) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("テンプレート作成中") },
+            text = { Text("カレンダーからテンプレートを生成しています...") },
+            confirmButton = { }
+        )
+    }
 }
 
 @Composable
 private fun SettingUi(
-    userStatus: UserStatus,
     sendIntent: (SettingIntent) -> Unit,
 ) {
 
-    val launcher = rememberLauncherForActivityResult(
+    val jsonLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let { sendIntent(SettingIntent.ImportData(it)) }
     }
 
+    val icsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let { sendIntent(SettingIntent.ImportIcsFile(it)) }
+    }
+
+    val settingViewModel: SettingViewModel = koinInject()
+    val state by settingViewModel.state.collectAsState()
 
     Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        UserStatusCard(userStatus)
+        UserStatusCard(state.userStatus)
         
+        // データ管理セクション
+        HorizontalDividerWithLabel("データ管理")
         DataButtons(
             onExportData = {
                 sendIntent(SettingIntent.ExportData)
             },
             onImportData = {
-                launcher.launch(arrayOf("application/json"))
+                jsonLauncher.launch(arrayOf("application/json"))
+            },
+            onImportIcsFile = {
+                icsLauncher.launch(arrayOf("text/calendar"))
             },
             onDeleteAllData = {
                 sendIntent(SettingIntent.DeleteAllData)
             }
         )
         
+        // アカウント設定セクション
+        HorizontalDividerWithLabel("アカウント設定")
         AccountButtons(
-            onEditProfile = {
-                // TODO: プロフィール編集の実装
+            onGoogleLink = {
+                sendIntent(SettingIntent.LinkWithGoogle)
             },
-            onChangePassword = {
-                // TODO: パスワード変更の実装
+            onGoogleUnlink = {
+                sendIntent(SettingIntent.ChangeGoogleAccount)
             },
-            onLogout = {
-                // TODO: ログアウトの実装
-            }
+            isGoogleLinked = state.userStatus.id.isNotEmpty()
         )
     }
 }
@@ -181,7 +210,6 @@ private fun SettingUi(
 @Composable
 private fun SettingScreenPreview() {
     SettingUi(
-        userStatus = UserStatus(),
         sendIntent = {},
     )
 }

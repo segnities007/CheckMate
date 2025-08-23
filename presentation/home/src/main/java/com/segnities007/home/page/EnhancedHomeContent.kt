@@ -55,12 +55,17 @@ fun EnhancedHomeContent(
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        // 今日の進捗
-        StatisticsCard(
-            itemsForToday = allItems,
-            itemCheckStates = itemCheckStates,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        // 今日の進捗セクション
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            HorizontalDividerWithLabel("今日の進捗")
+            StatisticsCard(
+                itemsForToday = allItems,
+                itemCheckStates = itemCheckStates
+            )
+        }
 
         // カテゴリ別アイテムリスト
         CategoryBasedItemList(

@@ -7,4 +7,9 @@ sealed interface SettingEffect : MviEffect {
     data class ShowToast(
         val message: String,
     ) : SettingEffect
+    
+    data class ShowIcsImportResult(
+        val successCount: Int,
+        val totalCount: Int,
+    ) : SettingEffect
 }

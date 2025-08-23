@@ -97,7 +97,13 @@ class HomeViewModel(
     }
 
     private suspend fun selectDate(date: LocalDate) {
-        setState { copy(selectedDate = date) }
+        setState { 
+            copy(
+                selectedDate = date,
+                currentYear = date.year,
+                currentMonth = date.monthNumber
+            )
+        }
 
         val templates = templateRepo.getTemplatesForDay(date.dayOfWeek.name)
         val itemIdsForToday = templates.flatMap { it.itemIds }.distinct()

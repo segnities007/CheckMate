@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.segnities007.repository"
+    namespace = "com.segnities007.domain.repository"
     compileSdk = 36
 
     defaultConfig {

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -103,6 +104,7 @@ private fun ItemTexts(
             text = name,
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             fontSize = 16.sp,
         )
         if (!description.isNullOrEmpty()) {
@@ -111,6 +113,7 @@ private fun ItemTexts(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }

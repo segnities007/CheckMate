@@ -36,9 +36,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun AccountButtons(
-    onEditProfile: () -> Unit,
-    onChangePassword: () -> Unit,
-    onLogout: () -> Unit,
+    onGoogleLink: () -> Unit,
+    onGoogleUnlink: () -> Unit,
+    isGoogleLinked: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(
@@ -60,39 +60,26 @@ fun AccountButtons(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // セクションタイトル
-            Text(
-                text = "アカウント設定",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
             // ボタンリスト
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AccountButtonCard(
-                    title = "プロフィール編集",
-                    description = "ユーザー情報を変更",
-                    icon = Icons.Default.Person,
-                    onClick = onEditProfile
-                )
-                
-                AccountButtonCard(
-                    title = "パスワード変更",
-                    description = "セキュリティ設定を変更",
-                    icon = Icons.Default.Lock,
-                    onClick = onChangePassword
-                )
-                
-                AccountButtonCard(
-                    title = "ログアウト",
-                    description = "アカウントからログアウト",
-                    icon = Icons.Default.Logout,
-                    onClick = onLogout,
-                    isDestructive = true
-                )
+                // Google連携ボタン（連携状況に応じて表示）
+                if (isGoogleLinked) {
+                    AccountButtonCard(
+                        title = "アカウント変更",
+                        description = "別のGoogleアカウントに変更",
+                        icon = Icons.Default.Link,
+                        onClick = onGoogleUnlink
+                    )
+                } else {
+                    AccountButtonCard(
+                        title = "Googleで連携",
+                        description = "Googleアカウントと連携してデータを同期",
+                        icon = Icons.Default.Link,
+                        onClick = onGoogleLink
+                    )
+                }
             }
         }
     }

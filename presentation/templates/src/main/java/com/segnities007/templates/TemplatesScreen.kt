@@ -27,6 +27,11 @@ import com.segnities007.templates.page.WeeklyTemplateList
 import com.segnities007.templates.page.WeeklyTemplateSelector
 import org.koin.compose.koinInject
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +87,7 @@ fun TemplatesScreen(
                 onTemplateClick = { templatesViewModel.sendIntent(TemplatesIntent.SelectTemplate(it)) },
                 onSearchQueryChange = { query -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSearchQuery(query)) },
                 onSortOrderChange = { sortOrder -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSortOrder(sortOrder)) },
-                onDayOfWeekChange = { dayOfWeek -> templatesViewModel.sendIntent(TemplatesIntent.UpdateSelectedDayOfWeek(dayOfWeek)) }
+                onDayOfWeekChange = { dayOfWeek -> templatesViewModel.sendIntent(TemplatesIntent.UpdateSelectedDayOfWeek(dayOfWeek)) },
             )
         }
         composable<TemplatesRoute.WeeklyTemplateSelector> {
