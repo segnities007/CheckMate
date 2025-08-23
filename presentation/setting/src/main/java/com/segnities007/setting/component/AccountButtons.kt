@@ -41,46 +41,22 @@ fun AccountButtons(
     isGoogleLinked: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedCard(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 1.dp,
-            hoveredElevation = 1.dp
-        ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // ボタンリスト
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Google連携ボタン（連携状況に応じて表示）
-                if (isGoogleLinked) {
-                    AccountButtonCard(
-                        title = "アカウント変更",
-                        description = "別のGoogleアカウントに変更",
-                        icon = Icons.Default.Link,
-                        onClick = onGoogleUnlink
-                    )
-                } else {
-                    AccountButtonCard(
-                        title = "Googleで連携",
-                        description = "Googleアカウントと連携してデータを同期",
-                        icon = Icons.Default.Link,
-                        onClick = onGoogleLink
-                    )
-                }
-            }
+        if (isGoogleLinked) {
+            AccountButtonCard(
+                title = "アカウント変更",
+                icon = Icons.Default.Link,
+                onClick = onGoogleUnlink
+            )
+        } else {
+            AccountButtonCard(
+                title = "Googleで連携",
+                icon = Icons.Default.Link,
+                onClick = onGoogleLink
+            )
         }
     }
 }
@@ -88,7 +64,6 @@ fun AccountButtons(
 @Composable
 private fun AccountButtonCard(
     title: String,
-    description: String,
     icon: ImageVector,
     onClick: () -> Unit,
     isDestructive: Boolean = false,
@@ -104,27 +79,27 @@ private fun AccountButtonCard(
             hoveredElevation = 0.dp
         ),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         onClick = onClick
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // アイコン
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(40.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(
                         if (isDestructive) {
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                            MaterialTheme.colorScheme.errorContainer
                         } else {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                            MaterialTheme.colorScheme.primaryContainer
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -137,31 +112,22 @@ private fun AccountButtonCard(
                     } else {
                         MaterialTheme.colorScheme.primary
                     },
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
-            // テキスト情報
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = if (isDestructive) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    }
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            // タイトル
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = if (isDestructive) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+                modifier = Modifier.weight(1f)
+            )
 
             // 矢印アイコン
             Icon(

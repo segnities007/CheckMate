@@ -45,66 +45,40 @@ fun DataButtons(
     onImportIcsFile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedCard(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 1.dp,
-            hoveredElevation = 1.dp
-        ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // ボタンリスト
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                DataButtonCard(
-                    title = "データをエクスポート",
-                    description = "アプリのデータを外部に保存",
-                    icon = Icons.Default.Download,
-                    onClick = onExportData
-                )
-                
-                DataButtonCard(
-                    title = "データをインポート",
-                    description = "外部からデータを読み込み",
-                    icon = Icons.Default.Upload,
-                    onClick = onImportData
-                )
-                
-                DataButtonCard(
-                    title = "カレンダーからテンプレート作成",
-                    description = "ICSファイルからテンプレートを自動生成",
-                    icon = Icons.Default.CalendarMonth,
-                    onClick = onImportIcsFile
-                )
-                
-                DataButtonCard(
-                    title = "全データを削除",
-                    description = "すべてのデータを削除（復元不可）",
-                    icon = Icons.Default.DeleteForever,
-                    onClick = onDeleteAllData,
-                    isDestructive = true
-                )
-            }
-        }
+        DataButtonCard(
+            title = "エクスポート",
+            icon = Icons.Default.Download,
+            onClick = onExportData
+        )
+        
+        DataButtonCard(
+            title = "インポート",
+            icon = Icons.Default.Upload,
+            onClick = onImportData
+        )
+        
+        DataButtonCard(
+            title = "カレンダーから作成",
+            icon = Icons.Default.CalendarMonth,
+            onClick = onImportIcsFile
+        )
+        
+        DataButtonCard(
+            title = "全データ削除",
+            icon = Icons.Default.DeleteForever,
+            onClick = onDeleteAllData,
+            isDestructive = true
+        )
     }
 }
 
 @Composable
 private fun DataButtonCard(
     title: String,
-    description: String,
     icon: ImageVector,
     onClick: () -> Unit,
     isDestructive: Boolean = false,
@@ -120,27 +94,27 @@ private fun DataButtonCard(
             hoveredElevation = 0.dp
         ),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         onClick = onClick
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // アイコン
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(40.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(
                         if (isDestructive) {
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                            MaterialTheme.colorScheme.errorContainer
                         } else {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                            MaterialTheme.colorScheme.primaryContainer
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -153,31 +127,22 @@ private fun DataButtonCard(
                     } else {
                         MaterialTheme.colorScheme.primary
                     },
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
-            // テキスト情報
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = if (isDestructive) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    }
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            // タイトル
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = if (isDestructive) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+                modifier = Modifier.weight(1f)
+            )
 
             // 矢印アイコン
             Icon(

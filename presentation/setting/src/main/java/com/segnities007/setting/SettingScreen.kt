@@ -118,8 +118,8 @@ fun SettingScreen(
     if (state.showDeleteAllDataDialog) {
         AlertDialog(
             onDismissRequest = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
-            title = { Text("全データの削除") },
-            text = { Text("すべてのデータを本当に削除しますか？") },
+            title = { Text("全データ削除") },
+            text = { Text("すべてのデータを削除しますか？") },
             confirmButton = {
                 TextButton(
                     onClick = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) }
@@ -141,8 +141,8 @@ fun SettingScreen(
     if (state.isImportingIcs) {
         AlertDialog(
             onDismissRequest = { },
-            title = { Text("テンプレート作成中") },
-            text = { Text("カレンダーからテンプレートを生成しています...") },
+            title = { Text("作成中") },
+            text = { Text("テンプレートを生成しています...") },
             confirmButton = { }
         )
     }
@@ -170,13 +170,13 @@ private fun SettingUi(
 
     Column(
         modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UserStatusCard(state.userStatus)
         
         // データ管理セクション
-        HorizontalDividerWithLabel("データ管理")
+        HorizontalDividerWithLabel("データ")
         DataButtons(
             onExportData = {
                 sendIntent(SettingIntent.ExportData)
@@ -193,7 +193,7 @@ private fun SettingUi(
         )
         
         // アカウント設定セクション
-        HorizontalDividerWithLabel("アカウント設定")
+        HorizontalDividerWithLabel("アカウント")
         AccountButtons(
             onGoogleLink = {
                 sendIntent(SettingIntent.LinkWithGoogle)
