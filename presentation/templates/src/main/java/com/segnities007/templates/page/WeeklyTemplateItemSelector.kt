@@ -386,3 +386,4 @@ fun WeeklyTemplateSelectorPreview() {
         setNavigationBar = {},
     )
 }
+
