@@ -148,6 +148,8 @@ fun WeeklyTemplateSelector(
                     text = template.title,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
@@ -255,6 +257,8 @@ fun WeeklyTemplateSelector(
                                 text = item.name,
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             

@@ -52,14 +52,6 @@ fun StatisticsCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // タイトル
-            Text(
-                text = "今日の進捗",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
             // メイン進捗
             Row(
                 modifier = Modifier.fillMaxWidth(),

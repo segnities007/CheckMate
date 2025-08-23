@@ -40,6 +40,7 @@ import com.segnities007.setting.mvi.SettingIntent
 import com.segnities007.setting.mvi.SettingViewModel
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UserStatusCard
+import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import org.koin.compose.koinInject
 
 @Composable
@@ -151,6 +152,8 @@ private fun SettingUi(
     ) {
         UserStatusCard(userStatus)
         
+        // データ管理セクション
+        HorizontalDividerWithLabel("データ管理")
         DataButtons(
             onExportData = {
                 sendIntent(SettingIntent.ExportData)
@@ -163,6 +166,8 @@ private fun SettingUi(
             }
         )
         
+        // アカウント設定セクション
+        HorizontalDividerWithLabel("アカウント設定")
         AccountButtons(
             onEditProfile = {
                 // TODO: プロフィール編集の実装

@@ -60,14 +60,6 @@ fun AccountButtons(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // セクションタイトル
-            Text(
-                text = "アカウント設定",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
             // ボタンリスト
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
