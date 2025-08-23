@@ -21,6 +21,8 @@ data class TemplatesState(
     val templateSortOrder: TemplateSortOrder = TemplateSortOrder.NAME_ASC,
     val selectedDayOfWeek: DayOfWeek? = null,
     val filteredTemplates: List<WeeklyTemplate> = emptyList(),
+    // 削除確認ダイアログ
+    val templateToDelete: WeeklyTemplate? = null,
 ) : MviState
 
 enum class SortOrder {

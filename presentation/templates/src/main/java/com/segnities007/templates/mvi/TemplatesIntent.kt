@@ -60,4 +60,9 @@ sealed interface TemplatesIntent : MviIntent {
     data class UpdateSelectedDayOfWeek(
         val dayOfWeek: DayOfWeek?,
     ) : TemplatesIntent
+
+    // 削除確認ダイアログ
+    data object ConfirmDeleteTemplate : TemplatesIntent
+
+    data object CancelDeleteTemplate : TemplatesIntent
 }

@@ -31,7 +31,7 @@ class TemplatesViewModel(
                 )
 
             is TemplatesIntent.EditWeeklyTemplate -> editWeeklyTemplate(intent.weeklyTemplate)
-            is TemplatesIntent.DeleteWeeklyTemplate -> deleteWeeklyTemplate(intent.weeklyTemplate)
+            is TemplatesIntent.DeleteWeeklyTemplate -> showDeleteConfirmation(intent.weeklyTemplate)
             is TemplatesIntent.SelectTemplate -> selectTemplate(intent.weeklyTemplate)
 
             TemplatesIntent.GetAllWeeklyTemplates -> getAllWeeklyTemplates()
@@ -51,6 +51,10 @@ class TemplatesViewModel(
             is TemplatesIntent.UpdateTemplateSearchQuery -> updateTemplateSearchQuery(intent)
             is TemplatesIntent.UpdateTemplateSortOrder -> updateTemplateSortOrder(intent)
             is TemplatesIntent.UpdateSelectedDayOfWeek -> updateSelectedDayOfWeek(intent)
+
+            // 削除確認ダイアログ
+            TemplatesIntent.ConfirmDeleteTemplate -> confirmDeleteTemplate()
+            TemplatesIntent.CancelDeleteTemplate -> cancelDeleteTemplate()
         }
     }
 
@@ -186,11 +190,24 @@ class TemplatesViewModel(
         }
     }
 
-    private fun deleteWeeklyTemplate(template: WeeklyTemplate) {
-        viewModelScope.launch {
-            weeklyTemplateRepository.deleteTemplate(template)
-            getAllWeeklyTemplates()
+    private fun showDeleteConfirmation(template: WeeklyTemplate) {
+        setState { copy(templateToDelete = template) }
+    }
+
+    private fun confirmDeleteTemplate() {
+        val templateToDelete = state.value.templateToDelete
+        if (templateToDelete != null) {
+            viewModelScope.launch {
+                weeklyTemplateRepository.deleteTemplate(templateToDelete)
+                setState { copy(templateToDelete = null) }
+                getAllWeeklyTemplates()
+                sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
+            }
         }
+    }
+
+    private fun cancelDeleteTemplate() {
+        setState { copy(templateToDelete = null) }
     }
 
     private fun selectTemplate(template: WeeklyTemplate) {
