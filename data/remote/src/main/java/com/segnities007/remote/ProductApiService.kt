@@ -14,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import android.util.Log
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpTimeoutConfig
 
 class ProductApiService {
     private val httpClient = HttpClient(CIO) {
@@ -26,6 +28,11 @@ class ProductApiService {
         install(Logging) {
             logger = Logger.ANDROID
             level = LogLevel.INFO
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS   // リクエスト全体のタイムアウト無効
+            connectTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS   // 接続確立のタイムアウト無効
+            socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS    // ソケット読み書きのタイムアウト無効
         }
     }
 

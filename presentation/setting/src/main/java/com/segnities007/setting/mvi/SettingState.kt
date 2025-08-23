@@ -6,4 +6,6 @@ import com.segnities007.ui.mvi.MviState
 data class SettingState(
     val showDeleteAllDataDialog: Boolean = false,
     val userStatus: UserStatus = UserStatus(),
+    val showIcsImportDialog: Boolean = false,
+    val isImportingIcs: Boolean = false,
 ) : MviState

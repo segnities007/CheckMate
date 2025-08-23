@@ -91,6 +91,13 @@ fun SettingScreen(
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                is SettingEffect.ShowIcsImportResult -> {
+                    Toast.makeText(
+                        localContext,
+                        "${effect.successCount}個のテンプレートを作成しました",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
@@ -129,6 +136,16 @@ fun SettingScreen(
             }
         )
     }
+
+    // ICSインポート中ダイアログ
+    if (state.isImportingIcs) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("テンプレート作成中") },
+            text = { Text("カレンダーからテンプレートを生成しています...") },
+            confirmButton = { }
+        )
+    }
 }
 
 @Composable
@@ -136,10 +153,16 @@ private fun SettingUi(
     sendIntent: (SettingIntent) -> Unit,
 ) {
 
-    val launcher = rememberLauncherForActivityResult(
+    val jsonLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let { sendIntent(SettingIntent.ImportData(it)) }
+    }
+
+    val icsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let { sendIntent(SettingIntent.ImportIcsFile(it)) }
     }
 
     val settingViewModel: SettingViewModel = koinInject()
@@ -159,7 +182,10 @@ private fun SettingUi(
                 sendIntent(SettingIntent.ExportData)
             },
             onImportData = {
-                launcher.launch(arrayOf("application/json"))
+                jsonLauncher.launch(arrayOf("application/json"))
+            },
+            onImportIcsFile = {
+                icsLauncher.launch(arrayOf("text/calendar"))
             },
             onDeleteAllData = {
                 sendIntent(SettingIntent.DeleteAllData)

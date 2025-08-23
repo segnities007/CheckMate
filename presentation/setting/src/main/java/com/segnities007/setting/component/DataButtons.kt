@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Download
@@ -41,6 +42,7 @@ fun DataButtons(
     onExportData: () -> Unit,
     onImportData: () -> Unit,
     onDeleteAllData: () -> Unit,
+    onImportIcsFile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(
@@ -78,6 +80,13 @@ fun DataButtons(
                     description = "外部からデータを読み込み",
                     icon = Icons.Default.Upload,
                     onClick = onImportData
+                )
+                
+                DataButtonCard(
+                    title = "カレンダーからテンプレート作成",
+                    description = "ICSファイルからテンプレートを自動生成",
+                    icon = Icons.Default.CalendarMonth,
+                    onClick = onImportIcsFile
                 )
                 
                 DataButtonCard(

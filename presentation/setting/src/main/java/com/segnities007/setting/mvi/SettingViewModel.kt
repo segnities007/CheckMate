@@ -6,6 +6,7 @@ import com.segnities007.repository.BackupRepository
 import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.ItemCheckStateRepository
 import com.segnities007.repository.WeeklyTemplateRepository
+import com.segnities007.repository.IcsTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ class SettingViewModel(
     private val itemCheckStateRepository: ItemCheckStateRepository,
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val userRepository: UserRepository,
+    private val icsTemplateRepository: IcsTemplateRepository,
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
 
     init {
@@ -53,6 +55,9 @@ class SettingViewModel(
             is SettingIntent.LinkWithGoogle -> linkWithGoogle()
             is SettingIntent.ChangeGoogleAccount -> changeGoogleAccount()
             is SettingIntent.ShowToast -> showToast(intent)
+            is SettingIntent.ImportIcsFile -> importIcsFile(intent)
+            is SettingIntent.ShowIcsImportDialog -> showIcsImportDialog()
+            is SettingIntent.HideIcsImportDialog -> hideIcsImportDialog()
         }
     }
 
@@ -138,6 +143,37 @@ class SettingViewModel(
                 sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
             }
         }
+    }
+
+    private fun importIcsFile(intent: SettingIntent.ImportIcsFile) {
+        viewModelScope.launch {
+            try {
+                setState { copy(isImportingIcs = true) }
+                
+                val templates = icsTemplateRepository.generateTemplatesFromIcs(intent.uri)
+                icsTemplateRepository.saveGeneratedTemplates(templates)
+                
+                setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
+                sendEffect { 
+                    SettingEffect.ShowIcsImportResult(
+                        successCount = templates.size,
+                        totalCount = templates.size
+                    ) 
+                }
+            } catch (e: Exception) {
+                setState { copy(isImportingIcs = false) }
+                sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
+                Log.e("SettingViewModel", "ICSインポート失敗", e)
+            }
+        }
+    }
+
+    private fun showIcsImportDialog() {
+        setState { copy(showIcsImportDialog = true) }
+    }
+
+    private fun hideIcsImportDialog() {
+        setState { copy(showIcsImportDialog = false) }
     }
 
     private suspend fun saveToDownloads(fileName: String, jsonString: String) {

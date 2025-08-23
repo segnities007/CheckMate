@@ -73,9 +73,16 @@ dependencies {
     implementation(platform(libs.ktor.bom))
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
-    implementation("io.ktor:ktor-client-content-negotiation")
-    implementation("io.ktor:ktor-serialization-kotlinx-json")
-    implementation("io.ktor:ktor-client-logging")
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
 
+    
+
+    // datetime
+    implementation(libs.kotlinx.datetime)
+
+    // Gemini AI - 独自実装のため除外
+    // implementation(libs.google.ai.client)
 
 }
