@@ -19,9 +19,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,38 +56,46 @@ fun ConfirmBar(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 // Cancel
-                Box(
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .background(
-                                MaterialTheme.colorScheme.errorContainer.copy(alpha = alpha),
-                                shape = CircleShape,
-                            ).clickable { onCancel() },
-                    contentAlignment = Alignment.Center,
+                FloatingActionButton(
+                    onClick = onCancel,
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = alpha),
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = alpha),
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 2.dp,
+                        focusedElevation = 0.dp,
+                        hoveredElevation = 1.dp
+                    ),
+                    shape = CircleShape,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Cancel",
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = alpha)
                     )
                 }
 
                 // Confirm
-                Box(
-                    modifier =
-                        Modifier
-                            .size(48.dp)
-                            .background(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha),
-                                shape = CircleShape,
-                            ).clickable { onConfirm() },
-                    contentAlignment = Alignment.Center,
+                FloatingActionButton(
+                    onClick = onConfirm,
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha),
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha),
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 2.dp,
+                        focusedElevation = 0.dp,
+                        hoveredElevation = 1.dp
+                    ),
+                    shape = CircleShape,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Confirm",
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha)
                     )
                 }
             }

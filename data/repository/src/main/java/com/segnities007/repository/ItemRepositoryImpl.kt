@@ -57,4 +57,8 @@ class ItemRepositoryImpl(
     override suspend fun getProductInfoByBarcode(barcodeInfo: BarcodeInfo): ProductInfo? {
         return productApiService.getProductInfo(barcodeInfo.barcode)
     }
+    
+    override suspend fun clearAllItems() {
+        itemDao.clearAll()
+    }
 }

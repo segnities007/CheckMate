@@ -13,4 +13,6 @@ interface WeeklyTemplateRepository {
     suspend fun updateTemplate(template: WeeklyTemplate)
 
     suspend fun deleteTemplate(template: WeeklyTemplate)
+    
+    suspend fun clearAllTemplates()
 }

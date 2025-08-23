@@ -24,8 +24,11 @@ import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SpaceDashboard
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,23 +73,27 @@ private fun FloatingActionBarUi(
             HubRoute.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
         )
 
-    Row(
-        modifier =
-            Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
-                .padding(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        info.forEach { (route, icons) ->
-            NavItemButton(
-                alpha = alpha,
-                selectedIcon = icons[0],
-                unselectedIcon = icons[1],
-                selected = currentHubRoute == route,
-                onClick = { onNavigate(route) },
-            )
+    if (alpha > 0f) {
+        Surface(
+            shape = CircleShape,
+            shadowElevation = 8.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
+        ) {
+            Row(
+                modifier = Modifier.padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                info.forEach { (route, icons) ->
+                    NavItemButton(
+                        alpha = alpha,
+                        selectedIcon = icons[0],
+                        unselectedIcon = icons[1],
+                        selected = currentHubRoute == route,
+                        onClick = { onNavigate(route) },
+                    )
+                }
+            }
         }
     }
 }
@@ -99,38 +106,33 @@ private fun NavItemButton(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .clip(CircleShape)
-                .background(
-                    color =
-                        if (selected) {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha)
-                        } else {
-                            androidx.compose.ui.graphics.Color.Transparent
-                        },
-                ).padding(8.dp)
-                .then(
-                    if (alpha > 0f) {
-                        Modifier.clickable(onClick = onClick)
-                    } else {
-                        Modifier
-                    },
-                ),
-        contentAlignment = Alignment.Center,
+    FloatingActionButton(
+        onClick = onClick,
+        modifier = Modifier.size(64.dp),
+        containerColor = if (selected) {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha)
+        } else {
+            MaterialTheme.colorScheme.surface.copy(alpha = alpha * 0.3f)
+        },
+        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
+        elevation = FloatingActionButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 2.dp,
+            focusedElevation = 0.dp,
+            hoveredElevation = 1.dp
+        ),
+        shape = CircleShape,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Icon(
-                modifier = Modifier.size(42.dp),
-                imageVector = if (selected) selectedIcon else unselectedIcon,
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onBackground.copy(alpha),
-            )
-        }
+        Icon(
+            modifier = Modifier.size(32.dp),
+            imageVector = if (selected) selectedIcon else unselectedIcon,
+            contentDescription = "",
+            tint = if (selected) {
+                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha)
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+            }
+        )
     }
 }
 

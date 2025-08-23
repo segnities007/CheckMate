@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -102,6 +105,29 @@ fun TemplatesScreen(
                 templatesViewModel.sendIntent(TemplatesIntent.AddWeeklyTemplate(title, dayOfWeek))
             },
             sheetState = sheetState,
+        )
+    }
+
+    // 削除確認ダイアログ
+    state.templateToDelete?.let { template ->
+        AlertDialog(
+            onDismissRequest = { templatesViewModel.sendIntent(TemplatesIntent.CancelDeleteTemplate) },
+            title = { Text("テンプレートの削除") },
+            text = { Text("「${template.title}」を本当に削除しますか？") },
+            confirmButton = {
+                TextButton(
+                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.ConfirmDeleteTemplate) }
+                ) {
+                    Text("削除")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.CancelDeleteTemplate) }
+                ) {
+                    Text("キャンセル")
+                }
+            }
         )
     }
 }
