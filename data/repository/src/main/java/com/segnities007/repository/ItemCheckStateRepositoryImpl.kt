@@ -16,4 +16,8 @@ class ItemCheckStateRepositoryImpl(
     override suspend fun saveCheckState(state: ItemCheckState) {
         dao.insert(state.toEntity()) // insert は REPLACE なので更新も可能
     }
+    
+    override suspend fun clearAllCheckStates() {
+        dao.clearAll()
+    }
 }

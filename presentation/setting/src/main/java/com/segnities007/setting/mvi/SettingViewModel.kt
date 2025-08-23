@@ -3,8 +3,10 @@ package com.segnities007.setting.mvi
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.segnities007.repository.BackupRepository
+import com.segnities007.repository.ItemRepository
+import com.segnities007.repository.ItemCheckStateRepository
+import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
-import com.segnities007.ui.mvi.MviState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,13 +21,19 @@ import android.util.Log
 class SettingViewModel(
     private val backupRepository: BackupRepository,
     private val appContext: Context,
-) : BaseViewModel<SettingIntent, MviState, SettingEffect>(object : MviState {}) {
+    private val itemRepository: ItemRepository,
+    private val itemCheckStateRepository: ItemCheckStateRepository,
+    private val weeklyTemplateRepository: WeeklyTemplateRepository,
+) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
 
     override suspend fun handleIntent(intent: SettingIntent) {
         when (intent) {
             is SettingIntent.ShowToast -> showToast(intent)
             SettingIntent.ExportData -> exportData()
             is SettingIntent.ImportData -> importData(intent)
+            SettingIntent.DeleteAllData -> showDeleteAllDataConfirmation()
+            SettingIntent.ConfirmDeleteAllData -> confirmDeleteAllData()
+            SettingIntent.CancelDeleteAllData -> cancelDeleteAllData()
         }
     }
 
@@ -61,6 +69,31 @@ class SettingViewModel(
         }
     }
 
+    private fun showDeleteAllDataConfirmation() {
+        setState { copy(showDeleteAllDataDialog = true) }
+    }
+
+    private fun confirmDeleteAllData() {
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    // Repositoryを使用して全データを削除
+                    itemCheckStateRepository.clearAllCheckStates()
+                    weeklyTemplateRepository.clearAllTemplates()
+                    itemRepository.clearAllItems()
+                }
+                setState { copy(showDeleteAllDataDialog = false) }
+                sendEffect { SettingEffect.ShowToast("全データを削除しました") }
+            } catch (e: Exception) {
+                sendEffect { SettingEffect.ShowToast("データ削除失敗: ${e.message}") }
+                Log.e("SettingViewModel", "データ削除失敗", e)
+            }
+        }
+    }
+
+    private fun cancelDeleteAllData() {
+        setState { copy(showDeleteAllDataDialog = false) }
+    }
 
     private suspend fun saveToDownloads(fileName: String, jsonString: String) {
         withContext(Dispatchers.IO) {

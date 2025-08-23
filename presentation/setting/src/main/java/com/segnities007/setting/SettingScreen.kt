@@ -17,8 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -49,6 +53,7 @@ fun SettingScreen(
 ) {
     val localContext = LocalContext.current
     val settingViewModel: SettingViewModel = koinInject()
+    val state by settingViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
     val targetAlpha by remember {
@@ -101,6 +106,29 @@ fun SettingScreen(
         SettingUi(userStatus, settingViewModel::sendIntent)
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
+
+    // 全データ削除確認ダイアログ
+    if (state.showDeleteAllDataDialog) {
+        AlertDialog(
+            onDismissRequest = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
+            title = { Text("全データの削除") },
+            text = { Text("すべてのデータを本当に削除しますか？") },
+            confirmButton = {
+                TextButton(
+                    onClick = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) }
+                ) {
+                    Text("削除")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) }
+                ) {
+                    Text("キャンセル")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -131,7 +159,7 @@ private fun SettingUi(
                 launcher.launch(arrayOf("application/json"))
             },
             onDeleteAllData = {
-                // TODO: 全データ削除の実装
+                sendIntent(SettingIntent.DeleteAllData)
             }
         )
         

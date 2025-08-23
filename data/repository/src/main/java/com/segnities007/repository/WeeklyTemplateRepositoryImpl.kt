@@ -23,4 +23,8 @@ class WeeklyTemplateRepositoryImpl(
     override suspend fun deleteTemplate(template: WeeklyTemplate) {
         dao.delete(template.toEntity())
     }
+    
+    override suspend fun clearAllTemplates() {
+        dao.clearAll()
+    }
 }

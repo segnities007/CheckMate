@@ -11,4 +11,7 @@ sealed interface SettingIntent : MviIntent {
 
     data object ExportData: SettingIntent
     data class ImportData(val uri: Uri): SettingIntent
+    data object DeleteAllData: SettingIntent
+    data object ConfirmDeleteAllData: SettingIntent
+    data object CancelDeleteAllData: SettingIntent
 }
