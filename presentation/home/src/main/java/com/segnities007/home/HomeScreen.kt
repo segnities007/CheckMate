@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,8 +43,8 @@ fun HomeScreen(
     val targetAlpha by remember {
         derivedStateOf {
             when {
-                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
-                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
+                scrollState.value > 50 -> 0f
+                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f)
             }
         }
     }
@@ -70,13 +71,13 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 0.dp),
+            .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         
         EnhancedHomeContent(
-            innerPadding = innerPadding,
             selectedDate = state.selectedDate,
             currentYear = state.currentYear,
             currentMonth = state.currentMonth,
@@ -93,7 +94,6 @@ fun HomeScreen(
                 // 月が変更されたときの処理はEnhancedCalendarCard内で行われる
             },
             sendIntent = homeViewModel::sendIntent,
-            scrollState = scrollState
         )
         
         Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))

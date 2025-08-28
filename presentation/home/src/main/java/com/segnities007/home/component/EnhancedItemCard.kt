@@ -49,7 +49,10 @@ fun EnhancedItemCard(
         modifier = modifier
             .fillMaxWidth()
             .scale(scale)
-            .clickable { onCheckedChange(!checked) },
+
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onCheckedChange(!checked) }
+        ,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface

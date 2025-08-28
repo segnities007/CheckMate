@@ -22,7 +22,6 @@ import kotlinx.datetime.LocalDate
 
 @Composable
 fun EnhancedHomeContent(
-    innerPadding: PaddingValues,
     selectedDate: LocalDate,
     currentYear: Int,
     currentMonth: Int,
@@ -33,15 +32,11 @@ fun EnhancedHomeContent(
     onDateSelected: (LocalDate) -> Unit,
     onMonthChanged: (Int, Int) -> Unit,
     sendIntent: (HomeIntent) -> Unit,
-    scrollState: ScrollState,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // 改善されたカレンダー
+        // カレンダー
         EnhancedCalendarCard(
             year = currentYear,
             month = currentMonth,
@@ -52,20 +47,14 @@ fun EnhancedHomeContent(
                 onMonthChanged(year, month)
                 sendIntent(HomeIntent.ChangeMonth(year, month))
             },
-            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
         // 今日の進捗セクション
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            HorizontalDividerWithLabel("今日の進捗")
-            StatisticsCard(
+        HorizontalDividerWithLabel("今日の進捗")
+        StatisticsCard(
                 itemsForToday = allItems,
                 itemCheckStates = itemCheckStates
-            )
-        }
+        )
 
         // カテゴリ別アイテムリスト
         CategoryBasedItemList(
@@ -73,7 +62,6 @@ fun EnhancedHomeContent(
             itemCheckStates = itemCheckStates,
             onCheckItem = onCheckItem
         )
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }
 
@@ -90,7 +78,6 @@ private fun CategoryBasedItemList(
     val itemsByCategory = selectedItems.groupBy { it.category }
     
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // セクションヘッダー
