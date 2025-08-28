@@ -18,7 +18,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.segnities007.home.mvi.HomeIntent
@@ -26,6 +29,7 @@ import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.home.page.EnhancedHomeContent
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
+import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
 @Composable
@@ -39,19 +43,11 @@ fun HomeScreen(
     val homeViewModel: HomeViewModel = koinInject()
     val state by homeViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
+    val isVisible by rememberScrollVisibility(scrollState = scrollState)
 
-    val targetAlpha by remember {
-        derivedStateOf {
-            when {
-                scrollState.value > 50 -> 0f
-                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f)
-            }
-        }
-    }
-    
     val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = tween(durationMillis = 200),
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(500),
         label = "navigationBarAlpha"
     )
 
@@ -95,7 +91,6 @@ fun HomeScreen(
             },
             sendIntent = homeViewModel::sendIntent,
         )
-        
-        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }

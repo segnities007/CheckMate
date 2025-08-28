@@ -40,7 +40,7 @@ fun EnhancedItemCard(
     modifier: Modifier = Modifier,
 ) {
     val scale by animateFloatAsState(
-        targetValue = if (checked) 0.95f else 1f,
+        targetValue = if (checked) 0.975f else 1f,
         animationSpec = tween(durationMillis = 200),
         label = "scale"
     )
@@ -49,19 +49,11 @@ fun EnhancedItemCard(
         modifier = modifier
             .fillMaxWidth()
             .scale(scale)
-
             .clip(RoundedCornerShape(16.dp))
-            .clickable { onCheckedChange(!checked) }
-        ,
+            .clickable { onCheckedChange(!checked) },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 2.dp,
-            pressedElevation = 4.dp,
-            focusedElevation = 3.dp,
-            hoveredElevation = 3.dp
         ),
     ) {
         Row(
@@ -93,7 +85,7 @@ fun EnhancedItemCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 
-                if (!item.description.isNullOrEmpty()) {
+                if (item.description.isNotEmpty()) {
                     Text(
                         text = item.description,
                         style = MaterialTheme.typography.bodyMedium,
