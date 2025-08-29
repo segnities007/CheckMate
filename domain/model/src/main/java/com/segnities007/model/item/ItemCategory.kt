@@ -1,8 +1,10 @@
 package com.segnities007.model.item
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Immutable
 enum class ItemCategory {
     STUDY_SUPPLIES, // 学業用品
     DAILY_SUPPLIES, // 生活用品

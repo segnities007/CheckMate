@@ -91,6 +91,7 @@ androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", versi
 androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlKitBarcode" }
 google-ai-client = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "googleAiClient" }
+runtime = { module = "androidx.compose.runtime:runtime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

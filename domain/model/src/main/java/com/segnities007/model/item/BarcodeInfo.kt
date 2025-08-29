@@ -1,8 +1,10 @@
 package com.segnities007.model.item
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Immutable
 data class BarcodeInfo(
     val barcode: String,
     val format: String,
@@ -12,6 +14,7 @@ data class BarcodeInfo(
 )
 
 @Serializable
+@Immutable
 data class ProductInfo(
     val barcode: String,
     val name: String,

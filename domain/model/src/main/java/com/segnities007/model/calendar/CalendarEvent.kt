@@ -1,9 +1,11 @@
 package com.segnities007.model.calendar
 
+import androidx.compose.runtime.Immutable
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Immutable
 data class CalendarEvent(
     val id: String,
     val title: String,
@@ -16,6 +18,7 @@ data class CalendarEvent(
 )
 
 @Serializable
+@Immutable
 data class RecurrenceRule(
     val frequency: Frequency,
     val interval: Int = 1,
@@ -25,6 +28,7 @@ data class RecurrenceRule(
 )
 
 @Serializable
+@Immutable
 enum class Frequency {
     DAILY,
     WEEKLY,
@@ -33,6 +37,7 @@ enum class Frequency {
 }
 
 @Serializable
+@Immutable
 enum class DayOfWeek {
     MONDAY,
     TUESDAY,
@@ -44,6 +49,7 @@ enum class DayOfWeek {
 }
 
 @Serializable
+@Immutable
 data class EventGroup(
     val dayOfWeek: DayOfWeek,
     val timeSlot: TimeSlot,
@@ -51,6 +57,7 @@ data class EventGroup(
 )
 
 @Serializable
+@Immutable
 enum class TimeSlot {
     MORNING,
     AFTERNOON,
