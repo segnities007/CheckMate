@@ -16,25 +16,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.model.UserStatus
 import com.segnities007.navigation.HubRoute
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
+import com.segnities007.setting.component.DeleteAllDataDialog
+import com.segnities007.setting.component.ImportingDialog
 import com.segnities007.setting.mvi.SettingEffect
 import com.segnities007.setting.mvi.SettingIntent
 import com.segnities007.setting.mvi.SettingViewModel
@@ -111,35 +107,15 @@ fun SettingScreen(
 
     // 全データ削除確認ダイアログ
     if (state.showDeleteAllDataDialog) {
-        AlertDialog(
-            onDismissRequest = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
-            title = { Text("全データ削除") },
-            text = { Text("すべてのデータを削除しますか？") },
-            confirmButton = {
-                TextButton(
-                    onClick = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) },
-                ) {
-                    Text("削除")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
-                ) {
-                    Text("キャンセル")
-                }
-            },
+        DeleteAllDataDialog(
+            onConfirm = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) },
+            onDismiss = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
         )
     }
 
     // ICSインポート中ダイアログ
     if (state.isImportingIcs) {
-        AlertDialog(
-            onDismissRequest = { },
-            title = { Text("作成中") },
-            text = { Text("テンプレートを生成しています...") },
-            confirmButton = { },
-        )
+        ImportingDialog()
     }
 }
 
