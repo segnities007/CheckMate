@@ -2,6 +2,7 @@ package com.segnities007.templates.page
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,9 +22,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
@@ -67,9 +73,10 @@ import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.util.rememberScrollVisibility
 
 @Composable
-fun WeeklyTemplateList(
+fun TemplateList(
     innerPadding: PaddingValues,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
@@ -77,7 +84,6 @@ fun WeeklyTemplateList(
     onNavigate: (HubRoute) -> Unit,
     sendIntent: (TemplatesIntent) -> Unit,
     templates: List<WeeklyTemplate>,
-    allItems: List<Item>,
     templateSearchQuery: String,
     templateSortOrder: TemplateSortOrder,
     selectedDayOfWeek: DayOfWeek?,
@@ -87,23 +93,11 @@ fun WeeklyTemplateList(
     onDayOfWeekChange: (DayOfWeek?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val listState = rememberLazyListState()
-    val targetAlpha by remember {
-        derivedStateOf {
-            val firstVisibleItemIndex = listState.firstVisibleItemIndex
-            val firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset
-            
-            // より安定した透明度計算
-            when {
-                firstVisibleItemIndex > 0 -> 0f // スクロール開始時は非表示
-                firstVisibleItemScrollOffset > 50 -> 0f // 50px以上スクロールしたら非表示
-                else -> (1f - firstVisibleItemScrollOffset / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
-            }
-        }
-    }
+    val listState = rememberScrollState()
+    val isVisible by rememberScrollVisibility(listState)
     
     val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
+        targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 200),
         label = "navigationBarAlpha"
     )
@@ -124,7 +118,7 @@ fun WeeklyTemplateList(
                     contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Assignment,
+                        imageVector = Icons.AutoMirrored.Filled.Assignment,
                         contentDescription = "Add Template",
                     )
                 }
@@ -133,43 +127,66 @@ fun WeeklyTemplateList(
         setTopBar {}
     }
 
-    LazyColumn(
-        state = listState,
+    Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(listState)
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(
-            top = innerPadding.calculateTopPadding(),
-            bottom = innerPadding.calculateTopPadding()
+    ){
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        TemplateListUi(
+            innerPadding = innerPadding,
+            sendIntent = sendIntent,
+            templates = templates,
+            templateSearchQuery = templateSearchQuery,
+            templateSortOrder = templateSortOrder,
+            selectedDayOfWeek = selectedDayOfWeek,
+            onTemplateClick = onTemplateClick,
+            onSearchQueryChange = onSearchQueryChange,
+            onSortOrderChange = onSortOrderChange,
+            onDayOfWeekChange = onDayOfWeekChange,
         )
-    ) {
-        item {
-            // 検索・フィルタ・ソートバー
-            TemplateSearchFilterSortBar(
-                searchQuery = templateSearchQuery,
-                sortOrder = templateSortOrder,
-                selectedDayOfWeek = selectedDayOfWeek,
-                onSearchQueryChange = onSearchQueryChange,
-                onSortOrderChange = onSortOrderChange,
-                onDayOfWeekChange = onDayOfWeekChange
-            )
-        }
-        item {
-            HorizontalDividerWithLabel(
-                label = "テンプレート一覧"
-            )
-        }
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+    }
 
-        // テンプレートリスト
-        items(templates) { template ->
+}
+
+@Composable
+private fun TemplateListUi(
+    innerPadding: PaddingValues,
+    sendIntent: (TemplatesIntent) -> Unit,
+    templates: List<WeeklyTemplate>,
+    templateSearchQuery: String,
+    templateSortOrder: TemplateSortOrder,
+    selectedDayOfWeek: DayOfWeek?,
+    onTemplateClick: (WeeklyTemplate) -> Unit,
+    onSearchQueryChange: (String) -> Unit,
+    onSortOrderChange: (TemplateSortOrder) -> Unit,
+    onDayOfWeekChange: (DayOfWeek?) -> Unit,
+){
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ){
+        TemplateSearchFilterSortBar(
+            searchQuery = templateSearchQuery,
+            sortOrder = templateSortOrder,
+            selectedDayOfWeek = selectedDayOfWeek,
+            onSearchQueryChange = onSearchQueryChange,
+            onSortOrderChange = onSortOrderChange,
+            onDayOfWeekChange = onDayOfWeekChange
+        )
+        HorizontalDividerWithLabel(
+            label = "テンプレート一覧"
+        )
+
+        for (item in templates) {
             TemplateCard(
-                template = template,
-                allItems = allItems,
-                onClick = { onTemplateClick(template) },
-                onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(template)) }
+                template = item,
+                onClick = { onTemplateClick(item) },
+                onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(item)) }
             )
         }
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }
 
@@ -187,12 +204,6 @@ private fun TemplateSearchFilterSortBar(
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = elevatedCardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 1.dp,
-            hoveredElevation = 1.dp
-        ),
         colors = elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -249,13 +260,7 @@ private fun TemplateSearchFilterSortBar(
                             containerColor = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.onSurface
                         ),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                )
-                            )
+                        border = ButtonDefaults.outlinedButtonBorder(
                         )
                     ) {
                         Icon(
@@ -283,7 +288,7 @@ private fun TemplateSearchFilterSortBar(
                                 dayExpanded = false
                             }
                         )
-                        DayOfWeek.values().forEach { dayOfWeek ->
+                        DayOfWeek.entries.forEach { dayOfWeek ->
                             DropdownMenuItem(
                                 text = { Text(getDayOfWeekDisplayName(dayOfWeek)) },
                                 onClick = {
@@ -317,7 +322,7 @@ private fun TemplateSearchFilterSortBar(
                         )
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Sort,
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
                             contentDescription = "ソート",
                             modifier = Modifier.size(16.dp)
                         )
@@ -363,14 +368,10 @@ private fun TemplateSearchFilterSortBar(
 @Composable
 private fun TemplateCard(
     template: WeeklyTemplate,
-    allItems: List<Item>,
     onClick: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // テンプレートのアイテムIDに対応するアイテムを取得
-    val templateItems = allItems.filter { item -> template.itemIds.contains(item.id) }
-    
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -485,15 +486,6 @@ private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
     }
 }
 
-private fun getTemplateSortOrderShortName(sortOrder: TemplateSortOrder): String {
-    return when (sortOrder) {
-        TemplateSortOrder.NAME_ASC -> "名前順"
-        TemplateSortOrder.NAME_DESC -> "名前順"
-        TemplateSortOrder.ITEM_COUNT_ASC -> "アイテム数順"
-        TemplateSortOrder.ITEM_COUNT_DESC -> "アイテム数順"
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun WeeklyTemplateListPreview() {
@@ -511,7 +503,7 @@ fun WeeklyTemplateListPreview() {
             ),
         )
 
-    WeeklyTemplateList(
+    TemplateList(
         innerPadding = PaddingValues(0.dp),
         setFab = {},
         setTopBar = {},
@@ -519,7 +511,6 @@ fun WeeklyTemplateListPreview() {
         onNavigate = {},
         sendIntent = {},
         templates = dummyTemplates,
-        allItems = listOf(),
         templateSearchQuery = "",
         templateSortOrder = TemplateSortOrder.NAME_ASC,
         selectedDayOfWeek = null,

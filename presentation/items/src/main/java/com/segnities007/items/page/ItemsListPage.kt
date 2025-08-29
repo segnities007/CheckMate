@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.FloatingActionButton
+import com.segnities007.ui.util.rememberScrollVisibility
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
@@ -60,13 +61,12 @@ fun ItemsListPage(
     setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
     sendIntent: (ItemsIntent) -> Unit,
-    onNavigateToCameraCapture: () -> Unit,
     onNavigateToBarcodeScanner: () -> Unit,
-    onNavigateToItemsList: () -> Unit,
     state: ItemsState,
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val isVisible by rememberScrollVisibility(scrollState)
 
     val granted = {
         // カメラ権限が許可された時の処理は何もしない
@@ -80,19 +80,10 @@ fun ItemsListPage(
                 granted()
             }
         }
-
-    val targetAlpha by remember {
-        derivedStateOf {
-            when {
-                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
-                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
-            }
-        }
-    }
     
     val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = tween(durationMillis = 200),
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 300),
         label = "navigationBarAlpha"
     )
 

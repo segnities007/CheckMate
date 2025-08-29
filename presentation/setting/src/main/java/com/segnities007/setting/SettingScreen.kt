@@ -41,6 +41,7 @@ import com.segnities007.setting.mvi.SettingViewModel
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UserStatusCard
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
 @Composable
@@ -55,19 +56,11 @@ fun SettingScreen(
     val settingViewModel: SettingViewModel = koinInject()
     val state by settingViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
-
-    val targetAlpha by remember {
-        derivedStateOf {
-            when {
-                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
-                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
-            }
-        }
-    }
+    val isVisible by rememberScrollVisibility(scrollState)
     
     val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = tween(durationMillis = 200),
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 500),
         label = "navigationBarAlpha"
     )
 

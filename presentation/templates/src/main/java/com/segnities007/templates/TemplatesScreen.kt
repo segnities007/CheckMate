@@ -1,8 +1,11 @@
 package com.segnities007.templates
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -23,15 +26,11 @@ import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
 import com.segnities007.templates.mvi.TemplatesEffect
 import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.templates.mvi.TemplatesViewModel
-import com.segnities007.templates.page.WeeklyTemplateList
-import com.segnities007.templates.page.WeeklyTemplateSelector
+import com.segnities007.templates.page.TemplateList
+import com.segnities007.templates.page.TemplateSelector
 import org.koin.compose.koinInject
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,8 +43,8 @@ fun TemplatesScreen(
 ) {
     val templatesViewModel: TemplatesViewModel = koinInject()
     val state by templatesViewModel.state.collectAsState()
+    val localContext = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     val navController = rememberNavController()
 
     LaunchedEffect(Unit) {
@@ -55,9 +54,12 @@ fun TemplatesScreen(
                     navController.navigate(TemplatesRoute.WeeklyTemplateSelector)
                 }
                 is TemplatesEffect.ShowToast -> {
-                    // TODO
+                    Toast.makeText(
+                        localContext,
+                        effect.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-
                 TemplatesEffect.NavigateToWeeklyTemplateList ->
                     navController.navigate(TemplatesRoute.WeeklyTemplateList)
             }
@@ -72,7 +74,7 @@ fun TemplatesScreen(
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         composable<TemplatesRoute.WeeklyTemplateList> {
-            WeeklyTemplateList(
+            TemplateList(
                 innerPadding = innerPadding,
                 setFab = setFab,
                 setTopBar = setTopBar,
@@ -80,7 +82,6 @@ fun TemplatesScreen(
                 onNavigate = onNavigate,
                 sendIntent = templatesViewModel::sendIntent,
                 templates = state.filteredTemplates,
-                allItems = state.allItems,
                 templateSearchQuery = state.templateSearchQuery,
                 templateSortOrder = state.templateSortOrder,
                 selectedDayOfWeek = state.selectedDayOfWeek,
@@ -91,7 +92,7 @@ fun TemplatesScreen(
             )
         }
         composable<TemplatesRoute.WeeklyTemplateSelector> {
-            WeeklyTemplateSelector(
+            TemplateSelector(
                 sendIntent = templatesViewModel::sendIntent,
                 innerPadding = innerPadding,
                 setNavigationBar = setNavigationBar,
