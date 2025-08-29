@@ -31,7 +31,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    
+
     lint {
         disable += "UnsafeOptInUsageError"
     }
@@ -82,5 +82,4 @@ dependencies {
 
     // barcode scanning
     implementation(libs.mlkit.barcode.scanning)
-
 }

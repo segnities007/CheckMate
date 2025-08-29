@@ -39,24 +39,30 @@ fun EnhancedCalendarCard(
     onMonthChanged: (Int, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    
+    val today =
+        Clock.System
+            .now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
+
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 1.dp,
-            hoveredElevation = 1.dp
-        ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        elevation =
+            CardDefaults.elevatedCardElevation(
+                defaultElevation = 1.dp,
+                pressedElevation = 2.dp,
+                focusedElevation = 1.dp,
+                hoveredElevation = 1.dp,
+            ),
+        colors =
+            CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // ヘッダー（月間ナビゲーション付き）
             CalendarHeader(
@@ -71,7 +77,7 @@ fun EnhancedCalendarCard(
                     val newMonth = if (month == 12) 1 else month + 1
                     val newYear = if (month == 12) year + 1 else year
                     onMonthChanged(newYear, newMonth)
-                }
+                },
             )
 
             // 曜日ヘッダー
@@ -92,28 +98,32 @@ fun EnhancedCalendarCard(
                 OutlinedButton(
                     onClick = { onDateSelected(today) },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            )
-                        )
-                    )
+                    colors =
+                        ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        ),
+                    border =
+                        ButtonDefaults.outlinedButtonBorder.copy(
+                            brush =
+                                androidx.compose.ui.graphics.Brush.verticalGradient(
+                                    colors =
+                                        listOf(
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                        ),
+                                ),
+                        ),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Today,
                         contentDescription = "今日",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "今日に戻る",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
             }
@@ -131,19 +141,20 @@ private fun CalendarHeader(
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
             onClick = onPreviousMonth,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Icon(
                 imageVector = Icons.Default.ChevronLeft,
                 contentDescription = "前月",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -151,20 +162,21 @@ private fun CalendarHeader(
             text = "${year}年 ${month}月",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         IconButton(
             onClick = onNextMonth,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "次月",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -174,7 +186,7 @@ private fun CalendarHeader(
 private fun CalendarWeekdayRow() {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         listOf("日", "月", "火", "水", "木", "金", "土").forEach { day ->
             val textColor =
@@ -185,7 +197,7 @@ private fun CalendarWeekdayRow() {
                 }
             Box(
                 modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = day,
@@ -193,7 +205,7 @@ private fun CalendarWeekdayRow() {
                     color = textColor,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
                 )
             }
         }
@@ -212,59 +224,64 @@ private fun EnhancedCalendarDateGrid(
     val firstOfMonth = LocalDate(year, month, 1)
     val totalDays = firstOfMonth.plus(1, DateTimeUnit.MONTH).minus(1, DateTimeUnit.DAY).dayOfMonth
     // 日曜日を0、月曜日を1、...、土曜日を6とする
-    val firstWeekday = when (firstOfMonth.dayOfWeek) {
-        KDayOfWeek.SUNDAY -> 0
-        KDayOfWeek.MONDAY -> 1
-        KDayOfWeek.TUESDAY -> 2
-        KDayOfWeek.WEDNESDAY -> 3
-        KDayOfWeek.THURSDAY -> 4
-        KDayOfWeek.FRIDAY -> 5
-        KDayOfWeek.SATURDAY -> 6
-    }
-    
+    val firstWeekday =
+        when (firstOfMonth.dayOfWeek) {
+            KDayOfWeek.SUNDAY -> 0
+            KDayOfWeek.MONDAY -> 1
+            KDayOfWeek.TUESDAY -> 2
+            KDayOfWeek.WEDNESDAY -> 3
+            KDayOfWeek.THURSDAY -> 4
+            KDayOfWeek.FRIDAY -> 5
+            KDayOfWeek.SATURDAY -> 6
+        }
+
     // 必要な行数を計算（最大6行）
     val requiredRows = minOf(6, ((totalDays + firstWeekday - 1) / 7) + 1)
 
     // テンプレートがある日付を取得
-    val datesWithTemplates = templates.flatMap { template ->
-        template.daysOfWeek.map { dayOfWeek ->
-            // 今月の該当する曜日の日付を計算
-            val firstDayOfWeek = firstOfMonth.dayOfWeek
-            val targetDayOfWeek = when (dayOfWeek.name) {
-                "MONDAY" -> KDayOfWeek.MONDAY
-                "TUESDAY" -> KDayOfWeek.TUESDAY
-                "WEDNESDAY" -> KDayOfWeek.WEDNESDAY
-                "THURSDAY" -> KDayOfWeek.THURSDAY
-                "FRIDAY" -> KDayOfWeek.FRIDAY
-                "SATURDAY" -> KDayOfWeek.SATURDAY
-                "SUNDAY" -> KDayOfWeek.SUNDAY
-                else -> KDayOfWeek.MONDAY
-            }
-            
-            val daysToAdd = (targetDayOfWeek.isoDayNumber - firstDayOfWeek.isoDayNumber + 7) % 7
-            val firstOccurrence = firstOfMonth.plus(daysToAdd, DateTimeUnit.DAY)
-            
-            // 今月の該当する曜日のすべての日付を生成
-            (0..4).mapNotNull { week ->
-                val date = firstOccurrence.plus(week * 7, DateTimeUnit.DAY)
-                if (date.month == firstOfMonth.month) date else null
-            }
-        }.flatten()
-    }.distinct()
+    val datesWithTemplates =
+        templates
+            .flatMap { template ->
+                template.daysOfWeek
+                    .map { dayOfWeek ->
+                        // 今月の該当する曜日の日付を計算
+                        val firstDayOfWeek = firstOfMonth.dayOfWeek
+                        val targetDayOfWeek =
+                            when (dayOfWeek.name) {
+                                "MONDAY" -> KDayOfWeek.MONDAY
+                                "TUESDAY" -> KDayOfWeek.TUESDAY
+                                "WEDNESDAY" -> KDayOfWeek.WEDNESDAY
+                                "THURSDAY" -> KDayOfWeek.THURSDAY
+                                "FRIDAY" -> KDayOfWeek.FRIDAY
+                                "SATURDAY" -> KDayOfWeek.SATURDAY
+                                "SUNDAY" -> KDayOfWeek.SUNDAY
+                                else -> KDayOfWeek.MONDAY
+                            }
+
+                        val daysToAdd = (targetDayOfWeek.isoDayNumber - firstDayOfWeek.isoDayNumber + 7) % 7
+                        val firstOccurrence = firstOfMonth.plus(daysToAdd, DateTimeUnit.DAY)
+
+                        // 今月の該当する曜日のすべての日付を生成
+                        (0..4).mapNotNull { week ->
+                            val date = firstOccurrence.plus(week * 7, DateTimeUnit.DAY)
+                            if (date.month == firstOfMonth.month) date else null
+                        }
+                    }.flatten()
+            }.distinct()
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         repeat(requiredRows) { rowIndex ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 repeat(7) { columnIndex ->
                     val cellIndex = rowIndex * 7 + columnIndex
                     val day = cellIndex - firstWeekday + 1
-                    
+
                     if (cellIndex < firstWeekday || day > totalDays) {
                         // 空白セル
                         Box(modifier = Modifier.weight(1f))
@@ -272,7 +289,7 @@ private fun EnhancedCalendarDateGrid(
                         // 日付セル
                         val date = LocalDate(year, month, day)
                         val hasTemplates = datesWithTemplates.contains(date)
-                        
+
                         Box(modifier = Modifier.weight(1f)) {
                             EnhancedCalendarDateCell(
                                 date = date,
@@ -299,50 +316,57 @@ private fun EnhancedCalendarDateCell(
     hasTemplates: Boolean,
     onDateSelected: (LocalDate) -> Unit,
 ) {
-    val textColor = when {
-        isSelected -> MaterialTheme.colorScheme.onPrimary
-        isToday -> MaterialTheme.colorScheme.primary
-        date.dayOfWeek == KDayOfWeek.SUNDAY -> Color.Red
-        date.dayOfWeek == KDayOfWeek.SATURDAY -> Color.Blue
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val textColor =
+        when {
+            isSelected -> MaterialTheme.colorScheme.onPrimary
+            isToday -> MaterialTheme.colorScheme.primary
+            date.dayOfWeek == KDayOfWeek.SUNDAY -> Color.Red
+            date.dayOfWeek == KDayOfWeek.SATURDAY -> Color.Blue
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
 
-    val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
-    }
+    val backgroundColor =
+        when {
+            isSelected -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+        }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f) // 正方形を維持
-            .clip(CircleShape)
-            .background(backgroundColor)
-            .clickable { onDateSelected(date) },
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f) // 正方形を維持
+                .clip(CircleShape)
+                .background(backgroundColor)
+                .clickable { onDateSelected(date) },
         contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 "$day",
                 color = textColor,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
             )
-            
+
             // テンプレートインジケーター
             if (hasTemplates) {
                 Box(
-                    modifier = Modifier
-                        .size(3.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.primary
-                        )
+                    modifier =
+                        Modifier
+                            .size(3.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                            ),
                 )
             }
         }

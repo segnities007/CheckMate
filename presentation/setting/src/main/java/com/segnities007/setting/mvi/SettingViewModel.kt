@@ -1,24 +1,24 @@
 package com.segnities007.setting.mvi
 
+import android.content.ContentValues
 import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.segnities007.repository.BackupRepository
-import com.segnities007.repository.ItemRepository
-import com.segnities007.repository.ItemCheckStateRepository
-import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.repository.IcsTemplateRepository
+import com.segnities007.repository.ItemCheckStateRepository
+import com.segnities007.repository.ItemRepository
+import com.segnities007.repository.UserRepository
+import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import java.io.File
-import android.content.ContentValues
-import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
-import android.util.Log
-import com.segnities007.repository.UserRepository
 
 class SettingViewModel(
     private val backupRepository: BackupRepository,
@@ -29,7 +29,6 @@ class SettingViewModel(
     private val userRepository: UserRepository,
     private val icsTemplateRepository: IcsTemplateRepository,
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
-
     init {
         loadUserStatus()
     }
@@ -81,10 +80,14 @@ class SettingViewModel(
     private fun importData(intent: SettingIntent.ImportData) {
         viewModelScope.launch {
             try {
-                val jsonString = withContext(Dispatchers.IO) {
-                    appContext.contentResolver.openInputStream(intent.uri)?.bufferedReader()?.use { it.readText() }
-                        ?: throw IllegalStateException("ファイルが読み込めません")
-                }
+                val jsonString =
+                    withContext(Dispatchers.IO) {
+                        appContext.contentResolver
+                            .openInputStream(intent.uri)
+                            ?.bufferedReader()
+                            ?.use { it.readText() }
+                            ?: throw IllegalStateException("ファイルが読み込めません")
+                    }
                 backupRepository.importData(jsonString)
                 sendEffect { SettingEffect.ShowToast("インポート完了") }
             } catch (e: Exception) {
@@ -149,16 +152,16 @@ class SettingViewModel(
         viewModelScope.launch {
             try {
                 setState { copy(isImportingIcs = true) }
-                
+
                 val templates = icsTemplateRepository.generateTemplatesFromIcs(intent.uri)
                 icsTemplateRepository.saveGeneratedTemplates(templates)
-                
+
                 setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
-                sendEffect { 
+                sendEffect {
                     SettingEffect.ShowIcsImportResult(
                         successCount = templates.size,
-                        totalCount = templates.size
-                    ) 
+                        totalCount = templates.size,
+                    )
                 }
             } catch (e: Exception) {
                 setState { copy(isImportingIcs = false) }
@@ -176,17 +179,22 @@ class SettingViewModel(
         setState { copy(showIcsImportDialog = false) }
     }
 
-    private suspend fun saveToDownloads(fileName: String, jsonString: String) {
+    private suspend fun saveToDownloads(
+        fileName: String,
+        jsonString: String,
+    ) {
         withContext(Dispatchers.IO) {
-            val contentValues = ContentValues().apply {
-                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-                put(MediaStore.Downloads.MIME_TYPE, "application/json")
-                put(MediaStore.Downloads.IS_PENDING, 1)
-            }
+            val contentValues =
+                ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                    put(MediaStore.Downloads.MIME_TYPE, "application/json")
+                    put(MediaStore.Downloads.IS_PENDING, 1)
+                }
 
             val resolver = appContext.contentResolver
-            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                ?: throw IllegalStateException("MediaStoreにファイル作成失敗")
+            val uri =
+                resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                    ?: throw IllegalStateException("MediaStoreにファイル作成失敗")
 
             resolver.openOutputStream(uri)?.use { stream ->
                 stream.write(jsonString.toByteArray())

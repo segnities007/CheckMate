@@ -76,7 +76,7 @@ private fun FloatingActionBarUi(
     if (alpha > 0f) {
         Surface(
             shape = CircleShape,
-            shadowElevation = 8.dp,
+            shadowElevation = 12.dp, // Material3 Expressive: より大きな影
             color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
         ) {
             Row(
@@ -108,30 +108,27 @@ private fun NavItemButton(
 ) {
     FloatingActionButton(
         onClick = onClick,
-        modifier = Modifier.size(64.dp),
-        containerColor = if (selected) {
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha)
-        } else {
-            MaterialTheme.colorScheme.surface.copy(alpha = alpha * 0.3f)
-        },
+        modifier = Modifier.size(72.dp), // Material3 Expressive: より大きなサイズ
+        containerColor =
+            if (selected) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha)
+            } else {
+                MaterialTheme.colorScheme.surface.copy(alpha = alpha * 0.5f) // より見やすく調整
+            },
         contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
-        elevation = FloatingActionButtonDefaults.elevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 0.dp,
-            hoveredElevation = 1.dp
-        ),
+        elevation = FloatingActionButtonDefaults.elevation(0.dp), // ボタン自体の影を削除
         shape = CircleShape,
     ) {
         Icon(
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(36.dp), // Material3 Expressive: より大きなアイコン
             imageVector = if (selected) selectedIcon else unselectedIcon,
             contentDescription = "",
-            tint = if (selected) {
-                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha)
-            } else {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
-            }
+            tint =
+                if (selected) {
+                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha)
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+                },
         )
     }
 }

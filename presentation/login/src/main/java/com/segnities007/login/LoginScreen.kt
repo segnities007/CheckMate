@@ -74,9 +74,10 @@ private fun Titles() {
         Icon(
             painter = painterResource(R.drawable.checkmate),
             contentDescription = "App Icon",
-            modifier = Modifier
-                .size(256.dp)
-                .padding(32.dp),
+            modifier =
+                Modifier
+                    .size(256.dp)
+                    .padding(32.dp),
         )
         Text(
             text = "CheckMate",

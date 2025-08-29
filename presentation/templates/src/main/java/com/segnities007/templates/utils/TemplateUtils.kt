@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.sp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.item.ItemCategory
 
-fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
-    return when (dayOfWeek) {
+fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String =
+    when (dayOfWeek) {
         DayOfWeek.MONDAY -> "月"
         DayOfWeek.TUESDAY -> "火"
         DayOfWeek.WEDNESDAY -> "水"
@@ -26,10 +26,9 @@ fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
         DayOfWeek.SATURDAY -> "土"
         DayOfWeek.SUNDAY -> "日"
     }
-}
 
-fun getCategoryColor(category: ItemCategory): Color {
-    return when (category) {
+fun getCategoryColor(category: ItemCategory): Color =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> Color(0xFF2196F3) // Blue - 学業用品
         ItemCategory.DAILY_SUPPLIES -> Color(0xFF4CAF50) // Green - 生活用品
         ItemCategory.CLOTHING_SUPPLIES -> Color(0xFF9C27B0) // Purple - 衣類用品
@@ -44,10 +43,9 @@ fun getCategoryColor(category: ItemCategory): Color {
         ItemCategory.ID_SUPPLIES -> Color(0xFF8BC34A) // Light Green - 証明用品
         ItemCategory.OTHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - その他用品
     }
-}
 
-fun getCategoryDisplayName(category: ItemCategory): String {
-    return when (category) {
+fun getCategoryDisplayName(category: ItemCategory): String =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> "学業用品"
         ItemCategory.DAILY_SUPPLIES -> "生活用品"
         ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
@@ -62,24 +60,22 @@ fun getCategoryDisplayName(category: ItemCategory): String {
         ItemCategory.ID_SUPPLIES -> "証明用品"
         ItemCategory.OTHER_SUPPLIES -> "その他用品"
     }
-}
 
 @Composable
-fun CategoryTag(
-    category: ItemCategory
-) {
+fun CategoryTag(category: ItemCategory) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(getCategoryColor(category).copy(alpha = 0.1f))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(getCategoryColor(category).copy(alpha = 0.1f))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         Text(
             text = getCategoryDisplayName(category),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
             color = getCategoryColor(category),
-            fontSize = 12.sp
+            fontSize = 12.sp,
         )
     }
 }

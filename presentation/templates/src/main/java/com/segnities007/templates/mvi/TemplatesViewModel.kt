@@ -95,28 +95,31 @@ class TemplatesViewModel(
 
         // 検索フィルタ
         if (currentState.searchQuery.isNotBlank()) {
-            filteredItems = filteredItems.filter { item ->
-                item.name.contains(currentState.searchQuery, ignoreCase = true) ||
-                item.description.contains(currentState.searchQuery, ignoreCase = true)
-            }
+            filteredItems =
+                filteredItems.filter { item ->
+                    item.name.contains(currentState.searchQuery, ignoreCase = true) ||
+                        item.description.contains(currentState.searchQuery, ignoreCase = true)
+                }
         }
 
         // カテゴリフィルタ
         if (currentState.selectedCategory != null) {
-            filteredItems = filteredItems.filter { item ->
-                item.category == currentState.selectedCategory
-            }
+            filteredItems =
+                filteredItems.filter { item ->
+                    item.category == currentState.selectedCategory
+                }
         }
 
         // 並び替え
-        filteredItems = when (currentState.sortOrder) {
-            SortOrder.NAME_ASC -> filteredItems.sortedBy { it.name }
-            SortOrder.NAME_DESC -> filteredItems.sortedByDescending { it.name }
-            SortOrder.CREATED_ASC -> filteredItems.sortedBy { it.createdAt }
-            SortOrder.CREATED_DESC -> filteredItems.sortedByDescending { it.createdAt }
-            SortOrder.CATEGORY_ASC -> filteredItems.sortedBy { it.category.name }
-            SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
-        }
+        filteredItems =
+            when (currentState.sortOrder) {
+                SortOrder.NAME_ASC -> filteredItems.sortedBy { it.name }
+                SortOrder.NAME_DESC -> filteredItems.sortedByDescending { it.name }
+                SortOrder.CREATED_ASC -> filteredItems.sortedBy { it.createdAt }
+                SortOrder.CREATED_DESC -> filteredItems.sortedByDescending { it.createdAt }
+                SortOrder.CATEGORY_ASC -> filteredItems.sortedBy { it.category.name }
+                SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
+            }
 
         setState { copy(filteredItems = filteredItems) }
     }
@@ -127,25 +130,28 @@ class TemplatesViewModel(
 
         // 検索フィルタ
         if (currentState.templateSearchQuery.isNotBlank()) {
-            filteredTemplates = filteredTemplates.filter { template ->
-                template.title.contains(currentState.templateSearchQuery, ignoreCase = true)
-            }
+            filteredTemplates =
+                filteredTemplates.filter { template ->
+                    template.title.contains(currentState.templateSearchQuery, ignoreCase = true)
+                }
         }
 
         // 曜日フィルタ
         if (currentState.selectedDayOfWeek != null) {
-            filteredTemplates = filteredTemplates.filter { template ->
-                template.daysOfWeek.contains(currentState.selectedDayOfWeek)
-            }
+            filteredTemplates =
+                filteredTemplates.filter { template ->
+                    template.daysOfWeek.contains(currentState.selectedDayOfWeek)
+                }
         }
 
         // 並び替え
-        filteredTemplates = when (currentState.templateSortOrder) {
-            TemplateSortOrder.NAME_ASC -> filteredTemplates.sortedBy { it.title }
-            TemplateSortOrder.NAME_DESC -> filteredTemplates.sortedByDescending { it.title }
-            TemplateSortOrder.ITEM_COUNT_ASC -> filteredTemplates.sortedBy { it.itemIds.size }
-            TemplateSortOrder.ITEM_COUNT_DESC -> filteredTemplates.sortedByDescending { it.itemIds.size }
-        }
+        filteredTemplates =
+            when (currentState.templateSortOrder) {
+                TemplateSortOrder.NAME_ASC -> filteredTemplates.sortedBy { it.title }
+                TemplateSortOrder.NAME_DESC -> filteredTemplates.sortedByDescending { it.title }
+                TemplateSortOrder.ITEM_COUNT_ASC -> filteredTemplates.sortedBy { it.itemIds.size }
+                TemplateSortOrder.ITEM_COUNT_DESC -> filteredTemplates.sortedByDescending { it.itemIds.size }
+            }
 
         setState { copy(filteredTemplates = filteredTemplates) }
     }

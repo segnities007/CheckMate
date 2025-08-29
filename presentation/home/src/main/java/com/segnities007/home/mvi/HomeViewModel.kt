@@ -8,6 +8,7 @@ import com.segnities007.repository.ItemCheckStateRepository
 import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toLocalDateTime
@@ -20,7 +21,6 @@ class HomeViewModel(
     private val templateRepo: WeeklyTemplateRepository,
     private val checkStateRepo: ItemCheckStateRepository,
 ) : BaseViewModel<HomeIntent, HomeState, HomeEffect>(HomeState()) {
-
     private val itemCheckStatesByDate = mutableMapOf<LocalDate, MutableMap<Int, Boolean>>()
 
     override suspend fun handleIntent(intent: HomeIntent) {
@@ -35,23 +35,30 @@ class HomeViewModel(
 
     init {
         // 現在の年月を設定
-        val today = Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
-        setState { 
+        val today =
+            Clock.System
+                .now()
+                .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                .date
+        setState {
             copy(
                 currentYear = today.year,
-                currentMonth = today.monthNumber
+                currentMonth = today.monthNumber,
             )
         }
-        
+
         getAllItems()
         ensureCheckHistoryForToday()
         viewModelScope.launch { handleIntent(HomeIntent.LoadTodayData) }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun ensureCheckHistoryForToday() {
-        viewModelScope.launch {
-            val today = Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+        viewModelScope.launch(Dispatchers.IO) {
+            val today =
+                Clock.System
+                    .now()
+                    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                    .date
             val templatesForToday = templateRepo.getTemplatesForDay(today.dayOfWeek.name)
             val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
             val allItems = itemRepo.getAllItems()
@@ -60,17 +67,19 @@ class HomeViewModel(
             for (item in itemsScheduledForToday) {
                 val existingState = checkStateRepo.getCheckStateForItem(item.id)
                 if (existingState == null) {
-                    val newCheckState = ItemCheckState(
-                        itemId = item.id,
-                        history = mutableListOf(ItemCheckRecord(date = today, isChecked = false))
-                    )
+                    val newCheckState =
+                        ItemCheckState(
+                            itemId = item.id,
+                            history = mutableListOf(ItemCheckRecord(date = today, isChecked = false)),
+                        )
                     checkStateRepo.saveCheckState(newCheckState)
                 } else {
                     val todayRecord = existingState.history.find { it.date == today }
                     if (todayRecord == null) {
-                        val updatedHistory = existingState.history.toMutableList().apply {
-                            add(ItemCheckRecord(date = today, isChecked = false))
-                        }
+                        val updatedHistory =
+                            existingState.history.toMutableList().apply {
+                                add(ItemCheckRecord(date = today, isChecked = false))
+                            }
                         val updatedCheckState = existingState.copy(history = updatedHistory)
                         checkStateRepo.saveCheckState(updatedCheckState)
                     }
@@ -80,7 +89,7 @@ class HomeViewModel(
     }
 
     private fun getAllItems() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val allItems = itemRepo.getAllItems()
             setState { copy(allItem = allItems) }
         }
@@ -97,11 +106,11 @@ class HomeViewModel(
     }
 
     private suspend fun selectDate(date: LocalDate) {
-        setState { 
+        setState {
             copy(
                 selectedDate = date,
                 currentYear = date.year,
-                currentMonth = date.monthNumber
+                currentMonth = date.monthNumber,
             )
         }
 
@@ -130,11 +139,14 @@ class HomeViewModel(
         }
     }
 
-    private fun changeMonth(year: Int, month: Int) {
-        setState { 
+    private fun changeMonth(
+        year: Int,
+        month: Int,
+    ) {
+        setState {
             copy(
                 currentYear = year,
-                currentMonth = month
+                currentMonth = month,
             )
         }
     }

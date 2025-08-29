@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -57,11 +57,11 @@ fun SettingScreen(
     val state by settingViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
     val isVisible by rememberScrollVisibility(scrollState)
-    
+
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 500),
-        label = "navigationBarAlpha"
+        label = "navigationBarAlpha",
     )
 
     LaunchedEffect(Unit) {
@@ -78,18 +78,20 @@ fun SettingScreen(
         settingViewModel.effect.collect { effect ->
             when (effect) {
                 is SettingEffect.ShowToast -> {
-                    Toast.makeText(
-                        localContext,
-                        effect.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast
+                        .makeText(
+                            localContext,
+                            effect.message,
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
                 is SettingEffect.ShowIcsImportResult -> {
-                    Toast.makeText(
-                        localContext,
-                        "${effect.successCount}個のテンプレートを作成しました",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast
+                        .makeText(
+                            localContext,
+                            "${effect.successCount}個のテンプレートを作成しました",
+                            Toast.LENGTH_LONG,
+                        ).show()
                 }
             }
         }
@@ -115,18 +117,18 @@ fun SettingScreen(
             text = { Text("すべてのデータを削除しますか？") },
             confirmButton = {
                 TextButton(
-                    onClick = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) }
+                    onClick = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) },
                 ) {
                     Text("削除")
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) }
+                    onClick = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
                 ) {
                     Text("キャンセル")
                 }
-            }
+            },
         )
     }
 
@@ -136,27 +138,26 @@ fun SettingScreen(
             onDismissRequest = { },
             title = { Text("作成中") },
             text = { Text("テンプレートを生成しています...") },
-            confirmButton = { }
+            confirmButton = { },
         )
     }
 }
 
 @Composable
-private fun SettingUi(
-    sendIntent: (SettingIntent) -> Unit,
-) {
+private fun SettingUi(sendIntent: (SettingIntent) -> Unit) {
+    val jsonLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri: Uri? ->
+            uri?.let { sendIntent(SettingIntent.ImportData(it)) }
+        }
 
-    val jsonLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        uri?.let { sendIntent(SettingIntent.ImportData(it)) }
-    }
-
-    val icsLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        uri?.let { sendIntent(SettingIntent.ImportIcsFile(it)) }
-    }
+    val icsLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri: Uri? ->
+            uri?.let { sendIntent(SettingIntent.ImportIcsFile(it)) }
+        }
 
     val settingViewModel: SettingViewModel = koinInject()
     val state by settingViewModel.state.collectAsState()
@@ -167,7 +168,7 @@ private fun SettingUi(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UserStatusCard(state.userStatus)
-        
+
         // データ管理セクション
         HorizontalDividerWithLabel("データ")
         DataButtons(
@@ -182,9 +183,9 @@ private fun SettingUi(
             },
             onDeleteAllData = {
                 sendIntent(SettingIntent.DeleteAllData)
-            }
+            },
         )
-        
+
         // アカウント設定セクション
         HorizontalDividerWithLabel("アカウント")
         AccountButtons(
@@ -194,7 +195,7 @@ private fun SettingUi(
             onGoogleUnlink = {
                 sendIntent(SettingIntent.ChangeGoogleAccount)
             },
-            isGoogleLinked = state.userStatus.id.isNotEmpty()
+            isGoogleLinked = state.userStatus.id.isNotEmpty(),
         )
     }
 }

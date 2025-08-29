@@ -10,19 +10,27 @@ sealed interface SettingIntent : MviIntent {
     ) : SettingIntent
 
     data object ExportData : SettingIntent
+
     data class ImportData(
-        val uri: Uri
+        val uri: Uri,
     ) : SettingIntent
+
     data object DeleteAllData : SettingIntent
+
     data object ConfirmDeleteAllData : SettingIntent
+
     data object CancelDeleteAllData : SettingIntent
+
     data object LinkWithGoogle : SettingIntent
+
     data object ChangeGoogleAccount : SettingIntent
-    
+
     // ICSファイル関連
     data class ImportIcsFile(
-        val uri: Uri
+        val uri: Uri,
     ) : SettingIntent
+
     data object ShowIcsImportDialog : SettingIntent
+
     data object HideIcsImportDialog : SettingIntent
 }

@@ -4,17 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.indicator.CircularProgressWithPercentage
 
 @Composable
 fun StatisticsCard(
@@ -25,98 +29,61 @@ fun StatisticsCard(
     val checkedCount = itemCheckStates.values.count { it }
     val totalCount = itemsForToday.size
     val progress = if (totalCount > 0) checkedCount.toFloat() / totalCount else 0f
-    
-    val categoryStats = itemsForToday
-        .groupBy { it.category }
-        .mapValues { (_, items) ->
-            val categoryCheckedCount = items.count { item -> itemCheckStates[item.id] == true }
-            val categoryTotalCount = items.size
-            val categoryProgress = if (categoryTotalCount > 0) categoryCheckedCount.toFloat() / categoryTotalCount else 0f
-            Triple(categoryCheckedCount, categoryTotalCount, categoryProgress)
-        }
+
+    val categoryStats =
+        itemsForToday
+            .groupBy { it.category }
+            .mapValues { (_, items) ->
+                val categoryCheckedCount = items.count { item -> itemCheckStates[item.id] == true }
+                val categoryTotalCount = items.size
+                val categoryProgress = if (categoryTotalCount > 0) categoryCheckedCount.toFloat() / categoryTotalCount else 0f
+                Triple(categoryCheckedCount, categoryTotalCount, categoryProgress)
+            }
 
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 1.dp,
-            hoveredElevation = 1.dp
-        ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors =
+            CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // メイン進捗
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column {
-                    Text(
-                        text = "${checkedCount}/${totalCount}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "アイテム完了",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(40.dp))
-                        .background(
-                            Brush.sweepGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.secondary
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
+                Column(
+                    modifier = Modifier.padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = "${(progress * 100).toInt()}%",
-                        style = MaterialTheme.typography.titleLarge,
+                        text = "達成数",
+                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = "$checkedCount/$totalCount",
+                        fontSize = 36.sp,
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
-            }
 
-            // 進捗バー
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
+                CircularProgressWithPercentage(progress = progress)
+            }
 
             // カテゴリ別統計
             if (categoryStats.isNotEmpty()) {
-                Text(
-                    text = "カテゴリ別進捗",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     categoryStats.forEach { (category, stats) ->
                         val (checked, total, progress) = stats
@@ -124,7 +91,7 @@ fun StatisticsCard(
                             category = category,
                             checkedCount = checked,
                             totalCount = total,
-                            progress = progress
+                            progress = progress,
                         )
                     }
                 }
@@ -138,40 +105,40 @@ private fun CategoryProgressRow(
     category: ItemCategory,
     checkedCount: Int,
     totalCount: Int,
-    progress: Float
+    progress: Float,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = getCategoryDisplayName(category),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
-        
+
         Text(
             text = "$checkedCount/$totalCount",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        
+
         LinearProgressIndicator(
-            progress = progress,
-            modifier = Modifier
-                .width(60.dp)
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp)),
+            progress = { progress },
+            modifier =
+                Modifier
+                    .width(60.dp),
             color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
         )
     }
 }
 
-private fun getCategoryDisplayName(category: ItemCategory): String {
-    return when (category) {
+private fun getCategoryDisplayName(category: ItemCategory): String =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> "学業用品"
         ItemCategory.DAILY_SUPPLIES -> "生活用品"
         ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
@@ -186,4 +153,3 @@ private fun getCategoryDisplayName(category: ItemCategory): String {
         ItemCategory.ID_SUPPLIES -> "証明用品"
         ItemCategory.OTHER_SUPPLIES -> "その他用品"
     }
-}

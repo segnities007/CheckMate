@@ -9,18 +9,18 @@ import kotlinx.serialization.Serializable
 data class ExportData(
     val items: List<ExportItem> = emptyList(),
     val states: List<ExportItemCheckState> = emptyList(),
-    val templates: List<ExportWeeklyTemplate> = emptyList()
+    val templates: List<ExportWeeklyTemplate> = emptyList(),
 ) {
     companion object {
         fun fromDomain(
             items: List<Item>,
             states: List<ItemCheckState>,
-            templates: List<WeeklyTemplate>
-        ): ExportData = ExportData(
-            items = items.map { it.toExport() },
-            states = states.map { it.toExport() },
-            templates = templates.map { it.toExport() }
-        )
+            templates: List<WeeklyTemplate>,
+        ): ExportData =
+            ExportData(
+                items = items.map { it.toExport() },
+                states = states.map { it.toExport() },
+                templates = templates.map { it.toExport() },
+            )
     }
 }
-

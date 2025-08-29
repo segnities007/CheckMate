@@ -14,8 +14,8 @@ interface ItemRepository {
     suspend fun deleteItem(id: Int)
 
     suspend fun getUncheckedItemsForToday(): List<Item>
-    
+
     suspend fun getProductInfoByBarcode(barcodeInfo: BarcodeInfo): ProductInfo?
-    
+
     suspend fun clearAllItems()
 }

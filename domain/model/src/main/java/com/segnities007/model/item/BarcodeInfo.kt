@@ -8,7 +8,7 @@ data class BarcodeInfo(
     val format: String,
     val rawValue: String,
     val displayValue: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
 )
 
 @Serializable
@@ -21,5 +21,5 @@ data class ProductInfo(
     val imageUrl: String? = null,
     val isbn: String? = null,
     val publisher: String? = null,
-    val author: String? = null
+    val author: String? = null,
 )

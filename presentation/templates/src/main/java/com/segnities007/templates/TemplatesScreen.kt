@@ -2,20 +2,22 @@ package com.segnities007.templates
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,8 +31,6 @@ import com.segnities007.templates.mvi.TemplatesViewModel
 import com.segnities007.templates.page.TemplateList
 import com.segnities007.templates.page.TemplateSelector
 import org.koin.compose.koinInject
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,11 +54,12 @@ fun TemplatesScreen(
                     navController.navigate(TemplatesRoute.WeeklyTemplateSelector)
                 }
                 is TemplatesEffect.ShowToast -> {
-                    Toast.makeText(
-                        localContext,
-                        effect.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast
+                        .makeText(
+                            localContext,
+                            effect.message,
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
                 TemplatesEffect.NavigateToWeeklyTemplateList ->
                     navController.navigate(TemplatesRoute.WeeklyTemplateList)
@@ -69,9 +70,10 @@ fun TemplatesScreen(
     NavHost(
         navController = navController,
         startDestination = TemplatesRoute.WeeklyTemplateList,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         composable<TemplatesRoute.WeeklyTemplateList> {
             TemplateList(
@@ -122,18 +124,18 @@ fun TemplatesScreen(
             text = { Text("「${template.title}」を本当に削除しますか？") },
             confirmButton = {
                 TextButton(
-                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.ConfirmDeleteTemplate) }
+                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.ConfirmDeleteTemplate) },
                 ) {
                     Text("削除")
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.CancelDeleteTemplate) }
+                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.CancelDeleteTemplate) },
                 ) {
                     Text("キャンセル")
                 }
-            }
+            },
         )
     }
 }

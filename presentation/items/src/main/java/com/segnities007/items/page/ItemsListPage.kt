@@ -1,11 +1,21 @@
 package com.segnities007.items.page
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -15,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -28,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.segnities007.items.component.CreateBottomSheet
+import com.segnities007.items.component.ItemsList
 import com.segnities007.items.component.SearchFilterBar
 import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsState
@@ -35,22 +47,8 @@ import com.segnities007.model.item.Item
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
-import kotlin.time.ExperimentalTime
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import com.segnities007.items.component.ItemsList
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.FloatingActionButton
 import com.segnities007.ui.util.rememberScrollVisibility
+import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
@@ -80,11 +78,11 @@ fun ItemsListPage(
                 granted()
             }
         }
-    
+
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 300),
-        label = "navigationBarAlpha"
+        label = "navigationBarAlpha",
     )
 
     LaunchedEffect(Unit) {
@@ -117,10 +115,11 @@ fun ItemsListPage(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .verticalScroll(scrollState),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         Column(
@@ -144,7 +143,7 @@ fun ItemsListPage(
             )
 
             HorizontalDividerWithLabel("アイテム一覧")
-            
+
             ItemsList(
                 state = state.copy(items = state.filteredItems),
                 onDeleteItem = { itemToDelete ->
@@ -167,11 +166,11 @@ fun ItemsListPage(
             onCreateItem = { name, description, category, _ ->
                 // バーコードスキャンで取得した表紙画像URLがある場合はそれを使用、ない場合は撮影した画像を使用
                 val imagePath = state.productInfo?.imageUrl ?: state.capturedTempPathForViewModel
-                
+
                 android.util.Log.d("ItemsListPage", "Creating item with imagePath: $imagePath")
                 android.util.Log.d("ItemsListPage", "productInfo.imageUrl: ${state.productInfo?.imageUrl}")
                 android.util.Log.d("ItemsListPage", "capturedTempPathForViewModel: ${state.capturedTempPathForViewModel}")
-                
+
                 val newItem =
                     Item(
                         name = name,
@@ -197,7 +196,8 @@ fun ItemsListPage(
                 if (ContextCompat.checkSelfPermission(
                         context,
                         Manifest.permission.CAMERA,
-                    ) == PackageManager.PERMISSION_GRANTED) {
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     onNavigateToBarcodeScanner()
                 } else {
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)

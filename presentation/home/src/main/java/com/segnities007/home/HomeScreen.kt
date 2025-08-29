@@ -16,12 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.segnities007.home.mvi.HomeIntent
@@ -48,7 +43,7 @@ fun HomeScreen(
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(500),
-        label = "navigationBarAlpha"
+        label = "navigationBarAlpha",
     )
 
     LaunchedEffect(Unit) {
@@ -65,14 +60,15 @@ fun HomeScreen(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(horizontal = 16.dp),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        
+
         EnhancedHomeContent(
             selectedDate = state.selectedDate,
             currentYear = state.currentYear,
@@ -87,7 +83,6 @@ fun HomeScreen(
                 homeViewModel.sendIntent(HomeIntent.SelectDate(date))
             },
             onMonthChanged = { year, month ->
-                // 月が変更されたときの処理はEnhancedCalendarCard内で行われる
             },
             sendIntent = homeViewModel::sendIntent,
         )

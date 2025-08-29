@@ -12,7 +12,7 @@ data class CalendarEvent(
     val endDateTime: LocalDateTime,
     val location: String? = null,
     val recurrenceRule: RecurrenceRule? = null,
-    val categories: List<String> = emptyList()
+    val categories: List<String> = emptyList(),
 )
 
 @Serializable
@@ -21,27 +21,39 @@ data class RecurrenceRule(
     val interval: Int = 1,
     val until: LocalDateTime? = null,
     val count: Int? = null,
-    val byDay: List<DayOfWeek> = emptyList()
+    val byDay: List<DayOfWeek> = emptyList(),
 )
 
 @Serializable
 enum class Frequency {
-    DAILY, WEEKLY, MONTHLY, YEARLY
+    DAILY,
+    WEEKLY,
+    MONTHLY,
+    YEARLY,
 }
 
 @Serializable
 enum class DayOfWeek {
-    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY,
 }
 
 @Serializable
 data class EventGroup(
     val dayOfWeek: DayOfWeek,
     val timeSlot: TimeSlot,
-    val events: List<CalendarEvent>
+    val events: List<CalendarEvent>,
 )
 
 @Serializable
 enum class TimeSlot {
-    MORNING, AFTERNOON, EVENING, NIGHT
+    MORNING,
+    AFTERNOON,
+    EVENING,
+    NIGHT,
 }

@@ -51,57 +51,63 @@ fun ItemCard(
     modifier: Modifier = Modifier,
 ) {
     var showDetailDialog by remember { mutableStateOf(false) }
-    
+
     ElevatedCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { showDetailDialog = true },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable { showDetailDialog = true },
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 1.dp,
-            focusedElevation = 0.dp,
-            hoveredElevation = 0.dp
-        ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        elevation =
+            CardDefaults.elevatedCardElevation(
+                defaultElevation = 4.dp, // Material3 Expressive: より大きなエレベーション
+                pressedElevation = 8.dp,
+                focusedElevation = 4.dp,
+                hoveredElevation = 6.dp,
+            ),
+        colors =
+            CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // アイテム画像
             Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                getCategoryColor(item.category).copy(alpha = 0.1f),
-                                getCategoryColor(item.category).copy(alpha = 0.05f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                colors =
+                                    listOf(
+                                        getCategoryColor(item.category).copy(alpha = 0.1f),
+                                        getCategoryColor(item.category).copy(alpha = 0.05f),
+                                    ),
+                            ),
+                        ),
+                contentAlignment = Alignment.Center,
             ) {
                 if (item.imagePath.isNotEmpty()) {
                     AsyncImage(
                         model = item.imagePath,
                         contentDescription = item.name,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Filled.Inventory,
                         contentDescription = "Item Icon",
                         tint = getCategoryColor(item.category),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     )
                 }
             }
@@ -109,7 +115,7 @@ fun ItemCard(
             // アイテム情報
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
                     text = item.name,
@@ -117,35 +123,36 @@ fun ItemCard(
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-                
+
                 CategoryTag(category = item.category)
             }
 
             // 削除ボタン
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                modifier =
+                    Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "削除",
                     tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
     }
-    
+
     // 詳細情報ダイアログ
     if (showDetailDialog) {
         ItemDetailDialog(
             item = item,
-            onDismiss = { showDetailDialog = false }
+            onDismiss = { showDetailDialog = false },
         )
     }
 }
@@ -156,9 +163,10 @@ private fun ItemCardIcon(
     name: String,
 ) {
     Box(
-        modifier = Modifier
-            .size(60.dp)
-            .clip(RoundedCornerShape(8.dp)),
+        modifier =
+            Modifier
+                .size(60.dp)
+                .clip(RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center,
     ) {
         if (imagePath.isNotEmpty()) {
@@ -170,9 +178,10 @@ private fun ItemCardIcon(
             )
         } else {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -190,24 +199,24 @@ private fun ItemCardIcon(
 @Composable
 private fun ItemDetailDialog(
     item: Item,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { 
+        title = {
             Text(
                 text = item.name,
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 // カテゴリタグ
                 CategoryTag(category = item.category)
-                
+
                 // 説明
                 if (item.description.isNotEmpty()) {
                     Column {
@@ -215,35 +224,35 @@ private fun ItemDetailDialog(
                             text = "メモ",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
                             text = item.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
-                
+
                 // 登録日
                 Column {
                     Text(
                         text = "登録日",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = item.createdAt.toString(),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) { Text("閉じる") }
-        }
+        },
     )
 }
 
@@ -252,7 +261,7 @@ private fun DeleteItemDialog(
     show: Boolean,
     item: Item,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     if (!show) return
     AlertDialog(
@@ -264,32 +273,31 @@ private fun DeleteItemDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("キャンセル") }
-        }
+        },
     )
 }
 
 @Composable
-private fun CategoryTag(
-    category: ItemCategory
-) {
+private fun CategoryTag(category: ItemCategory) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(getCategoryColor(category).copy(alpha = 0.1f))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(getCategoryColor(category).copy(alpha = 0.1f))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         Text(
             text = getCategoryDisplayName(category),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
             color = getCategoryColor(category),
-            fontSize = 12.sp
+            fontSize = 12.sp,
         )
     }
 }
 
-private fun getCategoryDisplayName(category: ItemCategory): String {
-    return when (category) {
+private fun getCategoryDisplayName(category: ItemCategory): String =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> "学業用品"
         ItemCategory.DAILY_SUPPLIES -> "生活用品"
         ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
@@ -304,10 +312,9 @@ private fun getCategoryDisplayName(category: ItemCategory): String {
         ItemCategory.ID_SUPPLIES -> "証明用品"
         ItemCategory.OTHER_SUPPLIES -> "その他用品"
     }
-}
 
-private fun getCategoryColor(category: ItemCategory): Color {
-    return when (category) {
+private fun getCategoryColor(category: ItemCategory): Color =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> Color(0xFF2196F3) // Blue - 学業用品
         ItemCategory.DAILY_SUPPLIES -> Color(0xFF4CAF50) // Green - 生活用品
         ItemCategory.CLOTHING_SUPPLIES -> Color(0xFF9C27B0) // Purple - 衣類用品
@@ -322,4 +329,3 @@ private fun getCategoryColor(category: ItemCategory): Color {
         ItemCategory.ID_SUPPLIES -> Color(0xFF8BC34A) // Light Green - 証明用品
         ItemCategory.OTHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - その他用品
     }
-}

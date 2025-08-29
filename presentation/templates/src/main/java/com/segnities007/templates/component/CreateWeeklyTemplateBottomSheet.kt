@@ -48,20 +48,21 @@ fun CreateWeeklyTemplateBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             // ヘッダー
             Text(
                 text = "テンプレートを作成",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             // テンプレート名入力
@@ -72,29 +73,30 @@ fun CreateWeeklyTemplateBottomSheet(
                 placeholder = { Text("例: 月曜日の忘れ物") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                )
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    ),
             )
 
             // 曜日選択
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
                     text = "適用する曜日",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                
+
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     DayOfWeek.entries.forEach { day ->
                         val isSelected = selectedDaysOfWeek.value.contains(day)
@@ -108,16 +110,17 @@ fun CreateWeeklyTemplateBottomSheet(
                                         selectedDaysOfWeek.value + day
                                     }
                             },
-                            label = { 
+                            label = {
                                 Text(
                                     text = getDayOfWeekDisplayName(day),
-                                    style = MaterialTheme.typography.bodyMedium
-                                ) 
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
                             },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                            colors =
+                                FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                ),
                         )
                     }
                 }
@@ -126,19 +129,20 @@ fun CreateWeeklyTemplateBottomSheet(
             // アクションボタン
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 OutlinedButton(
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
+                    colors =
+                        ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
                 ) {
                     Text("キャンセル")
                 }
-                
+
                 Button(
                     onClick = {
                         if (templateName.isNotBlank() && selectedDaysOfWeek.value.isNotEmpty()) {
@@ -148,10 +152,11 @@ fun CreateWeeklyTemplateBottomSheet(
                     },
                     modifier = Modifier.weight(1f),
                     enabled = templateName.isNotBlank() && selectedDaysOfWeek.value.isNotEmpty(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
                 ) {
                     Text("作成")
                 }
@@ -160,8 +165,8 @@ fun CreateWeeklyTemplateBottomSheet(
     }
 }
 
-private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
-    return when (dayOfWeek) {
+private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String =
+    when (dayOfWeek) {
         DayOfWeek.MONDAY -> "月"
         DayOfWeek.TUESDAY -> "火"
         DayOfWeek.WEDNESDAY -> "水"
@@ -170,7 +175,6 @@ private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
         DayOfWeek.SATURDAY -> "土"
         DayOfWeek.SUNDAY -> "日"
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)

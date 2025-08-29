@@ -1,11 +1,14 @@
 package com.segnities007.remote
 
-import com.segnities007.remote.model.GoogleBooksResponse
+import android.util.Log
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.model.item.ProductInfo
+import com.segnities007.remote.model.GoogleBooksResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpTimeoutConfig
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
@@ -13,47 +16,48 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import android.util.Log
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.HttpTimeoutConfig
 
 class ProductApiService {
-    private val httpClient = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                prettyPrint = true
-            })
-        }
-        install(Logging) {
-            logger = Logger.ANDROID
-            level = LogLevel.INFO
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS   // リクエスト全体のタイムアウト無効
-            connectTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS   // 接続確立のタイムアウト無効
-            socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS    // ソケット読み書きのタイムアウト無効
-        }
-    }
-
-    suspend fun getProductInfo(barcode: String): ProductInfo? = withContext(Dispatchers.IO) {
-        try {
-            Log.d("ProductApiService", "getProductInfo called with barcode: $barcode")
-
-            // ISBNの場合（10桁または13桁）
-            if (isIsbn(barcode)) {
-                Log.d("ProductApiService", "Barcode is ISBN, calling getBookInfo")
-                return@withContext getBookInfo(barcode)
+    private val httpClient =
+        HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        ignoreUnknownKeys = true
+                        prettyPrint = true
+                    },
+                )
             }
-
-            // その他のバーコード形式
-            Log.d("ProductApiService", "Barcode is not ISBN, calling getGenericProductInfo")
-            return@withContext getGenericProductInfo(barcode)
-        } catch (e: Exception) {
-            Log.e("ProductApiService", "Error in getProductInfo: ${e.message}", e)
-            null
+            install(Logging) {
+                logger = Logger.ANDROID
+                level = LogLevel.INFO
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS // リクエスト全体のタイムアウト無効
+                connectTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS // 接続確立のタイムアウト無効
+                socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS // ソケット読み書きのタイムアウト無効
+            }
         }
-    }
+
+    suspend fun getProductInfo(barcode: String): ProductInfo? =
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d("ProductApiService", "getProductInfo called with barcode: $barcode")
+
+                // ISBNの場合（10桁または13桁）
+                if (isIsbn(barcode)) {
+                    Log.d("ProductApiService", "Barcode is ISBN, calling getBookInfo")
+                    return@withContext getBookInfo(barcode)
+                }
+
+                // その他のバーコード形式
+                Log.d("ProductApiService", "Barcode is not ISBN, calling getGenericProductInfo")
+                return@withContext getGenericProductInfo(barcode)
+            } catch (e: Exception) {
+                Log.e("ProductApiService", "Error in getProductInfo: ${e.message}", e)
+                null
+            }
+        }
 
     private fun isIsbn(barcode: String): Boolean {
         val cleanBarcode = barcode.replace("-", "").replace(" ", "")
@@ -74,7 +78,7 @@ class ProductApiService {
                 name = "書籍 (ISBN: $isbn)",
                 description = "ISBN: $isbn の書籍",
                 category = ItemCategory.STUDY_SUPPLIES,
-                isbn = isbn
+                isbn = isbn,
             )
         } catch (e: Exception) {
             Log.e("ProductApiService", "Error in getBookInfo: ${e.message}", e)
@@ -85,17 +89,19 @@ class ProductApiService {
     private suspend fun getGoogleBooksInfo(isbn: String): ProductInfo? {
         Log.d("ProductApiService", "=== getGoogleBooksInfo START for ISBN: $isbn ===")
         try {
-            val response = httpClient.get("https://www.googleapis.com/books/v1/volumes") {
-                parameter("q", "isbn:$isbn")
-            }
+            val response =
+                httpClient.get("https://www.googleapis.com/books/v1/volumes") {
+                    parameter("q", "isbn:$isbn")
+                }
 
             val googleBooksResponse = response.body<GoogleBooksResponse>()
             val book = googleBooksResponse.items?.firstOrNull()?.volumeInfo
 
             if (book != null) {
                 // smallThumbnail を優先、なければ thumbnail
-                val imageUrl = (book.imageLinks?.smallThumbnail ?: book.imageLinks?.thumbnail)
-                    ?.replace("http://", "https://")
+                val imageUrl =
+                    (book.imageLinks?.smallThumbnail ?: book.imageLinks?.thumbnail)
+                        ?.replace("http://", "https://")
 
                 Log.d("ProductApiService", "Google Books - Title: ${book.title}")
                 Log.d("ProductApiService", "Google Books - ImageURL (final): $imageUrl")
@@ -108,7 +114,7 @@ class ProductApiService {
                     imageUrl = imageUrl,
                     isbn = isbn,
                     publisher = book.publisher,
-                    author = book.authors?.firstOrNull()
+                    author = book.authors?.firstOrNull(),
                 )
             }
         } catch (e: Exception) {
@@ -117,14 +123,13 @@ class ProductApiService {
         return null
     }
 
-    private fun getGenericProductInfo(barcode: String): ProductInfo? {
-        return ProductInfo(
+    private fun getGenericProductInfo(barcode: String): ProductInfo? =
+        ProductInfo(
             barcode = barcode,
             name = "商品 (バーコード: $barcode)",
             description = "バーコード: $barcode の商品",
-            category = ItemCategory.OTHER_SUPPLIES
+            category = ItemCategory.OTHER_SUPPLIES,
         )
-    }
 
     fun close() {
         httpClient.close()

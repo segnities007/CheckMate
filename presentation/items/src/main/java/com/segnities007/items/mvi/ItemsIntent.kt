@@ -48,16 +48,16 @@ sealed interface ItemsIntent : MviIntent {
     data class UpdateSortOrder(
         val sortOrder: SortOrder,
     ) : ItemsIntent
-    
+
     data object NavigateToBarcodeScanner : ItemsIntent
-    
+
     data class BarcodeDetected(
         val barcodeInfo: BarcodeInfo,
     ) : ItemsIntent
-    
+
     data class GetProductInfo(
         val barcodeInfo: BarcodeInfo,
     ) : ItemsIntent
-    
+
     data object ClearProductInfo : ItemsIntent
 }

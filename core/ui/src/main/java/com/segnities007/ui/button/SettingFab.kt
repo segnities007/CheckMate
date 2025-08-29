@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -67,9 +68,12 @@ fun SettingFab(
             }
         }
 
-        // メインのFAB
+        // メインのFAB - Material3 Expressive
         FloatingActionButton(
             onClick = { expanded = !expanded },
+            modifier = Modifier.size(64.dp),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
@@ -100,6 +104,9 @@ private fun FabActionButton(
     SmallFloatingActionButton(
         onClick = onClick,
         shape = CircleShape,
+        modifier = Modifier.size(48.dp),
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ) {
         icon()
     }

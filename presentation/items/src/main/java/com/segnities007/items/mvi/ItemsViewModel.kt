@@ -76,28 +76,31 @@ class ItemsViewModel(
 
         // 検索フィルタ
         if (currentState.searchQuery.isNotBlank()) {
-            filteredItems = filteredItems.filter { item ->
-                item.name.contains(currentState.searchQuery, ignoreCase = true) ||
-                item.description.contains(currentState.searchQuery, ignoreCase = true)
-            }
+            filteredItems =
+                filteredItems.filter { item ->
+                    item.name.contains(currentState.searchQuery, ignoreCase = true) ||
+                        item.description.contains(currentState.searchQuery, ignoreCase = true)
+                }
         }
 
         // カテゴリフィルタ
         if (currentState.selectedCategory != null) {
-            filteredItems = filteredItems.filter { item ->
-                item.category == currentState.selectedCategory
-            }
+            filteredItems =
+                filteredItems.filter { item ->
+                    item.category == currentState.selectedCategory
+                }
         }
 
         // 並び替え
-        filteredItems = when (currentState.sortOrder) {
-            SortOrder.NAME_ASC -> filteredItems.sortedBy { it.name }
-            SortOrder.NAME_DESC -> filteredItems.sortedByDescending { it.name }
-            SortOrder.CREATED_ASC -> filteredItems.sortedBy { it.createdAt }
-            SortOrder.CREATED_DESC -> filteredItems.sortedByDescending { it.createdAt }
-            SortOrder.CATEGORY_ASC -> filteredItems.sortedBy { it.category.name }
-            SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
-        }
+        filteredItems =
+            when (currentState.sortOrder) {
+                SortOrder.NAME_ASC -> filteredItems.sortedBy { it.name }
+                SortOrder.NAME_DESC -> filteredItems.sortedByDescending { it.name }
+                SortOrder.CREATED_ASC -> filteredItems.sortedBy { it.createdAt }
+                SortOrder.CREATED_DESC -> filteredItems.sortedByDescending { it.createdAt }
+                SortOrder.CATEGORY_ASC -> filteredItems.sortedBy { it.category.name }
+                SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
+            }
 
         setState { copy(filteredItems = filteredItems) }
     }
@@ -131,18 +134,19 @@ class ItemsViewModel(
             }
             val newItem =
                 withContext(Dispatchers.IO) {
-                    val finalImagePath = if (intent.item.imagePath.isNotBlank()) {
-                        // URLの場合はそのまま使用、ローカルファイルパスの場合は保存
-                        if (intent.item.imagePath.startsWith("http://") || intent.item.imagePath.startsWith("https://")) {
-                            android.util.Log.d("ItemsViewModel", "Using URL as imagePath: ${intent.item.imagePath}")
-                            intent.item.imagePath
+                    val finalImagePath =
+                        if (intent.item.imagePath.isNotBlank()) {
+                            // URLの場合はそのまま使用、ローカルファイルパスの場合は保存
+                            if (intent.item.imagePath.startsWith("http://") || intent.item.imagePath.startsWith("https://")) {
+                                android.util.Log.d("ItemsViewModel", "Using URL as imagePath: ${intent.item.imagePath}")
+                                intent.item.imagePath
+                            } else {
+                                android.util.Log.d("ItemsViewModel", "Saving local image: ${intent.item.imagePath}")
+                                imageRepository.saveImage(intent.item.imagePath, "${Uuid.random()}.jpg")
+                            }
                         } else {
-                            android.util.Log.d("ItemsViewModel", "Saving local image: ${intent.item.imagePath}")
-                            imageRepository.saveImage(intent.item.imagePath, "${Uuid.random()}.jpg")
+                            ""
                         }
-                    } else {
-                        ""
-                    }
                     intent.item.copy(imagePath = finalImagePath)
                 }
             itemRepository.insertItem(newItem)
@@ -164,40 +168,40 @@ class ItemsViewModel(
             getAllItems()
         }
     }
-    
+
     private fun handleBarcodeDetected(intent: ItemsIntent.BarcodeDetected) {
         setState { copy(scannedBarcodeInfo = intent.barcodeInfo) }
         // バーコード検出後、自動的に商品情報を取得
         sendIntent(ItemsIntent.GetProductInfo(intent.barcodeInfo))
     }
-    
+
     private fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
         viewModelScope.launch {
             setState { copy(isLoadingProductInfo = true) }
             try {
                 val productInfo = itemRepository.getProductInfoByBarcode(intent.barcodeInfo)
-                setState { 
+                setState {
                     copy(
                         productInfo = productInfo,
-                        isLoadingProductInfo = false
-                    ) 
+                        isLoadingProductInfo = false,
+                    )
                 }
-                
+
                 if (productInfo != null) {
                     // 商品情報が取得できた場合、ボトムシートの状態をリセットしてから表示
-                    setState { 
+                    setState {
                         copy(
                             isShowBottomSheet = false,
                             capturedImageUriForBottomSheet = null,
                             capturedTempPathForViewModel = "",
-                            shouldClearForm = true
-                        ) 
+                            shouldClearForm = true,
+                        )
                     }
-                    
+
                     // 少し遅延を入れてからボトムシートを表示（状態リセットのため）
                     kotlinx.coroutines.delay(100)
                     setState { copy(isShowBottomSheet = true) }
-                    
+
                     // フォームクリアフラグをリセット（productInfoは保持）
                     kotlinx.coroutines.delay(200)
                     setState { copy(shouldClearForm = false) }
@@ -210,13 +214,13 @@ class ItemsViewModel(
             }
         }
     }
-    
+
     private fun clearProductInfo() {
-        setState { 
+        setState {
             copy(
                 productInfo = null,
-                scannedBarcodeInfo = null
-            ) 
+                scannedBarcodeInfo = null,
+            )
         }
     }
 }

@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -95,11 +95,11 @@ fun TemplateList(
 ) {
     val listState = rememberScrollState()
     val isVisible by rememberScrollVisibility(listState)
-    
+
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 200),
-        label = "navigationBarAlpha"
+        label = "navigationBarAlpha",
     )
 
     LaunchedEffect(Unit) {
@@ -128,11 +128,12 @@ fun TemplateList(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(listState)
-            .padding(horizontal = 16.dp),
-    ){
+        modifier =
+            modifier
+                .fillMaxSize()
+                .verticalScroll(listState)
+                .padding(horizontal = 16.dp),
+    ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         TemplateListUi(
             innerPadding = innerPadding,
@@ -148,7 +149,6 @@ fun TemplateList(
         )
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
-
 }
 
 @Composable
@@ -163,30 +163,29 @@ private fun TemplateListUi(
     onSearchQueryChange: (String) -> Unit,
     onSortOrderChange: (TemplateSortOrder) -> Unit,
     onDayOfWeekChange: (DayOfWeek?) -> Unit,
-){
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
-    ){
+    ) {
         TemplateSearchFilterSortBar(
             searchQuery = templateSearchQuery,
             sortOrder = templateSortOrder,
             selectedDayOfWeek = selectedDayOfWeek,
             onSearchQueryChange = onSearchQueryChange,
             onSortOrderChange = onSortOrderChange,
-            onDayOfWeekChange = onDayOfWeekChange
+            onDayOfWeekChange = onDayOfWeekChange,
         )
         HorizontalDividerWithLabel(
-            label = "テンプレート一覧"
+            label = "テンプレート一覧",
         )
 
         for (item in templates) {
             TemplateCard(
                 template = item,
                 onClick = { onTemplateClick(item) },
-                onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(item)) }
+                onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(item)) },
             )
         }
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }
 
@@ -204,15 +203,17 @@ private fun TemplateSearchFilterSortBar(
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors =
+            elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // 検索バー
             OutlinedTextField(
@@ -223,70 +224,72 @@ private fun TemplateSearchFilterSortBar(
                     Text(
                         text = "テンプレートを検索...",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "検索",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                ),
+                colors =
+                    OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    ),
                 textStyle = MaterialTheme.typography.bodyMedium,
-                singleLine = true
+                singleLine = true,
             )
 
             // フィルタ・ソート行
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 // 曜日フィルタ
                 var dayExpanded by remember { mutableStateOf(false) }
                 Box(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     OutlinedButton(
                         onClick = { dayExpanded = true },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        border = ButtonDefaults.outlinedButtonBorder(
-                        )
+                        colors =
+                            ButtonDefaults.outlinedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            ),
+                        border =
+                            ButtonDefaults.outlinedButtonBorder(),
                     ) {
                         Icon(
                             imageVector = Icons.Default.FilterList,
                             contentDescription = "曜日",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = selectedDayOfWeek?.let { getDayOfWeekDisplayName(it) } ?: "全曜日",
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         )
                     }
 
                     DropdownMenu(
                         expanded = dayExpanded,
                         onDismissRequest = { dayExpanded = false },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                     ) {
                         DropdownMenuItem(
                             text = { Text("全曜日") },
                             onClick = {
                                 onDayOfWeekChange(null)
                                 dayExpanded = false
-                            }
+                            },
                         )
                         DayOfWeek.entries.forEach { dayOfWeek ->
                             DropdownMenuItem(
@@ -294,7 +297,7 @@ private fun TemplateSearchFilterSortBar(
                                 onClick = {
                                     onDayOfWeekChange(dayOfWeek)
                                     dayExpanded = false
-                                }
+                                },
                             )
                         }
                     }
@@ -303,60 +306,65 @@ private fun TemplateSearchFilterSortBar(
                 // ソート
                 var sortExpanded by remember { mutableStateOf(false) }
                 Box(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     OutlinedButton(
                         onClick = { sortExpanded = true },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(
-                            brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                )
-                            )
-                        )
+                        colors =
+                            ButtonDefaults.outlinedButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            ),
+                        border =
+                            ButtonDefaults.outlinedButtonBorder.copy(
+                                brush =
+                                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        colors =
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                            ),
+                                    ),
+                            ),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Sort,
                             contentDescription = "ソート",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = when (sortOrder) {
-                                TemplateSortOrder.NAME_ASC -> "名前順"
-                                TemplateSortOrder.NAME_DESC -> "名前順"
-                                TemplateSortOrder.ITEM_COUNT_ASC -> "アイテム数順"
-                                TemplateSortOrder.ITEM_COUNT_DESC -> "アイテム数順"
-                            },
+                            text =
+                                when (sortOrder) {
+                                    TemplateSortOrder.NAME_ASC -> "名前順"
+                                    TemplateSortOrder.NAME_DESC -> "名前順"
+                                    TemplateSortOrder.ITEM_COUNT_ASC -> "アイテム数順"
+                                    TemplateSortOrder.ITEM_COUNT_DESC -> "アイテム数順"
+                                },
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         )
                     }
 
                     DropdownMenu(
                         expanded = sortExpanded,
                         onDismissRequest = { sortExpanded = false },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                     ) {
                         DropdownMenuItem(
                             text = { Text("名前順") },
                             onClick = {
                                 onSortOrderChange(TemplateSortOrder.NAME_ASC)
                                 sortExpanded = false
-                            }
+                            },
                         )
                         DropdownMenuItem(
                             text = { Text("アイテム数順") },
                             onClick = {
                                 onSortOrderChange(TemplateSortOrder.ITEM_COUNT_ASC)
                                 sortExpanded = false
-                            }
+                            },
                         )
                     }
                 }
@@ -373,34 +381,38 @@ private fun TemplateCard(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
     ) {
         ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { onClick() },
             shape = RoundedCornerShape(16.dp),
-            elevation = elevatedCardElevation(
-                defaultElevation = 1.dp,
-                pressedElevation = 2.dp,
-                focusedElevation = 1.dp,
-                hoveredElevation = 1.dp
-            ),
-            colors = elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+            elevation =
+                elevatedCardElevation(
+                    defaultElevation = 1.dp,
+                    pressedElevation = 2.dp,
+                    focusedElevation = 1.dp,
+                    hoveredElevation = 1.dp,
+                ),
+            colors =
+                elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // メインコンテンツ
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     // ヘッダー
                     Text(
@@ -409,73 +421,76 @@ private fun TemplateCard(
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
 
                     // 曜日タグ
                     if (template.daysOfWeek.isNotEmpty()) {
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             items(template.daysOfWeek.toList()) { dayOfWeek ->
                                 Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    modifier =
+                                        Modifier
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp),
                                 ) {
                                     Text(
                                         text = getDayOfWeekDisplayName(dayOfWeek),
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
                             }
                         }
                     }
                 }
-                
+
                 // 削除ボタン
                 IconButton(
                     onClick = onDelete,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "削除",
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
         }
-        
+
         // インデックス付箋風のアイテム数表示（右上）
         Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = 8.dp, y = (-16).dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 8.dp, y = (-16).dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
         ) {
             Text(
                 text = "${template.itemIds.size}アイテム",
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
             )
         }
     }
 }
 
-private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
-    return when (dayOfWeek) {
+private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String =
+    when (dayOfWeek) {
         DayOfWeek.MONDAY -> "月"
         DayOfWeek.TUESDAY -> "火"
         DayOfWeek.WEDNESDAY -> "水"
@@ -484,7 +499,6 @@ private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String {
         DayOfWeek.SATURDAY -> "土"
         DayOfWeek.SUNDAY -> "日"
     }
-}
 
 @Preview(showBackground = true)
 @Composable

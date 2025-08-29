@@ -1,5 +1,6 @@
 package com.segnities007.home.page
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.ScrollState
 import com.segnities007.home.component.*
 import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.model.WeeklyTemplate
@@ -34,7 +34,7 @@ fun EnhancedHomeContent(
     sendIntent: (HomeIntent) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         // カレンダー
         EnhancedCalendarCard(
@@ -52,15 +52,15 @@ fun EnhancedHomeContent(
         // 今日の進捗セクション
         HorizontalDividerWithLabel("今日の進捗")
         StatisticsCard(
-                itemsForToday = allItems,
-                itemCheckStates = itemCheckStates
+            itemsForToday = allItems,
+            itemCheckStates = itemCheckStates,
         )
 
         // カテゴリ別アイテムリスト
         CategoryBasedItemList(
             allItems = allItems,
             itemCheckStates = itemCheckStates,
-            onCheckItem = onCheckItem
+            onCheckItem = onCheckItem,
         )
     }
 }
@@ -73,16 +73,16 @@ private fun CategoryBasedItemList(
 ) {
     val allItemIdsForSelectedDate = allItems.map { it.id }.distinct()
     val selectedItems = allItems.filter { allItemIdsForSelectedDate.contains(it.id) }
-    
+
     // カテゴリ別にアイテムをグループ化
     val itemsByCategory = selectedItems.groupBy { it.category }
-    
+
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // セクションヘッダー
         HorizontalDividerWithLabel("今日のアイテム")
-        
+
         if (selectedItems.isEmpty()) {
             // アイテムがない場合の表示
             EmptyStateCard()
@@ -90,15 +90,15 @@ private fun CategoryBasedItemList(
             // カテゴリ別にアイテムを表示
             itemsByCategory.forEach { (category, items) ->
                 val checkedCount = items.count { itemCheckStates[it.id] == true }
-                
+
                 CategoryGroupHeader(
                     category = category,
                     itemCount = items.size,
-                    checkedCount = checkedCount
+                    checkedCount = checkedCount,
                 )
-                
+
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items.forEach { item ->
                         val isChecked = itemCheckStates[item.id] ?: false
@@ -117,47 +117,48 @@ private fun CategoryBasedItemList(
 }
 
 @Composable
-private fun EmptyStateCard(
-    modifier: Modifier = Modifier
-) {
+private fun EmptyStateCard(modifier: Modifier = Modifier) {
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 1.dp,
-            hoveredElevation = 1.dp
-        ),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        elevation =
+            CardDefaults.elevatedCardElevation(
+                defaultElevation = 1.dp,
+                pressedElevation = 2.dp,
+                focusedElevation = 1.dp,
+                hoveredElevation = 1.dp,
+            ),
+        colors =
+            CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Icon(
                 imageVector = Icons.Default.Inventory,
                 contentDescription = "Empty",
                 modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            
+
             Text(
                 text = "今日のアイテムはありません",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            
+
             Text(
                 text = "テンプレートを作成してアイテムを追加してください",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
     }

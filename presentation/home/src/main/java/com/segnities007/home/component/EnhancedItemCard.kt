@@ -42,38 +42,41 @@ fun EnhancedItemCard(
     val scale by animateFloatAsState(
         targetValue = if (checked) 0.975f else 1f,
         animationSpec = tween(durationMillis = 200),
-        label = "scale"
+        label = "scale",
     )
 
     ElevatedCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .scale(scale)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onCheckedChange(!checked) },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .scale(scale)
+                .clip(RoundedCornerShape(16.dp))
+                .clickable { onCheckedChange(!checked) },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+        colors =
+            CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // アイテム画像
             EnhancedItemImage(
                 imagePath = item.imagePath,
                 name = item.name,
-                category = item.category
+                category = item.category,
             )
 
             // アイテム情報
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
                     text = item.name,
@@ -82,9 +85,9 @@ fun EnhancedItemCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-                
+
                 if (item.description.isNotEmpty()) {
                     Text(
                         text = item.description,
@@ -92,7 +95,7 @@ fun EnhancedItemCard(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
                     )
                 }
 
@@ -103,7 +106,7 @@ fun EnhancedItemCard(
             // チェックボックス
             EnhancedCheckbox(
                 checked = checked,
-                onCheckedChange = onCheckedChange
+                onCheckedChange = onCheckedChange,
             )
         }
     }
@@ -113,56 +116,57 @@ fun EnhancedItemCard(
 private fun EnhancedItemImage(
     imagePath: String,
     name: String,
-    category: ItemCategory
+    category: ItemCategory,
 ) {
     Box(
-        modifier = Modifier
-            .size(80.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        getCategoryColor(category).copy(alpha = 0.1f),
-                        getCategoryColor(category).copy(alpha = 0.05f)
-                    )
-                )
-            ),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors =
+                            listOf(
+                                getCategoryColor(category).copy(alpha = 0.1f),
+                                getCategoryColor(category).copy(alpha = 0.05f),
+                            ),
+                    ),
+                ),
+        contentAlignment = Alignment.Center,
     ) {
         if (imagePath.isNotEmpty()) {
             AsyncImage(
                 model = imagePath,
                 contentDescription = name,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
         } else {
             Icon(
                 imageVector = Icons.Filled.Inventory,
                 contentDescription = "Item Icon",
                 tint = getCategoryColor(category),
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             )
         }
     }
 }
 
 @Composable
-private fun CategoryTag(
-    category: ItemCategory
-) {
+private fun CategoryTag(category: ItemCategory) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(getCategoryColor(category).copy(alpha = 0.1f))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(getCategoryColor(category).copy(alpha = 0.1f))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         Text(
             text = getCategoryDisplayName(category),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
             color = getCategoryColor(category),
-            fontSize = 12.sp
+            fontSize = 12.sp,
         )
     }
 }
@@ -170,42 +174,45 @@ private fun CategoryTag(
 @Composable
 private fun EnhancedCheckbox(
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val scale by animateFloatAsState(
         targetValue = if (checked) 1.1f else 1f,
         animationSpec = tween(durationMillis = 150),
-        label = "checkbox_scale"
+        label = "checkbox_scale",
     )
 
     Box(
-        modifier = Modifier
-            .size(48.dp)
-            .scale(scale)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            .clickable { onCheckedChange(!checked) },
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .size(48.dp)
+                .scale(scale)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                .clickable { onCheckedChange(!checked) },
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = if (checked) {
-                Icons.Filled.CheckCircle
-            } else {
-                Icons.Filled.RadioButtonUnchecked
-            },
+            imageVector =
+                if (checked) {
+                    Icons.Filled.CheckCircle
+                } else {
+                    Icons.Filled.RadioButtonUnchecked
+                },
             contentDescription = if (checked) "Checked" else "Unchecked",
-            tint = if (checked) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            modifier = Modifier.size(24.dp)
+            tint =
+                if (checked) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            modifier = Modifier.size(24.dp),
         )
     }
 }
 
-private fun getCategoryColor(category: ItemCategory): Color {
-    return when (category) {
+private fun getCategoryColor(category: ItemCategory): Color =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> Color(0xFF2196F3) // Blue - 学業用品
         ItemCategory.DAILY_SUPPLIES -> Color(0xFF4CAF50) // Green - 生活用品
         ItemCategory.CLOTHING_SUPPLIES -> Color(0xFF9C27B0) // Purple - 衣類用品
@@ -220,10 +227,9 @@ private fun getCategoryColor(category: ItemCategory): Color {
         ItemCategory.ID_SUPPLIES -> Color(0xFF8BC34A) // Light Green - 証明用品
         ItemCategory.OTHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - その他用品
     }
-}
 
-private fun getCategoryDisplayName(category: ItemCategory): String {
-    return when (category) {
+private fun getCategoryDisplayName(category: ItemCategory): String =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> "学業用品"
         ItemCategory.DAILY_SUPPLIES -> "生活用品"
         ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
@@ -238,46 +244,47 @@ private fun getCategoryDisplayName(category: ItemCategory): String {
         ItemCategory.ID_SUPPLIES -> "証明用品"
         ItemCategory.OTHER_SUPPLIES -> "その他用品"
     }
-}
 
 @Composable
 fun CategoryGroupHeader(
     category: ItemCategory,
     itemCount: Int,
     checkedCount: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(getCategoryColor(category))
+                modifier =
+                    Modifier
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(getCategoryColor(category)),
             )
-            
+
             Text(
                 text = getCategoryDisplayName(category),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        
+
         Text(
             text = "$checkedCount/$itemCount",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
         )
     }
 }

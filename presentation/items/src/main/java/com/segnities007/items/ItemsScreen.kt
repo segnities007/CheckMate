@@ -11,14 +11,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.segnities007.navigation.HubRoute
-import com.segnities007.navigation.ItemsRoute
 import com.segnities007.items.mvi.ItemsEffect
 import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsViewModel
-import com.segnities007.items.page.ItemsListPage
-import com.segnities007.items.page.CameraCapturePage
 import com.segnities007.items.page.BarcodeScannerPage
+import com.segnities007.items.page.CameraCapturePage
+import com.segnities007.items.page.ItemsListPage
+import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.ItemsRoute
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)

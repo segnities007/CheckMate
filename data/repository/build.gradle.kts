@@ -16,7 +16,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-        
+
         // local.propertiesからAPIキーを読み込む
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
@@ -42,7 +42,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    
+
     buildFeatures {
         buildConfig = true
     }
@@ -72,8 +72,7 @@ dependencies {
 
     // Gemini AI
     implementation(libs.google.ai.client)
-    
+
     // datetime (GeminiAiService用)
     implementation(libs.kotlinx.datetime)
-
 }

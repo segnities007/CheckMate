@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -110,28 +110,30 @@ fun CameraCapture(
         Box(modifier = Modifier.fillMaxSize()) {
             // 上部のヘッダー
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .padding(top = 48.dp, start = 16.dp, end = 16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .padding(top = 48.dp, start = 16.dp, end = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // キャンセルボタン
                 IconButton(
                     onClick = onCancel,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            color = Color.Black.copy(alpha = 0.5f),
-                            shape = CircleShape
-                        )
+                    modifier =
+                        Modifier
+                            .size(48.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.5f),
+                                shape = CircleShape,
+                            ),
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "キャンセル",
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 }
 
@@ -141,27 +143,26 @@ fun CameraCapture(
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .background(
-                            color = Color.Black.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier =
+                        Modifier
+                            .background(
+                                color = Color.Black.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(20.dp),
+                            ).padding(horizontal = 16.dp, vertical = 8.dp),
                 )
 
                 // 右側のスペーサー（バランス用）
                 Spacer(modifier = Modifier.size(48.dp))
             }
 
-
-
             // 下部のコントロールエリア
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 48.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 48.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 // 撮影ボタン
                 FloatingActionButton(
@@ -194,12 +195,12 @@ fun CameraCapture(
                     },
                     modifier = Modifier.size(80.dp),
                     containerColor = Color.White,
-                    contentColor = Color.Black
+                    contentColor = Color.Black,
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
                         contentDescription = "撮影",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     )
                 }
 
@@ -210,12 +211,12 @@ fun CameraCapture(
                     text = "アイテムを撮影してください",
                     color = Color.White,
                     fontSize = 14.sp,
-                    modifier = Modifier
-                        .background(
-                            color = Color.Black.copy(alpha = 0.6f),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier =
+                        Modifier
+                            .background(
+                                color = Color.Black.copy(alpha = 0.6f),
+                                shape = RoundedCornerShape(16.dp),
+                            ).padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
         }
