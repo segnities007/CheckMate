@@ -126,7 +126,7 @@ private fun DashboardUi(
                 )
                 StatCardWithPercentage(
                     title = "累計完了率",
-                    value = "${state.historicalCompletionRate}% (${state.totalCheckedRecordsCount}/${state.totalRecordsCount})",
+                    value = "${state.totalCheckedRecordsCount}/${state.totalRecordsCount}",
                     progress =
                         if (state.totalRecordsCount >
                             0

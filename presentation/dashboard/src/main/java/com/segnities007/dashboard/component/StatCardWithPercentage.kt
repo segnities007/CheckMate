@@ -74,6 +74,7 @@ fun StatCardWithPercentage(
 
                 CircularProgressWithPercentage(
                     progress = progress,
+                    modifier = Modifier.size(64.dp),
                 )
             }
         }
