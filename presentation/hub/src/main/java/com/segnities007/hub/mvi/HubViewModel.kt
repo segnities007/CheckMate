@@ -9,6 +9,7 @@ import org.koin.core.component.KoinComponent
 
 class HubViewModel(
     private val userRepository: UserRepository,
+    private val reducer: HubReducer = HubReducer(),
 ) : BaseViewModel<HubIntent, HubState, HubEffect>(HubState()),
     KoinComponent {
     override suspend fun handleIntent(intent: HubIntent) {
@@ -25,24 +26,24 @@ class HubViewModel(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             val userStatus = userRepository.getUserStatus()
-            setState { copy(userStatus = userStatus) }
+            setState { it.copy(userStatus = userStatus) }
         }
     }
 
     private fun setBottomBar(intent: HubIntent.SetBottomBar) {
-        setState { copy(bottomBar = intent.bottomBar) }
+        setState { state -> reducer.reduce(state, intent) }
     }
 
     private fun setTopBar(intent: HubIntent.SetTopBar) {
-        setState { copy(topBar = intent.topBar) }
+        setState { state -> reducer.reduce(state, intent) }
     }
 
     private fun setFab(intent: HubIntent.SetFab) {
-        setState { copy(fab = intent.fab) }
+        setState { state -> reducer.reduce(state, intent) }
     }
 
     private fun navigate(intent: HubIntent.Navigate) {
-        setState { copy(currentHubRoute = intent.hubRoute) }
+        setState { state -> reducer.reduce(state, intent) }
         sendEffect { HubEffect.Navigate(intent.hubRoute) }
     }
 

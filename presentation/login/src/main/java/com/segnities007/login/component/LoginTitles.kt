@@ -39,3 +39,4 @@ fun LoginTitles(modifier: Modifier = Modifier) {
         )
     }
 }
+

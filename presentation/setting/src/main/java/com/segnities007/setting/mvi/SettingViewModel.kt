@@ -28,6 +28,7 @@ class SettingViewModel(
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val userRepository: UserRepository,
     private val icsTemplateRepository: IcsTemplateRepository,
+    private val reducer: SettingReducer = SettingReducer(),
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
     init {
         loadUserStatus()
@@ -37,7 +38,8 @@ class SettingViewModel(
         viewModelScope.launch {
             try {
                 val userStatus = userRepository.getUserStatus()
-                setState { copy(userStatus = userStatus) }
+                setState { reducer.reduce(this, SettingIntent.ShowToast("")) }
+                setState { state -> state.copy(userStatus = userStatus) }
             } catch (e: Exception) {
                 Log.e("SettingViewModel", "Failed to load user status", e)
             }
@@ -97,7 +99,7 @@ class SettingViewModel(
     }
 
     private fun showDeleteAllDataConfirmation() {
-        setState { copy(showDeleteAllDataDialog = true) }
+        setState { state -> reducer.reduce(state, SettingIntent.DeleteAllData) }
     }
 
     private fun confirmDeleteAllData() {
@@ -109,7 +111,7 @@ class SettingViewModel(
                     weeklyTemplateRepository.clearAllTemplates()
                     itemRepository.clearAllItems()
                 }
-                setState { copy(showDeleteAllDataDialog = false) }
+                setState { state -> reducer.reduce(state, SettingIntent.ConfirmDeleteAllData) }
                 sendEffect { SettingEffect.ShowToast("全データを削除しました") }
             } catch (e: Exception) {
                 sendEffect { SettingEffect.ShowToast("データ削除失敗: ${e.message}") }
@@ -119,7 +121,7 @@ class SettingViewModel(
     }
 
     private fun cancelDeleteAllData() {
-        setState { copy(showDeleteAllDataDialog = false) }
+        setState { state -> reducer.reduce(state, SettingIntent.CancelDeleteAllData) }
     }
 
     private fun linkWithGoogle() {
@@ -127,7 +129,7 @@ class SettingViewModel(
             try {
                 userRepository.loginWithGoogle()
                 val updatedUserStatus = userRepository.getUserStatus()
-                setState { copy(userStatus = updatedUserStatus) }
+                setState { state -> state.copy(userStatus = updatedUserStatus) }
                 sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
             } catch (e: Exception) {
                 sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
@@ -140,7 +142,7 @@ class SettingViewModel(
             try {
                 userRepository.loginWithGoogle()
                 val updatedUserStatus = userRepository.getUserStatus()
-                setState { copy(userStatus = updatedUserStatus) }
+                setState { state -> state.copy(userStatus = updatedUserStatus) }
                 sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
             } catch (e: Exception) {
                 sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
@@ -151,12 +153,12 @@ class SettingViewModel(
     private fun importIcsFile(intent: SettingIntent.ImportIcsFile) {
         viewModelScope.launch {
             try {
-                setState { copy(isImportingIcs = true) }
+                setState { state -> reducer.reduce(state, intent) }
 
                 val templates = icsTemplateRepository.generateTemplatesFromIcs(intent.uri)
                 icsTemplateRepository.saveGeneratedTemplates(templates)
 
-                setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
+                setState { state -> state.copy(isImportingIcs = false, showIcsImportDialog = false) }
                 sendEffect {
                     SettingEffect.ShowIcsImportResult(
                         successCount = templates.size,
@@ -164,7 +166,7 @@ class SettingViewModel(
                     )
                 }
             } catch (e: Exception) {
-                setState { copy(isImportingIcs = false) }
+                setState { state -> state.copy(isImportingIcs = false) }
                 sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
                 Log.e("SettingViewModel", "ICSインポート失敗", e)
             }
@@ -172,11 +174,11 @@ class SettingViewModel(
     }
 
     private fun showIcsImportDialog() {
-        setState { copy(showIcsImportDialog = true) }
+        setState { state -> reducer.reduce(state, SettingIntent.ShowIcsImportDialog) }
     }
 
     private fun hideIcsImportDialog() {
-        setState { copy(showIcsImportDialog = false) }
+        setState { state -> reducer.reduce(state, SettingIntent.HideIcsImportDialog) }
     }
 
     private suspend fun saveToDownloads(

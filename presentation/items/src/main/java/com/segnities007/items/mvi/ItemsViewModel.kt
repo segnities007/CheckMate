@@ -15,6 +15,7 @@ import kotlin.uuid.Uuid
 class ItemsViewModel(
     private val itemRepository: ItemRepository,
     private val imageRepository: ImageRepository,
+    private val reducer: ItemsReducer = ItemsReducer(),
 ) : BaseViewModel<ItemsIntent, ItemsState, ItemsEffect>(ItemsState()),
     KoinComponent {
     init {
@@ -43,29 +44,29 @@ class ItemsViewModel(
     }
 
     private fun updateIsShowBottomSheet(intent: ItemsIntent.UpdateIsShowBottomSheet) {
-        setState { copy(isShowBottomSheet = intent.isShowBottomSheet) }
+        setState { state -> reducer.reduce(state, intent) }
     }
 
     private fun updateCapturedImageUriForBottomSheet(intent: ItemsIntent.UpdateCapturedImageUriForBottomSheet) {
-        setState { copy(capturedImageUriForBottomSheet = intent.capturedImageUriForBottomSheet) }
+        setState { state -> reducer.reduce(state, intent) }
     }
 
     private fun updateCapturedTempPathForViewModel(intent: ItemsIntent.UpdateCapturedTempPathForViewModel) {
-        setState { copy(capturedTempPathForViewModel = intent.capturedTempPathForViewModel) }
+        setState { state -> reducer.reduce(state, intent) }
     }
 
     private fun updateSearchQuery(intent: ItemsIntent.UpdateSearchQuery) {
-        setState { copy(searchQuery = intent.query) }
+        setState { state -> reducer.reduce(state, intent) }
         applyFilters()
     }
 
     private fun updateSelectedCategory(intent: ItemsIntent.UpdateSelectedCategory) {
-        setState { copy(selectedCategory = intent.category) }
+        setState { state -> reducer.reduce(state, intent) }
         applyFilters()
     }
 
     private fun updateSortOrder(intent: ItemsIntent.UpdateSortOrder) {
-        setState { copy(sortOrder = intent.sortOrder) }
+        setState { state -> reducer.reduce(state, intent) }
         applyFilters()
     }
 

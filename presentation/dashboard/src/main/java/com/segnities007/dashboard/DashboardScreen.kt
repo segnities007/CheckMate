@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -22,9 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.segnities007.dashboard.component.ProgressCardsRow
-import com.segnities007.dashboard.component.StatCardsRow
-import com.segnities007.dashboard.component.UncheckedItemsSection
+import com.segnities007.dashboard.component.StatCard
+import com.segnities007.dashboard.component.StatCardWithPercentage
+import com.segnities007.dashboard.component.UncheckedItemsCard
 import com.segnities007.dashboard.mvi.DashboardState
 import com.segnities007.dashboard.mvi.DashboardViewModel
 import com.segnities007.navigation.HubRoute
@@ -97,19 +98,39 @@ private fun DashboardUi(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             HorizontalDividerWithLabel("統計")
-            StatCardsRow(
-                itemCount = state.itemCount,
-                templateCount = state.templateCount,
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StatCard(
+                    title = "総アイテム数",
+                    value = state.itemCount.toString(),
+                    modifier = Modifier.weight(1f),
+                )
+                StatCard(
+                    title = "総テンプレート数",
+                    value = state.templateCount.toString(),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StatCardWithPercentage(
+                    title = "本日の完了率",
+                    value = "${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
+                    progress = if (state.scheduledItemCountToday > 0) (state.checkedItemCountToday.toFloat() / state.scheduledItemCountToday) else 0f,
+                    modifier = Modifier.weight(1f),
+                )
+                StatCardWithPercentage(
+                    title = "累計完了率",
+                    value = "${state.totalCheckedRecordsCount}/${state.totalRecordsCount}",
+                    progress = if (state.totalRecordsCount > 0) (state.totalCheckedRecordsCount.toFloat() / state.totalRecordsCount) else 0f,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            UncheckedItemsCard(
+                title = "本日の未チェックアイテム",
+                items = state.uncheckedItemsToday,
             )
-            ProgressCardsRow(
-                checkedItemCountToday = state.checkedItemCountToday,
-                scheduledItemCountToday = state.scheduledItemCountToday,
-                totalCheckedRecordsCount = state.totalCheckedRecordsCount,
-                totalRecordsCount = state.totalRecordsCount,
-            )
-            UncheckedItemsSection(
-                uncheckedItemsToday = state.uncheckedItemsToday,
-                uncheckedItemsTomorrow = state.uncheckedItemsTomorrow,
+            UncheckedItemsCard(
+                title = "明日の未チェックアイテム",
+                items = state.uncheckedItemsTomorrow,
             )
         }
     }

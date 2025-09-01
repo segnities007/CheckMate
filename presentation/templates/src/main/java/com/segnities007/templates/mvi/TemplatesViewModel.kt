@@ -13,6 +13,7 @@ import kotlin.time.ExperimentalTime
 class TemplatesViewModel(
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val itemRepository: ItemRepository,
+    private val reducer: TemplatesReducer = TemplatesReducer(),
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
         initialState = TemplatesState(),
     ) {
@@ -37,8 +38,8 @@ class TemplatesViewModel(
             TemplatesIntent.GetAllWeeklyTemplates -> getAllWeeklyTemplates()
             TemplatesIntent.GetAllItems -> getAllItems()
 
-            TemplatesIntent.ShowBottomSheet -> setState { copy(isShowingBottomSheet = true) }
-            TemplatesIntent.HideBottomSheet -> setState { copy(isShowingBottomSheet = false) }
+            TemplatesIntent.ShowBottomSheet -> setState { state -> reducer.reduce(state, TemplatesIntent.ShowBottomSheet) }
+            TemplatesIntent.HideBottomSheet -> setState { state -> reducer.reduce(state, TemplatesIntent.HideBottomSheet) }
 
             TemplatesIntent.NavigateToWeeklyTemplateList ->
                 sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
@@ -59,32 +60,32 @@ class TemplatesViewModel(
     }
 
     private fun updateSearchQuery(intent: TemplatesIntent.UpdateSearchQuery) {
-        setState { copy(searchQuery = intent.query) }
+        setState { state -> reducer.reduce(state, intent) }
         applyFilters()
     }
 
     private fun updateSelectedCategory(intent: TemplatesIntent.UpdateSelectedCategory) {
-        setState { copy(selectedCategory = intent.category) }
+        setState { state -> reducer.reduce(state, intent) }
         applyFilters()
     }
 
     private fun updateSortOrder(intent: TemplatesIntent.UpdateSortOrder) {
-        setState { copy(sortOrder = intent.sortOrder) }
+        setState { state -> reducer.reduce(state, intent) }
         applyFilters()
     }
 
     private fun updateTemplateSearchQuery(intent: TemplatesIntent.UpdateTemplateSearchQuery) {
-        setState { copy(templateSearchQuery = intent.query) }
+        setState { state -> reducer.reduce(state, intent) }
         applyTemplateFilters()
     }
 
     private fun updateTemplateSortOrder(intent: TemplatesIntent.UpdateTemplateSortOrder) {
-        setState { copy(templateSortOrder = intent.sortOrder) }
+        setState { state -> reducer.reduce(state, intent) }
         applyTemplateFilters()
     }
 
     private fun updateSelectedDayOfWeek(intent: TemplatesIntent.UpdateSelectedDayOfWeek) {
-        setState { copy(selectedDayOfWeek = intent.dayOfWeek) }
+        setState { state -> reducer.reduce(state, intent) }
         applyTemplateFilters()
     }
 
@@ -197,7 +198,7 @@ class TemplatesViewModel(
     }
 
     private fun showDeleteConfirmation(template: WeeklyTemplate) {
-        setState { copy(templateToDelete = template) }
+        setState { state -> reducer.reduce(state, TemplatesIntent.DeleteWeeklyTemplate(template)) }
     }
 
     private fun confirmDeleteTemplate() {
@@ -205,7 +206,7 @@ class TemplatesViewModel(
         if (templateToDelete != null) {
             viewModelScope.launch {
                 weeklyTemplateRepository.deleteTemplate(templateToDelete)
-                setState { copy(templateToDelete = null) }
+                setState { state -> reducer.reduce(state, TemplatesIntent.ConfirmDeleteTemplate) }
                 getAllWeeklyTemplates()
                 sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
             }
@@ -213,11 +214,11 @@ class TemplatesViewModel(
     }
 
     private fun cancelDeleteTemplate() {
-        setState { copy(templateToDelete = null) }
+        setState { state -> reducer.reduce(state, TemplatesIntent.CancelDeleteTemplate) }
     }
 
     private fun selectTemplate(template: WeeklyTemplate) {
-        setState { copy(selectedTemplate = template) }
+        setState { state -> reducer.reduce(state, TemplatesIntent.SelectTemplate(template)) }
         sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
     }
 }
