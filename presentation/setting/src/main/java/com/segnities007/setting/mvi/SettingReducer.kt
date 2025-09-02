@@ -7,16 +7,18 @@ class SettingReducer : MviReducer<SettingState, SettingIntent> {
         return when (intent) {
             is SettingIntent.ShowIcsImportDialog -> currentState.copy(showIcsImportDialog = true)
             is SettingIntent.HideIcsImportDialog -> currentState.copy(showIcsImportDialog = false)
-            is SettingIntent.ShowToast -> currentState // Effectのみ、状態変化なし
             is SettingIntent.DeleteAllData -> currentState.copy(showDeleteAllDataDialog = true)
             is SettingIntent.CancelDeleteAllData -> currentState.copy(showDeleteAllDataDialog = false)
             is SettingIntent.ConfirmDeleteAllData -> currentState.copy(showDeleteAllDataDialog = false)
-            is SettingIntent.LinkWithGoogle -> currentState // Effectのみ、状態変化なし
-            is SettingIntent.ChangeGoogleAccount -> currentState // Effectのみ、状態変化なし
             is SettingIntent.ImportIcsFile -> currentState.copy(isImportingIcs = true)
-            is SettingIntent.ImportData -> currentState // Effectのみ、状態変化なし
-                is SettingIntent.ExportData -> currentState // Effectのみ、状態変化なし
-                else -> currentState
+            // Effect-only intents: these do not modify state, but trigger side effects handled elsewhere.
+            // They simply return the current state unchanged.
+            is SettingIntent.ShowToast,
+            is SettingIntent.LinkWithGoogle,
+            is SettingIntent.ChangeGoogleAccount,
+            is SettingIntent.ImportData,
+            is SettingIntent.ExportData -> currentState
+            else -> currentState
         }
     }
 }
