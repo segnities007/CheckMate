@@ -20,48 +20,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-@Serializable
-data class GeminiRequest(
-    val contents: List<Content>,
-    val generationConfig: GenerationConfig? = null,
-)
-
-@Serializable
-data class Content(
-    val parts: List<Part>,
-)
-
-@Serializable
-data class Part(
-    val text: String,
-)
-
-@Serializable
-data class GenerationConfig(
-    val temperature: Double = 0.7,
-    val topK: Int = 40,
-    val topP: Double = 0.95,
-    val maxOutputTokens: Int = 1024,
-)
-
-@Serializable
-data class GeminiResponse(
-    val candidates: List<Candidate>? = null,
-    val error: GeminiError? = null,
-)
-
-@Serializable
-data class Candidate(
-    val content: Content,
-)
-
-@Serializable
-data class GeminiError(
-    val code: Int? = null,
-    val message: String? = null,
-    val status: String? = null,
-)
-
 class GeminiAiService(
     private val apiKey: String,
 ) {
@@ -94,7 +52,7 @@ class GeminiAiService(
             try {
                 if (apiKey.isBlank()) {
                     Log.w("GeminiAiService", "API key is blank")
-                    return@withContext emptyList<Int>()
+                    return@withContext emptyList()
                 }
 
                 val prompt = buildPrompt(event, availableItems)
