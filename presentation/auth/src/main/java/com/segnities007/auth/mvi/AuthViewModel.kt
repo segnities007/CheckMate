@@ -7,6 +7,7 @@ import com.segnities007.repository.UserRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.ui.mvi.MviState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
@@ -18,24 +19,27 @@ class AuthViewModel(
         when (intent) {
             is AuthIntent.Navigate -> navigate(intent)
             is AuthIntent.ShowToast -> showToast(intent)
+            AuthIntent.CheckAccount -> checkAccount()
             is AuthIntent.TopNavigate -> topNavigate(intent)
         }
     }
 
     init {
-        init()
+        sendIntent(AuthIntent.CheckAccount)
     }
 
     private fun init() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = userRepository.isAccountCreated()
-            if (result) {
-                topNavigate(AuthIntent.TopNavigate(Route.Hub))
-            } else {
-                navigate(
-                    AuthIntent.Navigate(AuthRoute.Login),
-                )
-            }
+        // kept for compatibility but not used; checkAccount handles the logic
+    }
+
+    private suspend fun checkAccount() {
+        val result = withContext(Dispatchers.IO) { userRepository.isAccountCreated() }
+        if (result) {
+            topNavigate(AuthIntent.TopNavigate(Route.Hub))
+        } else {
+            navigate(
+                AuthIntent.Navigate(AuthRoute.Login),
+            )
         }
     }
 

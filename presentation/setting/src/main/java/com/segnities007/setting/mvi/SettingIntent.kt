@@ -33,4 +33,6 @@ sealed interface SettingIntent : MviIntent {
     data object ShowIcsImportDialog : SettingIntent
 
     data object HideIcsImportDialog : SettingIntent
+
+    data object LoadUserStatus : SettingIntent
 }

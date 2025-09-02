@@ -26,4 +26,16 @@ sealed interface HomeIntent : MviIntent {
         val year: Int,
         val month: Int,
     ) : HomeIntent
+
+    data object EnsureCheckHistory : HomeIntent
+
+    // Reducer-only intents
+    data class SetAllItems(
+        val allItems: List<com.segnities007.model.item.Item>,
+    ) : HomeIntent
+
+    data class SetItemCheckStates(
+        val date: kotlinx.datetime.LocalDate,
+        val itemCheckStates: Map<Int, Boolean>,
+    ) : HomeIntent
 }

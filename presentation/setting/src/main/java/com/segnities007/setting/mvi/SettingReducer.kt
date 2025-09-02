@@ -15,7 +15,8 @@ class SettingReducer : MviReducer<SettingState, SettingIntent> {
             is SettingIntent.ChangeGoogleAccount -> currentState // Effectのみ、状態変化なし
             is SettingIntent.ImportIcsFile -> currentState.copy(isImportingIcs = true)
             is SettingIntent.ImportData -> currentState // Effectのみ、状態変化なし
-            is SettingIntent.ExportData -> currentState // Effectのみ、状態変化なし
+                is SettingIntent.ExportData -> currentState // Effectのみ、状態変化なし
+                else -> currentState
         }
     }
 }

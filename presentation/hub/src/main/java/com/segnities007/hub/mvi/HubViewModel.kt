@@ -5,17 +5,19 @@ import com.segnities007.repository.UserRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 
 class HubViewModel(
     private val userRepository: UserRepository,
-    private val reducer: HubReducer = HubReducer(),
 ) : BaseViewModel<HubIntent, HubState, HubEffect>(HubState()),
     KoinComponent {
+    private val reducer: HubReducer = HubReducer()
     override suspend fun handleIntent(intent: HubIntent) {
         when (intent) {
             is HubIntent.Navigate -> navigate(intent)
             is HubIntent.ShowToast -> showToast(intent)
+            HubIntent.LoadUserStatus -> loadUserStatus()
             HubIntent.Logout -> logout()
             is HubIntent.SetBottomBar -> setBottomBar(intent)
             is HubIntent.SetFab -> setFab(intent)
@@ -24,26 +26,28 @@ class HubViewModel(
     }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            val userStatus = userRepository.getUserStatus()
-            setState { it.copy(userStatus = userStatus) }
-        }
+        sendIntent(HubIntent.LoadUserStatus)
+    }
+
+    private suspend fun loadUserStatus() {
+        val userStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
+        setState { copy(userStatus = userStatus) }
     }
 
     private fun setBottomBar(intent: HubIntent.SetBottomBar) {
-        setState { state -> reducer.reduce(state, intent) }
+    setState { reducer.reduce(this, intent) }
     }
 
     private fun setTopBar(intent: HubIntent.SetTopBar) {
-        setState { state -> reducer.reduce(state, intent) }
+    setState { reducer.reduce(this, intent) }
     }
 
     private fun setFab(intent: HubIntent.SetFab) {
-        setState { state -> reducer.reduce(state, intent) }
+    setState { reducer.reduce(this, intent) }
     }
 
     private fun navigate(intent: HubIntent.Navigate) {
-        setState { state -> reducer.reduce(state, intent) }
+    setState { reducer.reduce(this, intent) }
         sendEffect { HubEffect.Navigate(intent.hubRoute) }
     }
 

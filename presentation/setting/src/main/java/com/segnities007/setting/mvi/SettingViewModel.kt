@@ -28,26 +28,23 @@ class SettingViewModel(
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val userRepository: UserRepository,
     private val icsTemplateRepository: IcsTemplateRepository,
-    private val reducer: SettingReducer = SettingReducer(),
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
+    private val reducer: SettingReducer = SettingReducer()
     init {
-        loadUserStatus()
+    sendIntent(SettingIntent.LoadUserStatus)
     }
-
-    private fun loadUserStatus() {
-        viewModelScope.launch {
-            try {
-                val userStatus = userRepository.getUserStatus()
-                setState { reducer.reduce(this, SettingIntent.ShowToast("")) }
-                setState { state -> state.copy(userStatus = userStatus) }
-            } catch (e: Exception) {
-                Log.e("SettingViewModel", "Failed to load user status", e)
-            }
+    private suspend fun loadUserStatus() {
+        try {
+            val userStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
+            setState { copy(userStatus = userStatus) }
+        } catch (e: Exception) {
+            Log.e("SettingViewModel", "Failed to load user status", e)
         }
     }
 
     override suspend fun handleIntent(intent: SettingIntent) {
         when (intent) {
+            SettingIntent.LoadUserStatus -> loadUserStatus()
             is SettingIntent.ExportData -> exportData()
             is SettingIntent.ImportData -> importData(intent)
             is SettingIntent.DeleteAllData -> showDeleteAllDataConfirmation()
@@ -66,119 +63,106 @@ class SettingViewModel(
         sendEffect { SettingEffect.ShowToast(intent.message) }
     }
 
-    private fun exportData() {
-        viewModelScope.launch {
-            try {
-                val jsonString = backupRepository.exportData()
-                saveToDownloads("backup.json", jsonString)
-                sendEffect { SettingEffect.ShowToast("バックアップ完了") }
-            } catch (e: Exception) {
-                sendEffect { SettingEffect.ShowToast("バックアップ失敗: ${e.message}") }
-                Log.e("SettingViewModel", "バックアップ失敗", e)
-            }
+    private suspend fun exportData() {
+        try {
+            val jsonString = withContext(Dispatchers.IO) { backupRepository.exportData() }
+            saveToDownloads("backup.json", jsonString)
+            sendEffect { SettingEffect.ShowToast("バックアップ完了") }
+        } catch (e: Exception) {
+            sendEffect { SettingEffect.ShowToast("バックアップ失敗: ${e.message}") }
+            Log.e("SettingViewModel", "バックアップ失敗", e)
         }
     }
 
-    private fun importData(intent: SettingIntent.ImportData) {
-        viewModelScope.launch {
-            try {
-                val jsonString =
-                    withContext(Dispatchers.IO) {
-                        appContext.contentResolver
-                            .openInputStream(intent.uri)
-                            ?.bufferedReader()
-                            ?.use { it.readText() }
-                            ?: throw IllegalStateException("ファイルが読み込めません")
-                    }
-                backupRepository.importData(jsonString)
-                sendEffect { SettingEffect.ShowToast("インポート完了") }
-            } catch (e: Exception) {
-                sendEffect { SettingEffect.ShowToast("インポート失敗: ${e.message}") }
+    private suspend fun importData(intent: SettingIntent.ImportData) {
+        try {
+            val jsonString = withContext(Dispatchers.IO) {
+                appContext.contentResolver
+                    .openInputStream(intent.uri)
+                    ?.bufferedReader()
+                    ?.use { it.readText() }
+                    ?: throw IllegalStateException("ファイルが読み込めません")
             }
+            backupRepository.importData(jsonString)
+            sendEffect { SettingEffect.ShowToast("インポート完了") }
+        } catch (e: Exception) {
+            sendEffect { SettingEffect.ShowToast("インポート失敗: ${e.message}") }
         }
     }
 
     private fun showDeleteAllDataConfirmation() {
-        setState { state -> reducer.reduce(state, SettingIntent.DeleteAllData) }
+    setState { reducer.reduce(this, SettingIntent.DeleteAllData) }
     }
 
-    private fun confirmDeleteAllData() {
-        viewModelScope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    // Repositoryを使用して全データを削除
-                    itemCheckStateRepository.clearAllCheckStates()
-                    weeklyTemplateRepository.clearAllTemplates()
-                    itemRepository.clearAllItems()
-                }
-                setState { state -> reducer.reduce(state, SettingIntent.ConfirmDeleteAllData) }
-                sendEffect { SettingEffect.ShowToast("全データを削除しました") }
-            } catch (e: Exception) {
-                sendEffect { SettingEffect.ShowToast("データ削除失敗: ${e.message}") }
-                Log.e("SettingViewModel", "データ削除失敗", e)
+    private suspend fun confirmDeleteAllData() {
+        try {
+            withContext(Dispatchers.IO) {
+                // Repositoryを使用して全データを削除
+                itemCheckStateRepository.clearAllCheckStates()
+                weeklyTemplateRepository.clearAllTemplates()
+                itemRepository.clearAllItems()
             }
+            setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
+            sendEffect { SettingEffect.ShowToast("全データを削除しました") }
+        } catch (e: Exception) {
+            sendEffect { SettingEffect.ShowToast("データ削除失敗: ${e.message}") }
+            Log.e("SettingViewModel", "データ削除失敗", e)
         }
     }
 
     private fun cancelDeleteAllData() {
-        setState { state -> reducer.reduce(state, SettingIntent.CancelDeleteAllData) }
+    setState { reducer.reduce(this, SettingIntent.CancelDeleteAllData) }
     }
 
-    private fun linkWithGoogle() {
-        viewModelScope.launch {
-            try {
-                userRepository.loginWithGoogle()
-                val updatedUserStatus = userRepository.getUserStatus()
-                setState { state -> state.copy(userStatus = updatedUserStatus) }
-                sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
-            } catch (e: Exception) {
-                sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
-            }
+    private suspend fun linkWithGoogle() {
+        try {
+            withContext(Dispatchers.IO) { userRepository.loginWithGoogle() }
+            val updatedUserStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
+            setState { copy(userStatus = updatedUserStatus) }
+            sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
+        } catch (e: Exception) {
+            sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
         }
     }
 
-    private fun changeGoogleAccount() {
-        viewModelScope.launch {
-            try {
-                userRepository.loginWithGoogle()
-                val updatedUserStatus = userRepository.getUserStatus()
-                setState { state -> state.copy(userStatus = updatedUserStatus) }
-                sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
-            } catch (e: Exception) {
-                sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
-            }
+    private suspend fun changeGoogleAccount() {
+        try {
+            withContext(Dispatchers.IO) { userRepository.loginWithGoogle() }
+            val updatedUserStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
+            setState { copy(userStatus = updatedUserStatus) }
+            sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
+        } catch (e: Exception) {
+            sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
         }
     }
 
-    private fun importIcsFile(intent: SettingIntent.ImportIcsFile) {
-        viewModelScope.launch {
-            try {
-                setState { state -> reducer.reduce(state, intent) }
+    private suspend fun importIcsFile(intent: SettingIntent.ImportIcsFile) {
+        try {
+            setState { reducer.reduce(this, intent) }
 
-                val templates = icsTemplateRepository.generateTemplatesFromIcs(intent.uri)
-                icsTemplateRepository.saveGeneratedTemplates(templates)
+            val templates = withContext(Dispatchers.IO) { icsTemplateRepository.generateTemplatesFromIcs(intent.uri) }
+            withContext(Dispatchers.IO) { icsTemplateRepository.saveGeneratedTemplates(templates) }
 
-                setState { state -> state.copy(isImportingIcs = false, showIcsImportDialog = false) }
-                sendEffect {
-                    SettingEffect.ShowIcsImportResult(
-                        successCount = templates.size,
-                        totalCount = templates.size,
-                    )
-                }
-            } catch (e: Exception) {
-                setState { state -> state.copy(isImportingIcs = false) }
-                sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
-                Log.e("SettingViewModel", "ICSインポート失敗", e)
+            setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
+            sendEffect {
+                SettingEffect.ShowIcsImportResult(
+                    successCount = templates.size,
+                    totalCount = templates.size,
+                )
             }
+        } catch (e: Exception) {
+            setState { copy(isImportingIcs = false) }
+            sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
+            Log.e("SettingViewModel", "ICSインポート失敗", e)
         }
     }
 
     private fun showIcsImportDialog() {
-        setState { state -> reducer.reduce(state, SettingIntent.ShowIcsImportDialog) }
+    setState { reducer.reduce(this, SettingIntent.ShowIcsImportDialog) }
     }
 
     private fun hideIcsImportDialog() {
-        setState { state -> reducer.reduce(state, SettingIntent.HideIcsImportDialog) }
+    setState { reducer.reduce(this, SettingIntent.HideIcsImportDialog) }
     }
 
     private suspend fun saveToDownloads(

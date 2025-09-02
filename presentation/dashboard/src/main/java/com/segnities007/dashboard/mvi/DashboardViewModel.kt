@@ -17,12 +17,11 @@ class DashboardViewModel(
     private val itemRepository: ItemRepository,
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val itemCheckStateRepository: ItemCheckStateRepository,
-    private val reducer: DashboardReducer = DashboardReducer(),
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
+    private val reducer: DashboardReducer = DashboardReducer()
     init {
-        viewModelScope.launch {
-            handleIntent(DashboardIntent.LoadDashboardData)
-        }
+    // schedule load via BaseViewModel.sendIntent
+    sendIntent(DashboardIntent.LoadDashboardData)
     }
 
     override suspend fun handleIntent(intent: DashboardIntent) {
@@ -33,7 +32,7 @@ class DashboardViewModel(
 
     @OptIn(ExperimentalTime::class)
     private suspend fun loadDashboardData() {
-        setState { state -> reducer.reduce(state, DashboardIntent.LoadDashboardData) }
+    setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
         try {
             val allItems = itemRepository.getAllItems()
             val itemCount = allItems.size
@@ -87,7 +86,7 @@ class DashboardViewModel(
                 }
 
             setState {
-                it.copy(
+                copy(
                     isLoading = false,
                     itemCount = itemCount,
                     templateCount = templateCount,
@@ -103,7 +102,7 @@ class DashboardViewModel(
             }
         } catch (e: Exception) {
             val errorMessage = e.localizedMessage ?: "不明なエラーが発生しました"
-            setState { it.copy(isLoading = false, error = errorMessage) }
+            setState { copy(isLoading = false, error = errorMessage) }
 //            sendEffect { DashboardEffect.ShowError("データの読み込みに失敗しました: $errorMessage") }
         }
     }

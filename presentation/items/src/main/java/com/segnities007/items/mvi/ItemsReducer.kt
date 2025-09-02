@@ -11,6 +11,12 @@ class ItemsReducer : MviReducer<ItemsState, ItemsIntent> {
             is ItemsIntent.UpdateSearchQuery -> currentState.copy(searchQuery = intent.query)
             is ItemsIntent.UpdateSelectedCategory -> currentState.copy(selectedCategory = intent.category)
             is ItemsIntent.UpdateSortOrder -> currentState.copy(sortOrder = intent.sortOrder)
+            is ItemsIntent.SetFilteredItems -> currentState.copy(filteredItems = intent.filteredItems)
+            is ItemsIntent.SetItems -> currentState.copy(items = intent.items)
+            is ItemsIntent.SetScannedBarcodeInfo -> currentState.copy(scannedBarcodeInfo = intent.barcodeInfo)
+            is ItemsIntent.SetProductInfoLoading -> currentState.copy(isLoadingProductInfo = intent.isLoading)
+            is ItemsIntent.SetProductInfo -> currentState.copy(productInfo = intent.productInfo)
+            is ItemsIntent.SetShouldClearForm -> currentState.copy(shouldClearForm = intent.shouldClear)
             else -> currentState
         }
     }

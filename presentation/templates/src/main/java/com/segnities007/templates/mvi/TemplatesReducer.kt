@@ -16,6 +16,10 @@ class TemplatesReducer : MviReducer<TemplatesState, TemplatesIntent> {
             is TemplatesIntent.SelectTemplate -> currentState.copy(selectedTemplate = intent.weeklyTemplate)
             is TemplatesIntent.DeleteWeeklyTemplate -> currentState.copy(templateToDelete = intent.weeklyTemplate)
             TemplatesIntent.ConfirmDeleteTemplate, TemplatesIntent.CancelDeleteTemplate -> currentState.copy(templateToDelete = null)
+            is TemplatesIntent.SetFilteredItems -> currentState.copy(filteredItems = intent.filteredItems)
+            is TemplatesIntent.SetFilteredTemplates -> currentState.copy(filteredTemplates = intent.filteredTemplates)
+            is TemplatesIntent.SetAllItems -> currentState.copy(allItems = intent.allItems)
+            is TemplatesIntent.SetWeeklyTemplates -> currentState.copy(weeklyTemplates = intent.weeklyTemplates)
             else -> currentState
         }
     }

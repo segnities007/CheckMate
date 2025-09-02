@@ -13,6 +13,8 @@ sealed interface AuthIntent : MviIntent {
         val route: Route,
     ) : AuthIntent
 
+    data object CheckAccount : AuthIntent
+
     data class ShowToast(
         val message: String,
     ) : AuthIntent

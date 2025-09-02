@@ -60,4 +60,29 @@ sealed interface ItemsIntent : MviIntent {
     ) : ItemsIntent
 
     data object ClearProductInfo : ItemsIntent
+    
+    // Reducer-only intents for updating computed/presentation state
+    data class SetFilteredItems(
+        val filteredItems: List<Item>,
+    ) : ItemsIntent
+
+    data class SetItems(
+        val items: List<Item>,
+    ) : ItemsIntent
+
+    data class SetScannedBarcodeInfo(
+        val barcodeInfo: BarcodeInfo?,
+    ) : ItemsIntent
+
+    data class SetProductInfoLoading(
+        val isLoading: Boolean,
+    ) : ItemsIntent
+
+    data class SetProductInfo(
+        val productInfo: com.segnities007.model.item.ProductInfo?,
+    ) : ItemsIntent
+
+    data class SetShouldClearForm(
+        val shouldClear: Boolean,
+    ) : ItemsIntent
 }

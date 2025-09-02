@@ -65,4 +65,21 @@ sealed interface TemplatesIntent : MviIntent {
     data object ConfirmDeleteTemplate : TemplatesIntent
 
     data object CancelDeleteTemplate : TemplatesIntent
+
+    // Reducer-only intents for computed/presentation state
+    data class SetFilteredItems(
+        val filteredItems: List<com.segnities007.model.item.Item>,
+    ) : TemplatesIntent
+
+    data class SetFilteredTemplates(
+        val filteredTemplates: List<WeeklyTemplate>,
+    ) : TemplatesIntent
+
+    data class SetAllItems(
+        val allItems: List<com.segnities007.model.item.Item>,
+    ) : TemplatesIntent
+
+    data class SetWeeklyTemplates(
+        val weeklyTemplates: List<WeeklyTemplate>,
+    ) : TemplatesIntent
 }

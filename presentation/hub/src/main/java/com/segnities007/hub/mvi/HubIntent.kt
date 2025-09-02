@@ -26,4 +26,6 @@ sealed interface HubIntent : MviIntent {
     data class SetFab(
         val fab: @Composable () -> Unit,
     ) : HubIntent
+
+    data object LoadUserStatus : HubIntent
 }
