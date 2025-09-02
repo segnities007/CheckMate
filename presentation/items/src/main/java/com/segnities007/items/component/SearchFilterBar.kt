@@ -137,7 +137,7 @@ fun SearchFilterBar(
                                 categoryExpanded = false
                             },
                         )
-                        ItemCategory.values().forEach { category ->
+                        ItemCategory.entries.forEach { category ->
                             DropdownMenuItem(
                                 text = { Text(getCategoryDisplayName(category)) },
                                 onClick = {
