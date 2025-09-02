@@ -79,7 +79,4 @@ dependencies {
 
     // datetime
     implementation(libs.kotlinx.datetime)
-
-    // Gemini AI - 独自実装のため除外
-    // implementation(libs.google.ai.client)
 }
