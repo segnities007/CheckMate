@@ -4,6 +4,11 @@ import android.util.Log
 import com.segnities007.model.calendar.CalendarEvent
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.remote.model.Content
+import com.segnities007.remote.model.GeminiRequest
+import com.segnities007.remote.model.GeminiResponse
+import com.segnities007.remote.model.GenerationConfig
+import com.segnities007.remote.model.Part
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
