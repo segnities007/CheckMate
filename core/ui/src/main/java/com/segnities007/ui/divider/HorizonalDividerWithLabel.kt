@@ -35,7 +35,8 @@ fun HorizontalDividerWithLabel(label: String) {
         )
         HorizontalDivider(
             Modifier.weight(8f),
-            color = MaterialTheme.colorScheme.onSurface,)
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 

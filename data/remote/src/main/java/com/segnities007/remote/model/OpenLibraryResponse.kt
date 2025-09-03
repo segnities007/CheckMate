@@ -11,15 +11,15 @@ data class OpenLibraryResponse(
     val covers: List<Int>? = null,
     val isbn_10: List<String>? = null,
     val isbn_13: List<String>? = null,
-    val description: String? = null
+    val description: String? = null,
 )
 
 @Serializable
 data class Author(
-    val name: String? = null
+    val name: String? = null,
 )
 
 @Serializable
 data class Publisher(
-    val name: String? = null
+    val name: String? = null,
 )

@@ -55,47 +55,49 @@ fun ConfirmBar(
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Cancel
+                // Cancel - Material3 Expressive
                 FloatingActionButton(
                     onClick = onCancel,
-                    modifier = Modifier.size(56.dp),
+                    modifier = Modifier.size(64.dp), // Material3 Expressive: より大きなサイズ
                     containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = alpha),
                     contentColor = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = alpha),
-                    elevation = FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 2.dp,
-                        focusedElevation = 0.dp,
-                        hoveredElevation = 1.dp
-                    ),
+                    elevation =
+                        FloatingActionButtonDefaults.elevation(
+                            defaultElevation = 4.dp, // Material3 Expressive: より大きなエレベーション
+                            pressedElevation = 8.dp,
+                            focusedElevation = 4.dp,
+                            hoveredElevation = 6.dp,
+                        ),
                     shape = CircleShape,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Cancel",
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = alpha)
+                        modifier = Modifier.size(32.dp), // Material3 Expressive: より大きなアイコン
+                        tint = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = alpha),
                     )
                 }
 
-                // Confirm
+                // Confirm - Material3 Expressive
                 FloatingActionButton(
                     onClick = onConfirm,
-                    modifier = Modifier.size(56.dp),
+                    modifier = Modifier.size(64.dp), // Material3 Expressive: より大きなサイズ
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha),
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha),
-                    elevation = FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 2.dp,
-                        focusedElevation = 0.dp,
-                        hoveredElevation = 1.dp
-                    ),
+                    elevation =
+                        FloatingActionButtonDefaults.elevation(
+                            defaultElevation = 4.dp, // Material3 Expressive: より大きなエレベーション
+                            pressedElevation = 8.dp,
+                            focusedElevation = 4.dp,
+                            hoveredElevation = 6.dp,
+                        ),
                     shape = CircleShape,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Confirm",
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha)
+                        modifier = Modifier.size(32.dp), // Material3 Expressive: より大きなアイコン
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha),
                     )
                 }
             }

@@ -9,15 +9,17 @@ import kotlinx.serialization.Serializable
 data class ExportItemCheckRecord(
     @Serializable(with = LocalDateSerializer::class)
     val date: LocalDate,
-    val isChecked: Boolean = false
+    val isChecked: Boolean = false,
 )
 
-fun ItemCheckRecord.toExport(): ExportItemCheckRecord = ExportItemCheckRecord(
-    date = date,
-    isChecked = isChecked
-)
+fun ItemCheckRecord.toExport(): ExportItemCheckRecord =
+    ExportItemCheckRecord(
+        date = date,
+        isChecked = isChecked,
+    )
 
-fun ExportItemCheckRecord.toDomain(): ItemCheckRecord = ItemCheckRecord(
-    date = date,
-    isChecked = isChecked
-)
+fun ExportItemCheckRecord.toDomain(): ItemCheckRecord =
+    ItemCheckRecord(
+        date = date,
+        isChecked = isChecked,
+    )

@@ -1,27 +1,27 @@
 package com.segnities007.dashboard.mvi
 
 import androidx.lifecycle.viewModelScope
-import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.ItemCheckStateRepository
+import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.plus
 
 class DashboardViewModel(
     private val itemRepository: ItemRepository,
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val itemCheckStateRepository: ItemCheckStateRepository,
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
+    private val reducer: DashboardReducer = DashboardReducer()
     init {
-        viewModelScope.launch {
-            handleIntent(DashboardIntent.LoadDashboardData)
-        }
+    // schedule load via BaseViewModel.sendIntent
+    sendIntent(DashboardIntent.LoadDashboardData)
     }
 
     override suspend fun handleIntent(intent: DashboardIntent) {
@@ -32,7 +32,7 @@ class DashboardViewModel(
 
     @OptIn(ExperimentalTime::class)
     private suspend fun loadDashboardData() {
-        setState { copy(isLoading = true, error = null) }
+    setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
         try {
             val allItems = itemRepository.getAllItems()
             val itemCount = allItems.size
@@ -47,9 +47,10 @@ class DashboardViewModel(
             val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
             val scheduledItemCountToday = itemIdsForToday.size
             val checkStates = itemCheckStateRepository.getCheckStatesForItems(itemIdsForToday)
-            val checkedItemCountToday = checkStates.count { state ->
-                state.history.any { it.date == today && it.isChecked }
-            }
+            val checkedItemCountToday =
+                checkStates.count { state ->
+                    state.history.any { it.date == today && it.isChecked }
+                }
             val completionRateToday =
                 if (scheduledItemCountToday > 0) {
                     ((checkedItemCountToday.toDouble() / scheduledItemCountToday.toDouble()) * 100.0).toInt()
@@ -76,12 +77,13 @@ class DashboardViewModel(
             val itemsForTomorrow = allItems.filter { itemIdsForTomorrow.contains(it.id) }
             val checkStatesForTomorrow = itemCheckStateRepository.getCheckStatesForItems(itemIdsForTomorrow)
             val checkStateMapByItemId = checkStatesForTomorrow.associateBy { it.itemId }
-            val uncheckedItemsTomorrow = itemsForTomorrow.filter { item ->
-                val state = checkStateMapByItemId[item.id]
-                val record = state?.history?.find { it.date == tomorrow }
-                // Missing record means unchecked; existing false also unchecked
-                record?.isChecked != true
-            }
+            val uncheckedItemsTomorrow =
+                itemsForTomorrow.filter { item ->
+                    val state = checkStateMapByItemId[item.id]
+                    val record = state?.history?.find { it.date == tomorrow }
+                    // Missing record means unchecked; existing false also unchecked
+                    record?.isChecked != true
+                }
 
             setState {
                 copy(

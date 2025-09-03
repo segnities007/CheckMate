@@ -17,30 +17,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.model.UserStatus
 import com.segnities007.navigation.HubRoute
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
+import com.segnities007.setting.component.DeleteAllDataDialog
+import com.segnities007.setting.component.ImportingDialog
 import com.segnities007.setting.mvi.SettingEffect
 import com.segnities007.setting.mvi.SettingIntent
 import com.segnities007.setting.mvi.SettingViewModel
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UserStatusCard
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
 @Composable
@@ -55,20 +52,12 @@ fun SettingScreen(
     val settingViewModel: SettingViewModel = koinInject()
     val state by settingViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
+    val isVisible by rememberScrollVisibility(scrollState)
 
-    val targetAlpha by remember {
-        derivedStateOf {
-            when {
-                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
-                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
-            }
-        }
-    }
-    
     val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = tween(durationMillis = 200),
-        label = "navigationBarAlpha"
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 500),
+        label = "navigationBarAlpha",
     )
 
     LaunchedEffect(Unit) {
@@ -85,18 +74,20 @@ fun SettingScreen(
         settingViewModel.effect.collect { effect ->
             when (effect) {
                 is SettingEffect.ShowToast -> {
-                    Toast.makeText(
-                        localContext,
-                        effect.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast
+                        .makeText(
+                            localContext,
+                            effect.message,
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
                 is SettingEffect.ShowIcsImportResult -> {
-                    Toast.makeText(
-                        localContext,
-                        "${effect.successCount}個のテンプレートを作成しました",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast
+                        .makeText(
+                            localContext,
+                            "${effect.successCount}個のテンプレートを作成しました",
+                            Toast.LENGTH_LONG,
+                        ).show()
                 }
             }
         }
@@ -116,54 +107,33 @@ fun SettingScreen(
 
     // 全データ削除確認ダイアログ
     if (state.showDeleteAllDataDialog) {
-        AlertDialog(
-            onDismissRequest = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
-            title = { Text("全データ削除") },
-            text = { Text("すべてのデータを削除しますか？") },
-            confirmButton = {
-                TextButton(
-                    onClick = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) }
-                ) {
-                    Text("削除")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) }
-                ) {
-                    Text("キャンセル")
-                }
-            }
+        DeleteAllDataDialog(
+            onConfirm = { settingViewModel.sendIntent(SettingIntent.ConfirmDeleteAllData) },
+            onDismiss = { settingViewModel.sendIntent(SettingIntent.CancelDeleteAllData) },
         )
     }
 
     // ICSインポート中ダイアログ
     if (state.isImportingIcs) {
-        AlertDialog(
-            onDismissRequest = { },
-            title = { Text("作成中") },
-            text = { Text("テンプレートを生成しています...") },
-            confirmButton = { }
-        )
+        ImportingDialog()
     }
 }
 
 @Composable
-private fun SettingUi(
-    sendIntent: (SettingIntent) -> Unit,
-) {
+private fun SettingUi(sendIntent: (SettingIntent) -> Unit) {
+    val jsonLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri: Uri? ->
+            uri?.let { sendIntent(SettingIntent.ImportData(it)) }
+        }
 
-    val jsonLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        uri?.let { sendIntent(SettingIntent.ImportData(it)) }
-    }
-
-    val icsLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        uri?.let { sendIntent(SettingIntent.ImportIcsFile(it)) }
-    }
+    val icsLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri: Uri? ->
+            uri?.let { sendIntent(SettingIntent.ImportIcsFile(it)) }
+        }
 
     val settingViewModel: SettingViewModel = koinInject()
     val state by settingViewModel.state.collectAsState()
@@ -174,7 +144,7 @@ private fun SettingUi(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UserStatusCard(state.userStatus)
-        
+
         // データ管理セクション
         HorizontalDividerWithLabel("データ")
         DataButtons(
@@ -189,9 +159,9 @@ private fun SettingUi(
             },
             onDeleteAllData = {
                 sendIntent(SettingIntent.DeleteAllData)
-            }
+            },
         )
-        
+
         // アカウント設定セクション
         HorizontalDividerWithLabel("アカウント")
         AccountButtons(
@@ -201,7 +171,7 @@ private fun SettingUi(
             onGoogleUnlink = {
                 sendIntent(SettingIntent.ChangeGoogleAccount)
             },
-            isGoogleLinked = state.userStatus.id.isNotEmpty()
+            isGoogleLinked = state.userStatus.id.isNotEmpty(),
         )
     }
 }

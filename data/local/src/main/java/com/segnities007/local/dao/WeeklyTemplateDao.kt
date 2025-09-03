@@ -14,7 +14,6 @@ interface WeeklyTemplateDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(template: WeeklyTemplateEntity)
 
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(templates: List<WeeklyTemplateEntity>)
 

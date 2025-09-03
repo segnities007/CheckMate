@@ -13,25 +13,24 @@ import com.segnities007.model.item.ItemCheckRecord
 import com.segnities007.model.item.ItemCheckState
 import com.segnities007.repository.model.ExportData
 import com.segnities007.repository.model.toDomain
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.datetime.LocalDate
-import kotlin.time.Instant
+import kotlinx.serialization.json.Json
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class BackupRepositoryImpl(
     private val itemDao: ItemDao,
     private val itemCheckStateDao: ItemCheckStateDao,
     private val weeklyTemplateDao: WeeklyTemplateDao,
-    private val json: Json = Json { prettyPrint = true }
+    private val json: Json = Json { prettyPrint = true },
 ) : BackupRepository {
-
     override suspend fun exportData(): String {
         val items = itemDao.getAll().map { it.toDomain() }
         val states = itemCheckStateDao.getAll().map { it.toDomain() }
@@ -43,7 +42,6 @@ class BackupRepositoryImpl(
 
     override suspend fun importData(jsonString: String) {
         val data = json.decodeFromString<ExportData>(jsonString)
-
 
         itemDao.clearAll()
         itemCheckStateDao.clearAll()
@@ -57,17 +55,23 @@ class BackupRepositoryImpl(
 
 object LocalDateSerializer : KSerializer<LocalDate> {
     override val descriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: LocalDate) = encoder.encodeString(value.toString())
+
+    override fun serialize(
+        encoder: Encoder,
+        value: LocalDate,
+    ) = encoder.encodeString(value.toString())
+
     override fun deserialize(decoder: Decoder): LocalDate = LocalDate.parse(decoder.decodeString())
 }
 
 @OptIn(ExperimentalTime::class)
 object InstantSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeString(value.toString())
+
+    override fun serialize(
+        encoder: Encoder,
+        value: Instant,
+    ) = encoder.encodeString(value.toString())
+
     override fun deserialize(decoder: Decoder): Instant = Instant.parse(decoder.decodeString())
 }
-
-
-
-

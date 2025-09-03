@@ -10,6 +10,6 @@ sealed interface ItemsEffect : MviEffect {
     data object NavigateToItemsList : ItemsEffect
 
     data object NavigateToCameraCapture : ItemsEffect
-    
+
     data object NavigateToBarcodeScanner : ItemsEffect
 }

@@ -1,6 +1,7 @@
 package com.segnities007.items.component
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,10 +54,9 @@ import coil3.compose.AsyncImage
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.model.item.ProductInfo
 import kotlin.time.ExperimentalTime
-import android.util.Log
 
-private fun getCategoryDisplayName(category: ItemCategory): String {
-    return when (category) {
+private fun getCategoryDisplayName(category: ItemCategory): String =
+    when (category) {
         ItemCategory.STUDY_SUPPLIES -> "学業用品"
         ItemCategory.DAILY_SUPPLIES -> "生活用品"
         ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
@@ -71,7 +71,6 @@ private fun getCategoryDisplayName(category: ItemCategory): String {
         ItemCategory.ID_SUPPLIES -> "証明用品"
         ItemCategory.OTHER_SUPPLIES -> "その他用品"
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,8 +89,8 @@ fun CreateBottomSheet(
     var itemDescription by remember { mutableStateOf<String>("") }
     var expandedDropdown by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<ItemCategory?>(null) }
-    var imageUriForPreview by remember(capturedImageUriFromParent) { 
-        mutableStateOf(capturedImageUriFromParent) 
+    var imageUriForPreview by remember(capturedImageUriFromParent) {
+        mutableStateOf(capturedImageUriFromParent)
     }
     var showProductCover by remember { mutableStateOf(true) }
 
@@ -115,7 +114,7 @@ fun CreateBottomSheet(
             Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Name: ${productInfo.name}")
             Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Description: ${productInfo.description}")
             Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Category: ${productInfo.category}")
-            
+
             itemName = productInfo.name
             itemDescription = productInfo.description
             selectedCategory = productInfo.category
@@ -142,28 +141,29 @@ fun CreateBottomSheet(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     "アイテムを追加",
                     style = MaterialTheme.typography.headlineSmall,
                 )
-                
+
                 IconButton(
                     onClick = onRequestBarcodeScan,
                     enabled = !isLoadingFromParent,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(8.dp)
-                        )
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(8.dp),
+                            ),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.QrCodeScanner,
                         contentDescription = "バーコードスキャン",
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
@@ -236,7 +236,7 @@ fun CreateBottomSheet(
                             onSuccess = { state ->
                                 Log.d("CreateBottomSheet", "Successfully loaded image: ${productInfo.imageUrl}")
                                 Log.d("CreateBottomSheet", "Image size: ${state.painter.intrinsicSize}")
-                            }
+                            },
                         )
 
                         // 削除ボタンを画像右上に重ねる

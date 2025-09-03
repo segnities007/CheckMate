@@ -5,8 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.segnities007.dashboard.component.StatCard
+import com.segnities007.dashboard.component.StatCardWithPercentage
 import com.segnities007.dashboard.component.UncheckedItemsCard
 import com.segnities007.dashboard.mvi.DashboardState
 import com.segnities007.dashboard.mvi.DashboardViewModel
@@ -53,11 +54,11 @@ fun DashboardScreen(
             }
         }
     }
-    
+
     val alpha by animateFloatAsState(
         targetValue = targetAlpha,
         animationSpec = tween(durationMillis = 200),
-        label = "navigationBarAlpha"
+        label = "navigationBarAlpha",
     )
 
     LaunchedEffect(Unit) {
@@ -110,14 +111,16 @@ private fun DashboardUi(
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                StatCard(
+                StatCardWithPercentage(
                     title = "本日の完了率",
-                    value = "${state.completionRateToday}% (${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
+                    value = "${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
+                    progress = if (state.scheduledItemCountToday > 0) (state.checkedItemCountToday.toFloat() / state.scheduledItemCountToday) else 0f,
                     modifier = Modifier.weight(1f),
                 )
-                StatCard(
+                StatCardWithPercentage(
                     title = "累計完了率",
-                    value = "${state.historicalCompletionRate}% (${state.totalCheckedRecordsCount}/${state.totalRecordsCount})",
+                    value = "${state.totalCheckedRecordsCount}/${state.totalRecordsCount}",
+                    progress = if (state.totalRecordsCount > 0) (state.totalCheckedRecordsCount.toFloat() / state.totalRecordsCount) else 0f,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -132,6 +135,3 @@ private fun DashboardUi(
         }
     }
 }
-
-
-

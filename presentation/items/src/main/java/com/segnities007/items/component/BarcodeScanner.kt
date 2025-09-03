@@ -3,11 +3,11 @@ package com.segnities007.items.component
 import android.content.Context
 import android.util.Log
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -46,7 +46,7 @@ fun BarcodeScanner(
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
     val previewView = remember { PreviewView(context) }
     val scanner = remember { BarcodeScanning.getClient() }
-    
+
     var isScanning by remember { mutableStateOf(true) }
 
     DisposableEffect(lifecycleOwner) {
@@ -60,41 +60,45 @@ fun BarcodeScanner(
         val cameraProvider = ProcessCameraProvider.getInstance(context).get()
         try {
             cameraProvider.unbindAll()
-            
+
             val preview = Preview.Builder().build()
             preview.surfaceProvider = previewView.surfaceProvider
 
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
+            val imageAnalysis =
+                ImageAnalysis
+                    .Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
 
             imageAnalysis.setAnalyzer(cameraExecutor) { imageProxy ->
                 if (isScanning) {
                     @OptIn(ExperimentalGetImage::class)
                     val mediaImage = imageProxy.image
                     if (mediaImage != null) {
-                        val image = InputImage.fromMediaImage(
-                            mediaImage,
-                            imageProxy.imageInfo.rotationDegrees
-                        )
+                        val image =
+                            InputImage.fromMediaImage(
+                                mediaImage,
+                                imageProxy.imageInfo.rotationDegrees,
+                            )
 
-                        scanner.process(image)
+                        scanner
+                            .process(image)
                             .addOnSuccessListener { barcodes ->
                                 for (barcode in barcodes) {
                                     if (barcode.rawValue != null) {
-                                        val barcodeInfo = BarcodeInfo(
-                                            barcode = barcode.rawValue!!,
-                                            format = getBarcodeFormatName(barcode.format),
-                                            rawValue = barcode.rawValue!!,
-                                            displayValue = barcode.displayValue ?: barcode.rawValue!!
-                                        )
+                                        val barcodeInfo =
+                                            BarcodeInfo(
+                                                barcode = barcode.rawValue!!,
+                                                format = getBarcodeFormatName(barcode.format),
+                                                rawValue = barcode.rawValue!!,
+                                                displayValue = barcode.displayValue ?: barcode.rawValue!!,
+                                            )
                                         isScanning = false
                                         onBarcodeDetected(barcodeInfo)
                                         break
                                     }
                                 }
-                            }
-                            .addOnCompleteListener {
+                            }.addOnCompleteListener {
                                 imageProxy.close()
                             }
                     } else {
@@ -105,12 +109,13 @@ fun BarcodeScanner(
                 }
             }
 
-            val camera = cameraProvider.bindToLifecycle(
-                lifecycleOwner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
-                preview,
-                imageAnalysis
-            )
+            val camera =
+                cameraProvider.bindToLifecycle(
+                    lifecycleOwner,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    preview,
+                    imageAnalysis,
+                )
 
             // ズーム設定
             val zoomState = camera.cameraInfo.zoomState.value
@@ -134,7 +139,7 @@ fun BarcodeScanner(
                     scaleType = PreviewView.ScaleType.FILL_CENTER
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
 
         // オーバーレイ
@@ -144,122 +149,162 @@ fun BarcodeScanner(
             val left = (size.width - boxWidth) / 2
             val top = (size.height - boxHeight) / 2
 
-            val path = Path().apply {
-                addRect(Rect(0f, 0f, size.width, size.height))
-                addRect(Rect(left, top, left + boxWidth, top + boxHeight))
-                fillType = PathFillType.EvenOdd
-            }
+            val path =
+                Path().apply {
+                    addRect(Rect(0f, 0f, size.width, size.height))
+                    addRect(Rect(left, top, left + boxWidth, top + boxHeight))
+                    fillType = PathFillType.EvenOdd
+                }
             drawPath(path, color = Color.Black.copy(alpha = 0.5f))
         }
 
         // スキャンエリアの枠
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
         ) {
             Card(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(width = 280.dp, height = 180.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .size(width = 280.dp, height = 180.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Transparent)
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent),
                 ) {
                     // 角のインジケーター
                     repeat(4) { corner ->
                         val cornerSize = 40.dp
                         val cornerColor = MaterialTheme.colorScheme.primary
-                        
+
                         when (corner) {
                             0 -> { // 左上
                                 Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopStart)
-                                        .size(cornerSize)
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopStart)
+                                            .size(cornerSize),
                                 ) {
                                     Canvas(modifier = Modifier.fillMaxSize()) {
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(0f, cornerSize.toPx()),
-                                            end = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, cornerSize.toPx()),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, 0f),
+                                            strokeWidth = 4f,
                                         )
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                            end = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), 0f),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, 0f),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), 0f),
+                                            strokeWidth = 4f,
                                         )
                                     }
                                 }
                             }
                             1 -> { // 右上
                                 Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .size(cornerSize)
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(cornerSize),
                                 ) {
                                     Canvas(modifier = Modifier.fillMaxSize()) {
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), 0f),
-                                            end = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), cornerSize.toPx()),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), 0f),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), cornerSize.toPx()),
+                                            strokeWidth = 4f,
                                         )
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                            end = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), 0f),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, 0f),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), 0f),
+                                            strokeWidth = 4f,
                                         )
                                     }
                                 }
                             }
                             2 -> { // 左下
                                 Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .size(cornerSize)
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomStart)
+                                            .size(cornerSize),
                                 ) {
                                     Canvas(modifier = Modifier.fillMaxSize()) {
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                                            end = androidx.compose.ui.geometry.Offset(0f, cornerSize.toPx()),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, 0f),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, cornerSize.toPx()),
+                                            strokeWidth = 4f,
                                         )
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(0f, cornerSize.toPx()),
-                                            end = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), cornerSize.toPx()),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, cornerSize.toPx()),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), cornerSize.toPx()),
+                                            strokeWidth = 4f,
                                         )
                                     }
                                 }
                             }
                             3 -> { // 右下
                                 Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .size(cornerSize)
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .size(cornerSize),
                                 ) {
                                     Canvas(modifier = Modifier.fillMaxSize()) {
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(0f, cornerSize.toPx()),
-                                            end = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), cornerSize.toPx()),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(0f, cornerSize.toPx()),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), cornerSize.toPx()),
+                                            strokeWidth = 4f,
                                         )
                                         drawLine(
                                             color = cornerColor,
-                                            start = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), 0f),
-                                            end = androidx.compose.ui.geometry.Offset(cornerSize.toPx(), cornerSize.toPx()),
-                                            strokeWidth = 4f
+                                            start =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), 0f),
+                                            end =
+                                                androidx.compose.ui.geometry
+                                                    .Offset(cornerSize.toPx(), cornerSize.toPx()),
+                                            strokeWidth = 4f,
                                         )
                                     }
                                 }
@@ -276,53 +321,55 @@ fun BarcodeScanner(
             style = MaterialTheme.typography.bodyMedium,
             color = Color.White,
             textAlign = TextAlign.Center,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 100.dp)
-                .background(
-                    Color.Black.copy(alpha = 0.7f),
-                    RoundedCornerShape(8.dp)
-                )
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 100.dp)
+                    .background(
+                        Color.Black.copy(alpha = 0.7f),
+                        RoundedCornerShape(8.dp),
+                    ).padding(horizontal = 16.dp, vertical = 8.dp),
         )
 
         // コントロールボタン
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             // キャンセルボタン
             FloatingActionButton(
                 onClick = onCancel,
                 modifier = Modifier.size(56.dp),
                 containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "キャンセル"
+                    contentDescription = "キャンセル",
                 )
             }
 
             // スキャンアイコン
             Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        RoundedCornerShape(36.dp)
-                    ),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(72.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            RoundedCornerShape(36.dp),
+                        ),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Filled.QrCodeScanner,
                     contentDescription = "スキャン中",
                     modifier = Modifier.size(36.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
 
@@ -332,8 +379,8 @@ fun BarcodeScanner(
     }
 }
 
-private fun getBarcodeFormatName(format: Int): String {
-    return when (format) {
+private fun getBarcodeFormatName(format: Int): String =
+    when (format) {
         Barcode.FORMAT_QR_CODE -> "QR_CODE"
         Barcode.FORMAT_AZTEC -> "AZTEC"
         Barcode.FORMAT_CODABAR -> "CODABAR"
@@ -349,4 +396,3 @@ private fun getBarcodeFormatName(format: Int): String {
         Barcode.FORMAT_UPC_E -> "UPC_E"
         else -> "UNKNOWN"
     }
-}

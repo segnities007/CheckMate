@@ -11,14 +11,14 @@ interface IcsTemplateRepository {
      * @return 生成されたテンプレートのリスト
      */
     suspend fun generateTemplatesFromIcs(uri: Uri): List<WeeklyTemplate>
-    
+
     /**
      * カレンダーイベントからテンプレートを生成
      * @param events カレンダーイベントのリスト
      * @return 生成されたテンプレートのリスト
      */
     suspend fun generateTemplatesFromEvents(events: List<CalendarEvent>): List<WeeklyTemplate>
-    
+
     /**
      * 生成されたテンプレートを保存
      * @param templates 保存するテンプレートのリスト

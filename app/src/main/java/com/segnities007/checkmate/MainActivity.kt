@@ -36,7 +36,6 @@ class MainActivity : ComponentActivity() {
 private fun MainNavigation() {
     val mainNavController = rememberNavController()
     val mainViewModel: MainViewModel = koinInject()
-    val state by mainViewModel.state.collectAsState()
 
     val onNavigate: (Route) -> Unit = { route ->
         mainViewModel.sendIntent(MainIntent.Navigate(route))

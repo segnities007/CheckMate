@@ -1,5 +1,6 @@
 package com.segnities007.model.item
 
+import androidx.compose.runtime.Immutable
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -8,6 +9,7 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @Serializable
+@Immutable
 data class ItemCheckRecord
     @OptIn(ExperimentalTime::class)
     constructor(

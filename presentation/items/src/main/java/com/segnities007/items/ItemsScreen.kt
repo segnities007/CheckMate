@@ -1,22 +1,24 @@
 package com.segnities007.items
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.segnities007.navigation.HubRoute
-import com.segnities007.navigation.ItemsRoute
 import com.segnities007.items.mvi.ItemsEffect
 import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsViewModel
-import com.segnities007.items.page.ItemsListPage
-import com.segnities007.items.page.CameraCapturePage
 import com.segnities007.items.page.BarcodeScannerPage
+import com.segnities007.items.page.CameraCapturePage
+import com.segnities007.items.page.ItemsListPage
+import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.ItemsRoute
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,13 +32,14 @@ fun ItemsScreen(
 ) {
     val itemsViewModel: ItemsViewModel = koinInject()
     val state by itemsViewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val navController = rememberNavController()
 
     LaunchedEffect(Unit) {
         itemsViewModel.effect.collect { effect ->
             when (effect) {
                 is ItemsEffect.ShowToast -> {
-                    // TODO
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
                 ItemsEffect.NavigateToItemsList -> {
                     navController.navigate(ItemsRoute.ItemsList) {
@@ -65,14 +68,8 @@ fun ItemsScreen(
                 onNavigate = onNavigate,
                 sendIntent = itemsViewModel::sendIntent,
                 setTopBar = setTopBar,
-                onNavigateToCameraCapture = {
-                    itemsViewModel.sendIntent(ItemsIntent.NavigateToCameraCapture)
-                },
                 onNavigateToBarcodeScanner = {
                     itemsViewModel.sendIntent(ItemsIntent.NavigateToBarcodeScanner)
-                },
-                onNavigateToItemsList = {
-                    itemsViewModel.sendIntent(ItemsIntent.NavigateToItemsList)
                 },
                 state = state,
             )

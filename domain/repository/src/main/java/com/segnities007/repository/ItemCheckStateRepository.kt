@@ -9,6 +9,6 @@ interface ItemCheckStateRepository {
     suspend fun getCheckStatesForItems(itemIds: List<Int>): List<ItemCheckState>
 
     suspend fun saveCheckState(state: ItemCheckState)
-    
+
     suspend fun clearAllCheckStates()
 }
