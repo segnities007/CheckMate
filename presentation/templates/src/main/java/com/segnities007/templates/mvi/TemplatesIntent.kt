@@ -82,4 +82,12 @@ sealed interface TemplatesIntent : MviIntent {
     data class SetWeeklyTemplates(
         val weeklyTemplates: List<WeeklyTemplate>,
     ) : TemplatesIntent
+
+    // ICS インポート
+    data class ImportIcsTemplates(
+        val uri: android.net.Uri,
+    ) : TemplatesIntent
+    data object ShowIcsFilePicker : TemplatesIntent
+    data object ImportIcsStarted : TemplatesIntent
+    data object ImportIcsFinished : TemplatesIntent
 }

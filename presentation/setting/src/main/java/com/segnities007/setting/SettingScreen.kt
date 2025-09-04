@@ -154,9 +154,7 @@ private fun SettingUi(sendIntent: (SettingIntent) -> Unit) {
             onImportData = {
                 jsonLauncher.launch(arrayOf("application/json"))
             },
-            onImportIcsFile = {
-                icsLauncher.launch(arrayOf("text/calendar"))
-            },
+            // ICS インポートは Templates 画面へ移動
             onDeleteAllData = {
                 sendIntent(SettingIntent.DeleteAllData)
             },

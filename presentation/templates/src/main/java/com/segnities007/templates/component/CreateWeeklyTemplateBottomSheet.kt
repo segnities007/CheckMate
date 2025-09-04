@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -41,6 +42,8 @@ fun CreateWeeklyTemplateBottomSheet(
     onDismiss: () -> Unit,
     onCreateTemplate: (name: String, daysOfWeek: Set<DayOfWeek>) -> Unit,
     sheetState: SheetState,
+    onImportFromIcs: () -> Unit,
+    isImportingIcs: Boolean,
 ) {
     var templateName by remember { mutableStateOf("") }
     val selectedDaysOfWeek = remember { mutableStateOf(emptySet<DayOfWeek>()) }
@@ -57,13 +60,31 @@ fun CreateWeeklyTemplateBottomSheet(
                     .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            // ヘッダー
-            Text(
-                text = "テンプレートを作成",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            // ヘッダー + ICS で作成ボタン
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "テンプレートを作成",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.weight(1f))
+                OutlinedButton(
+                    onClick = onImportFromIcs,
+                    enabled = !isImportingIcs,
+                ) {
+                    if (isImportingIcs) {
+                        CircularProgressIndicator(modifier = Modifier.width(16.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                        Text("読み込み中")
+                    } else {
+                        Text("ICSで作成")
+                    }
+                }
+            }
 
             // テンプレート名入力
             OutlinedTextField(
@@ -161,6 +182,8 @@ fun CreateWeeklyTemplateBottomSheet(
                     Text("作成")
                 }
             }
+
+            // ICS ボタンはヘッダーに移動済み
         }
     }
 }
@@ -186,7 +209,9 @@ fun CreateWeeklyTemplateBottomSheetPreview() {
         CreateWeeklyTemplateBottomSheet(
             sheetState = sheetState,
             onDismiss = {},
-            onCreateTemplate = { _, _ -> }, // Adjusted for new signature
+            onCreateTemplate = { _, _ -> },
+            onImportFromIcs = {},
+            isImportingIcs = false,
         )
     }
 }

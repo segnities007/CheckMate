@@ -42,7 +42,6 @@ fun DataButtons(
     onExportData: () -> Unit,
     onImportData: () -> Unit,
     onDeleteAllData: () -> Unit,
-    onImportIcsFile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -61,11 +60,6 @@ fun DataButtons(
             onClick = onImportData,
         )
 
-        DataButtonCard(
-            title = "カレンダーから作成",
-            icon = Icons.Default.CalendarMonth,
-            onClick = onImportIcsFile,
-        )
 
         DataButtonCard(
             title = "全データ削除",

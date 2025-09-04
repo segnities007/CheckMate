@@ -149,6 +149,11 @@ fun ItemsListPage(
                 onDeleteItem = { itemToDelete ->
                     sendIntent(ItemsIntent.DeleteItems(itemToDelete.id))
                 },
+                onCreateClick = {
+                    sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
+                    sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
+                    sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+                },
             )
         }
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))

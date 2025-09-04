@@ -1,6 +1,8 @@
 package com.segnities007.templates
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -47,22 +49,27 @@ fun TemplatesScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val navController = rememberNavController()
 
+    // ICS ファイルピック用ランチャー（常に確保）
+    val icsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: android.net.Uri? ->
+        uri?.let { templatesViewModel.sendIntent(TemplatesIntent.ImportIcsTemplates(it)) }
+    }
+
     LaunchedEffect(Unit) {
         templatesViewModel.effect.collect { effect ->
             when (effect) {
-                is TemplatesEffect.NavigateToWeeklyTemplateSelector -> {
+                is TemplatesEffect.NavigateToWeeklyTemplateSelector ->
                     navController.navigate(TemplatesRoute.WeeklyTemplateSelector)
-                }
-                is TemplatesEffect.ShowToast -> {
-                    Toast
-                        .makeText(
-                            localContext,
-                            effect.message,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                }
                 TemplatesEffect.NavigateToWeeklyTemplateList ->
                     navController.navigate(TemplatesRoute.WeeklyTemplateList)
+                is TemplatesEffect.ShowToast ->
+                    Toast.makeText(localContext, effect.message, Toast.LENGTH_SHORT).show()
+                TemplatesEffect.LaunchIcsPicker ->
+                    // ボトムシート表示中のみ起動（安全側）
+                    if (state.isShowingBottomSheet) {
+                        icsLauncher.launch(arrayOf("text/calendar"))
+                    }
+                is TemplatesEffect.ShowIcsImportResult ->
+                    Toast.makeText(localContext, "${effect.successCount}件のテンプレートを生成", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -113,6 +120,18 @@ fun TemplatesScreen(
                 templatesViewModel.sendIntent(TemplatesIntent.AddWeeklyTemplate(title, dayOfWeek))
             },
             sheetState = sheetState,
+            onImportFromIcs = { templatesViewModel.sendIntent(TemplatesIntent.ShowIcsFilePicker) },
+            isImportingIcs = state.isImportingIcs,
+        )
+    }
+
+    // ICSインポート中ダイアログ（SettingScreenと同一コンポーネントを再利用）
+    if (state.isImportingIcs) {
+        AlertDialog(
+            onDismissRequest = { /* no dismiss while importing */ },
+            title = { Text("作成中") },
+            text = { Text("テンプレートを生成しています...") },
+            confirmButton = {},
         )
     }
 

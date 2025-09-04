@@ -2,8 +2,10 @@ package com.segnities007.templates.mvi
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.lifecycle.viewModelScope
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.repository.ItemRepository
+import com.segnities007.repository.IcsTemplateRepository
 import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import kotlinx.coroutines.launch
@@ -13,6 +15,7 @@ import kotlin.time.ExperimentalTime
 class TemplatesViewModel(
     private val weeklyTemplateRepository: WeeklyTemplateRepository,
     private val itemRepository: ItemRepository,
+    private val icsTemplateRepository: IcsTemplateRepository,
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
         initialState = TemplatesState(),
     ) {
@@ -59,6 +62,11 @@ class TemplatesViewModel(
             // 削除確認ダイアログ
             TemplatesIntent.ConfirmDeleteTemplate -> confirmDeleteTemplate()
             TemplatesIntent.CancelDeleteTemplate -> cancelDeleteTemplate()
+
+            is TemplatesIntent.ImportIcsTemplates -> importIcs(intent.uri)
+            TemplatesIntent.ShowIcsFilePicker -> sendEffect { TemplatesEffect.LaunchIcsPicker }
+            TemplatesIntent.ImportIcsStarted -> setState { copy(isImportingIcs = true) }
+            TemplatesIntent.ImportIcsFinished -> setState { copy(isImportingIcs = false) }
         }
     }
 
@@ -215,5 +223,19 @@ class TemplatesViewModel(
     private fun selectTemplate(template: WeeklyTemplate) {
         setState { reducer.reduce(this, TemplatesIntent.SelectTemplate(template)) }
         sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
+    }
+
+    private fun importIcs(uri: android.net.Uri) = viewModelScope.launch {
+        setState { copy(isImportingIcs = true) }
+        try {
+            val templates = withContext(Dispatchers.IO) { icsTemplateRepository.generateTemplatesFromIcs(uri) }
+            withContext(Dispatchers.IO) { icsTemplateRepository.saveGeneratedTemplates(templates) }
+            getAllWeeklyTemplates()
+            setState { copy(isImportingIcs = false) }
+            sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
+        } catch (e: Exception) {
+            setState { copy(isImportingIcs = false) }
+            sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }
+        }
     }
 }
