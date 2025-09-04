@@ -21,6 +21,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -56,28 +57,47 @@ class GeminiAiService(private val apiKey: String) {
 
     suspend fun recommendItemsForEvent(event: CalendarEvent, availableItems: List<Item>): List<Int> =
         if (apiKey.isBlank()) emptyList() else withContext(Dispatchers.IO) {
-            runCatching {
-                val prompt = buildPrompt(event, availableItems)
-                val request = GeminiRequest(
-                    contents = listOf(Content(parts = listOf(Part(text = prompt)))),
-                    generationConfig = GenerationConfig(temperature = 0.3, maxOutputTokens = 256),
-                )
-                val response = httpClient.post("$baseUrl/models/$modelName:generateContent?key=$apiKey") {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
+            var attempt = 0
+            val maxAttempts = 3
+            while (attempt < maxAttempts) {
+                attempt++
+                val result = runCatching {
+                    val prompt = buildPrompt(event, availableItems)
+                    val request = GeminiRequest(
+                        contents = listOf(Content(parts = listOf(Part(text = prompt)))),
+                        generationConfig = GenerationConfig(temperature = 0.3, maxOutputTokens = 256),
+                    )
+                    val response = httpClient.post("$baseUrl/models/$modelName:generateContent?key=$apiKey") {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }
+                    val geminiResponse = response.body<GeminiResponse>()
+                    if (geminiResponse.error != null) {
+                        val code = geminiResponse.error?.code
+                        val status = geminiResponse.error?.status
+                        val message = geminiResponse.error?.message
+                        Log.e("GeminiAiService", "Gemini API error (attempt $attempt): $code $status $message")
+                        if (code == 503 || status == "UNAVAILABLE") {
+                            // transient -> retry
+                            null
+                        } else {
+                            // non-retryable
+                            return@withContext emptyList<Int>()
+                        }
+                    } else {
+                        val text = geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text.orEmpty()
+                        return@withContext parseAiResponse(text, availableItems)
+                    }
+                }.getOrElse { e ->
+                    Log.e("GeminiAiService", "Error calling Gemini API (attempt $attempt)", e)
+                    null
                 }
-                val geminiResponse = response.body<GeminiResponse>()
-                if (geminiResponse.error != null) {
-                    Log.e("GeminiAiService", "Gemini API error: ${geminiResponse.error}")
-                    emptyList()
-                } else {
-                    val text = geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text.orEmpty()
-                    parseAiResponse(text, availableItems)
+                if (result != null) return@withContext result
+                if (attempt < maxAttempts) {
+                    delay(300L * attempt) // simple backoff
                 }
-            }.getOrElse { e ->
-                Log.e("GeminiAiService", "Error calling Gemini API", e)
-                emptyList()
             }
+            emptyList()
         }
 
     private fun buildPrompt(

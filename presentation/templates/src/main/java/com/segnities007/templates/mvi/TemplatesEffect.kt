@@ -10,4 +10,8 @@ sealed interface TemplatesEffect : MviEffect {
     data object NavigateToWeeklyTemplateSelector : TemplatesEffect
 
     data object NavigateToWeeklyTemplateList : TemplatesEffect
+
+    // ICS インポート用
+    data object LaunchIcsPicker : TemplatesEffect
+    data class ShowIcsImportResult(val successCount: Int) : TemplatesEffect
 }

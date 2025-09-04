@@ -23,6 +23,8 @@ data class TemplatesState(
     val filteredTemplates: List<WeeklyTemplate> = emptyList(),
     // 削除確認ダイアログ
     val templateToDelete: WeeklyTemplate? = null,
+    // ICS インポート状態
+    val isImportingIcs: Boolean = false,
 ) : MviState
 
 enum class SortOrder {
