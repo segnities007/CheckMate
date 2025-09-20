@@ -83,18 +83,17 @@ private fun FloatingActionBarUi(
             colors =
                 listOf(
                     MaterialTheme.colorScheme.primaryContainer,
-                    MaterialTheme.colorScheme.primary.copy(0.3f),
+                    MaterialTheme.colorScheme.primary.copy(0.2f),
                 ),
         )
 
     Row(
         modifier =
             Modifier
-                .shadow(12.dp, CircleShape)
+                .shadow(2.dp, CircleShape)
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .background(brush, CircleShape)
                 .padding(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         info.forEach { (route, icons) ->
@@ -126,7 +125,7 @@ private fun NavItemButton(
             tint =
                 when (selected) {
                     true -> MaterialTheme.colorScheme.primary
-                    false -> MaterialTheme.colorScheme.onSurface.copy(0.4f)
+                    false -> MaterialTheme.colorScheme.onSurface.copy(0.2f)
                 },
         )
     }
