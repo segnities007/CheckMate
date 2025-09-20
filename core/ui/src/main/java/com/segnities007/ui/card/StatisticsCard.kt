@@ -1,4 +1,4 @@
-package com.segnities007.home.component
+package com.segnities007.ui.card
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.ui.indicator.CircularProgressWithPercentage
+import androidx.compose.ui.tooling.preview.Preview
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun StatisticsCard(
@@ -48,16 +50,12 @@ fun StatisticsCard(
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors =
-            CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // メイン進捗
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -82,24 +80,34 @@ fun StatisticsCard(
                 CircularProgressWithPercentage(progress = progress)
             }
 
-            // カテゴリ別統計
             if (categoryStats.isNotEmpty()) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     categoryStats.forEach { (category, stats) ->
-                        val (checked, total, progress) = stats
+                        val (checked, total, p) = stats
                         CategoryProgressRow(
                             category = category,
                             checkedCount = checked,
                             totalCount = total,
-                            progress = progress,
+                            progress = p,
                         )
                     }
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalTime::class)
+@Composable
+@Preview
+private fun StatisticsCardPreview() {
+    val items = listOf(
+        Item(id = 1, name = "水筒", category = ItemCategory.DAILY_SUPPLIES),
+        Item(id = 2, name = "教科書", category = ItemCategory.STUDY_SUPPLIES),
+        Item(id = 3, name = "雨具", category = ItemCategory.WEATHER_SUPPLIES),
+    )
+    val checks = mapOf(1 to true, 2 to false, 3 to true)
+    StatisticsCard(itemsForToday = items, itemCheckStates = checks)
 }
 
 @Composable
@@ -129,11 +137,7 @@ private fun CategoryProgressRow(
 
         LinearProgressIndicator(
             progress = { progress },
-            modifier =
-                Modifier
-                    .width(80.dp)
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+            modifier = Modifier.width(80.dp).height(8.dp).clip(RoundedCornerShape(4.dp)),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             strokeCap = StrokeCap.Round,

@@ -1,4 +1,4 @@
-package com.segnities007.templates.component
+package com.segnities007.ui.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun TemplateCard(
@@ -48,13 +49,6 @@ fun TemplateCard(
                     .fillMaxWidth()
                     .clickable { onClick() },
             shape = RoundedCornerShape(16.dp),
-            elevation =
-                CardDefaults.elevatedCardElevation(
-                    defaultElevation = 1.dp,
-                    pressedElevation = 2.dp,
-                    focusedElevation = 1.dp,
-                    hoveredElevation = 1.dp,
-                ),
             colors =
                 CardDefaults.elevatedCardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -68,12 +62,10 @@ fun TemplateCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                // メインコンテンツ
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    // ヘッダー
                     Text(
                         text = template.title,
                         style = MaterialTheme.typography.headlineMedium,
@@ -83,7 +75,6 @@ fun TemplateCard(
                         color = MaterialTheme.colorScheme.onSurface,
                     )
 
-                    // 曜日タグ
                     if (template.daysOfWeek.isNotEmpty()) {
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -109,7 +100,6 @@ fun TemplateCard(
                     }
                 }
 
-                // 削除ボタン
                 IconButton(
                     onClick = onDelete,
                     modifier =
@@ -128,7 +118,6 @@ fun TemplateCard(
             }
         }
 
-        // インデックス付箋風のアイテム数表示（右上）
         Box(
             modifier =
                 Modifier
@@ -158,3 +147,15 @@ private fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String =
         DayOfWeek.SATURDAY -> "土"
         DayOfWeek.SUNDAY -> "日"
     }
+
+@Composable
+@Preview
+private fun TemplateCardPreview() {
+    val template = WeeklyTemplate(
+        id = 1,
+        title = "月水金セット",
+        daysOfWeek = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
+        itemIds = listOf(1, 2, 3),
+    )
+    TemplateCard(template = template, onClick = {}, onDelete = {})
+}

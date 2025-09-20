@@ -23,9 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.segnities007.dashboard.component.StatCard
-import com.segnities007.dashboard.component.StatCardWithPercentage
-import com.segnities007.dashboard.component.UncheckedItemsCard
+import com.segnities007.ui.card.StatCard
+import com.segnities007.ui.card.StatCardWithPercentage
+import com.segnities007.ui.card.UncheckedItemsCard
 import com.segnities007.dashboard.mvi.DashboardState
 import com.segnities007.dashboard.mvi.DashboardViewModel
 import com.segnities007.navigation.HubRoute

@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.navigation.HubRoute
-import com.segnities007.templates.component.TemplateCard
+import com.segnities007.ui.card.TemplateCard
 import com.segnities007.templates.component.TemplateSearchFilterSortBar
-import com.segnities007.templates.component.TemplatesEmptyStateCard
+import com.segnities007.ui.card.TemplatesEmptyStateCard
 import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.ui.bar.FloatingNavigationBar
