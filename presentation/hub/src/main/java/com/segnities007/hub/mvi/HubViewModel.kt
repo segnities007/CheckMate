@@ -11,6 +11,7 @@ class HubViewModel(
 ) : BaseViewModel<HubIntent, HubState, HubEffect>(HubState()),
     KoinComponent {
     private val reducer: HubReducer = HubReducer()
+
     override suspend fun handleIntent(intent: HubIntent) {
         when (intent) {
             is HubIntent.Navigate -> navigate(intent)
@@ -33,19 +34,19 @@ class HubViewModel(
     }
 
     private fun setBottomBar(intent: HubIntent.SetBottomBar) {
-    setState { reducer.reduce(this, intent) }
+        setState { reducer.reduce(this, intent) }
     }
 
     private fun setTopBar(intent: HubIntent.SetTopBar) {
-    setState { reducer.reduce(this, intent) }
+        setState { reducer.reduce(this, intent) }
     }
 
     private fun setFab(intent: HubIntent.SetFab) {
-    setState { reducer.reduce(this, intent) }
+        setState { reducer.reduce(this, intent) }
     }
 
     private fun navigate(intent: HubIntent.Navigate) {
-    setState { reducer.reduce(this, intent) }
+        setState { reducer.reduce(this, intent) }
         sendEffect { HubEffect.Navigate(intent.hubRoute) }
     }
 

@@ -60,7 +60,6 @@ fun DataButtons(
             onClick = onImportData,
         )
 
-
         DataButtonCard(
             title = "全データ削除",
             icon = Icons.Default.DeleteForever,

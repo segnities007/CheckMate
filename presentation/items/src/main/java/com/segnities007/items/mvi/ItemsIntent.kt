@@ -60,7 +60,7 @@ sealed interface ItemsIntent : MviIntent {
     ) : ItemsIntent
 
     data object ClearProductInfo : ItemsIntent
-    
+
     // Reducer-only intents for updating computed/presentation state
     data class SetFilteredItems(
         val filteredItems: List<Item>,

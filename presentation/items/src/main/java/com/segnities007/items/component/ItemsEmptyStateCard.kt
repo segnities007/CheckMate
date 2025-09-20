@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
  * Home用のEmptyStateCardとはメッセージ/依存関係を分離して items モジュール内で完結させる。
  */
 @Composable
-
 fun ItemsEmptyStateCard(
     modifier: Modifier = Modifier,
     title: String = "登録されたアイテムがありません",
@@ -37,9 +36,10 @@ fun ItemsEmptyStateCard(
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {

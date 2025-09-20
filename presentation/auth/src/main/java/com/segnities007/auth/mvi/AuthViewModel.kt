@@ -7,8 +7,8 @@ import com.segnities007.repository.UserRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.ui.mvi.MviState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 
 class AuthViewModel(

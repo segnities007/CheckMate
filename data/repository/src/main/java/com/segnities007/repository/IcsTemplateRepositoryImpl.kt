@@ -226,48 +226,59 @@ class IcsTemplateRepositoryImpl(
     }
 
     // ===== Signature-based cache key (date independent, normalized) =====
-    private fun signatureKey(e: CalendarEvent): String = buildString {
-        append(normalizeTitleForPattern(e.title))
-        append('|')
-        append(e.startDateTime.dayOfWeek.name)
-        append('|')
-        append(e.startDateTime.hour)
-        append('|')
-        val duration = ((e.endDateTime.hour * 60 + e.endDateTime.minute) - (e.startDateTime.hour * 60 + e.startDateTime.minute)).coerceAtLeast(0)
-        append(duration / 15 * 15) // bucket 15min
-        append('|')
-        append("v2") // prompt/version tag sync
-    }
+    private fun signatureKey(e: CalendarEvent): String =
+        buildString {
+            append(normalizeTitleForPattern(e.title))
+            append('|')
+            append(e.startDateTime.dayOfWeek.name)
+            append('|')
+            append(e.startDateTime.hour)
+            append('|')
+            val duration =
+                ((e.endDateTime.hour * 60 + e.endDateTime.minute) - (e.startDateTime.hour * 60 + e.startDateTime.minute))
+                    .coerceAtLeast(
+                        0,
+                    )
+            append(duration / 15 * 15) // bucket 15min
+            append('|')
+            append("v2") // prompt/version tag sync
+        }
 
     // 学生用途に偏らないため動的にルールを決定 (学術イベント比率で academic / general を切替)
     private fun buildFallbackRules(events: List<CalendarEvent>): List<Pair<Regex, List<String>>> {
         val academicIndicator = Regex("(授業|講義|class|lesson|英語|数学|国語|理科|試験|テスト|exam)")
         val academicCount = events.count { academicIndicator.containsMatchIn(it.title.lowercase()) }
         val ratio = if (events.isEmpty()) 0.0 else academicCount.toDouble() / events.size
-        val academic = listOf(
-            Regex("英語|English", RegexOption.IGNORE_CASE) to listOf("辞書", "ノート", "筆箱"),
-            Regex("国語|現代文|古文") to listOf("ノート", "筆箱"),
-            Regex("数学|算数|Math", RegexOption.IGNORE_CASE) to listOf("ノート", "筆箱", "電卓"),
-            Regex("理科|化学|物理|Science", RegexOption.IGNORE_CASE) to listOf("ノート", "筆箱"),
-            Regex("体育|スポーツ|Sports|yoga|ヨガ|run|ラン", RegexOption.IGNORE_CASE) to listOf("ドリンク", "タオル", "ハンカチ"),
-            Regex("美術|Art|図工", RegexOption.IGNORE_CASE) to listOf("筆箱", "スケッチブック"),
-            Regex("音楽|Music", RegexOption.IGNORE_CASE) to listOf("筆箱", "ノート"),
-            Regex("試験|テスト|exam", RegexOption.IGNORE_CASE) to listOf("筆箱", "ノート", "pc"),
-        )
-        val general = listOf(
-            Regex("meeting|mtg|面談|面接|打合せ|打ち合わせ", RegexOption.IGNORE_CASE) to listOf("pc", "ノート", "筆箱", "充電器"),
-            Regex("出社|出張|office|勤務|work", RegexOption.IGNORE_CASE) to listOf("pc", "財布", "鍵", "充電器"),
-            Regex("スポーツ|運動|yoga|ヨガ|run|ラン", RegexOption.IGNORE_CASE) to listOf("ドリンク", "タオル", "ハンカチ"),
-            Regex("サロン|美容|美容院|理髪|hair|カット", RegexOption.IGNORE_CASE) to listOf("財布", "目薬", "ハンカチ"),
-            Regex("旅行|trip|travel|旅", RegexOption.IGNORE_CASE) to listOf("財布", "充電器", "pc"),
-            Regex("面接|interview", RegexOption.IGNORE_CASE) to listOf("pc", "筆箱", "財布"),
-            Regex("買い物|shopping", RegexOption.IGNORE_CASE) to listOf("財布", "エコバッグ"),
-        )
+        val academic =
+            listOf(
+                Regex("英語|English", RegexOption.IGNORE_CASE) to listOf("辞書", "ノート", "筆箱"),
+                Regex("国語|現代文|古文") to listOf("ノート", "筆箱"),
+                Regex("数学|算数|Math", RegexOption.IGNORE_CASE) to listOf("ノート", "筆箱", "電卓"),
+                Regex("理科|化学|物理|Science", RegexOption.IGNORE_CASE) to listOf("ノート", "筆箱"),
+                Regex("体育|スポーツ|Sports|yoga|ヨガ|run|ラン", RegexOption.IGNORE_CASE) to listOf("ドリンク", "タオル", "ハンカチ"),
+                Regex("美術|Art|図工", RegexOption.IGNORE_CASE) to listOf("筆箱", "スケッチブック"),
+                Regex("音楽|Music", RegexOption.IGNORE_CASE) to listOf("筆箱", "ノート"),
+                Regex("試験|テスト|exam", RegexOption.IGNORE_CASE) to listOf("筆箱", "ノート", "pc"),
+            )
+        val general =
+            listOf(
+                Regex("meeting|mtg|面談|面接|打合せ|打ち合わせ", RegexOption.IGNORE_CASE) to listOf("pc", "ノート", "筆箱", "充電器"),
+                Regex("出社|出張|office|勤務|work", RegexOption.IGNORE_CASE) to listOf("pc", "財布", "鍵", "充電器"),
+                Regex("スポーツ|運動|yoga|ヨガ|run|ラン", RegexOption.IGNORE_CASE) to listOf("ドリンク", "タオル", "ハンカチ"),
+                Regex("サロン|美容|美容院|理髪|hair|カット", RegexOption.IGNORE_CASE) to listOf("財布", "目薬", "ハンカチ"),
+                Regex("旅行|trip|travel|旅", RegexOption.IGNORE_CASE) to listOf("財布", "充電器", "pc"),
+                Regex("面接|interview", RegexOption.IGNORE_CASE) to listOf("pc", "筆箱", "財布"),
+                Regex("買い物|shopping", RegexOption.IGNORE_CASE) to listOf("財布", "エコバッグ"),
+            )
         // 学術割合が 30% 以上なら academic + general (少し一般も) そうでなければ general + 一部 academic
         return if (ratio >= 0.3) academic + general.take(3) else general + academic.take(3)
     }
 
-    private data class CacheEntry(val ids: List<Int>, val timestamp: Long)
+    private data class CacheEntry(
+        val ids: List<Int>,
+        val timestamp: Long,
+    )
+
     private val recommendationCache = LinkedHashMap<String, CacheEntry>(100, 0.75f, true)
     private val cacheTtlMs = 24 * 60 * 60 * 1000L // 24h
     private val maxCacheEntries = 200
@@ -289,7 +300,10 @@ class IcsTemplateRepositoryImpl(
         }
     }
 
-    private fun putCache(key: String, ids: List<Int>) {
+    private fun putCache(
+        key: String,
+        ids: List<Int>,
+    ) {
         evictIfNeeded()
         recommendationCache[key] = CacheEntry(ids, System.currentTimeMillis())
     }
@@ -299,7 +313,10 @@ class IcsTemplateRepositoryImpl(
         return if (System.currentTimeMillis() - entry.timestamp <= cacheTtlMs) entry.ids else null
     }
 
-    private fun keywordFilterItems(items: List<Item>, events: List<CalendarEvent>): List<Item> {
+    private fun keywordFilterItems(
+        items: List<Item>,
+        events: List<CalendarEvent>,
+    ): List<Item> {
         if (items.size <= 30) return items
         val joined = events.joinToString(" ") { it.title + " " + (it.description ?: "") }
         val lowered = joined.lowercase()
@@ -322,7 +339,8 @@ class IcsTemplateRepositoryImpl(
     ): List<Int> {
         val rule = fallbackRules.firstOrNull { it.first.containsMatchIn(event.title) } ?: return emptyList()
         val wantedNames = rule.second
-        return allItems.filter { wantedNames.any { wn -> it.name.contains(wn, ignoreCase = true) } }
+        return allItems
+            .filter { wantedNames.any { wn -> it.name.contains(wn, ignoreCase = true) } }
             .map { it.id }
             .take(6)
     }
@@ -337,14 +355,20 @@ class IcsTemplateRepositoryImpl(
         val groups = events.groupBy { signatureKey(it) }
         val signatureRepresentative = groups.mapValues { (_, list) -> list.minByOrNull { it.startDateTime }!! }
         val (cachedSigs, toQuerySigs) = signatureRepresentative.values.partition { getCache(signatureKey(it)) != null }
-        cachedSigs.forEach { rep -> getCache(signatureKey(rep))?.let { ids ->
-            groups[signatureKey(rep)]!!.forEach { _ -> resultIds += ids }
-        } }
+        cachedSigs.forEach { rep ->
+            getCache(signatureKey(rep))?.let { ids ->
+                groups[signatureKey(rep)]!!.forEach { _ -> resultIds += ids }
+            }
+        }
         val toQueryEvents = toQuerySigs
         if (toQueryEvents.isNotEmpty()) {
-            val batchMap = try { geminiAiService.recommendItemsForEvents(toQueryEvents, allItems) } catch (e: Exception) {
-                Log.e("IcsTemplate", "Batch recommend failure", e); emptyMap()
-            }
+            val batchMap =
+                try {
+                    geminiAiService.recommendItemsForEvents(toQueryEvents, allItems)
+                } catch (e: Exception) {
+                    Log.e("IcsTemplate", "Batch recommend failure", e)
+                    emptyMap()
+                }
             toQueryEvents.forEach { e ->
                 val ids = batchMap[e.id].orEmpty().ifEmpty { fallbackItemsFor(e, allItemsFull, dynamicFallbackRules) }
                 putCache(signatureKey(e), ids)
@@ -355,16 +379,16 @@ class IcsTemplateRepositoryImpl(
         return resultIds.distinct()
     }
 
-    private fun deduplicateEvents(events: List<CalendarEvent>): List<CalendarEvent> =
-        events.distinctBy { dedupKey(it) }
+    private fun deduplicateEvents(events: List<CalendarEvent>): List<CalendarEvent> = events.distinctBy { dedupKey(it) }
 
-    private fun dedupKey(e: CalendarEvent): String = buildString {
-        append(e.title.trim())
-        append('#')
-        append(e.startDateTime)
-        append('#')
-        append(e.endDateTime)
-    }
+    private fun dedupKey(e: CalendarEvent): String =
+        buildString {
+            append(e.title.trim())
+            append('#')
+            append(e.startDateTime)
+            append('#')
+            append(e.endDateTime)
+        }
 
     // ===== Weekly pattern collapse =====
     private fun collapseWeeklyPatterns(events: List<CalendarEvent>): List<CalendarEvent> {
@@ -372,13 +396,14 @@ class IcsTemplateRepositoryImpl(
         // key = dayOfWeek + startHour + normalizedTitle
         val map = LinkedHashMap<String, CalendarEvent>()
         events.forEach { e ->
-            val key = buildString {
-                append(e.startDateTime.dayOfWeek.name)
-                append('#')
-                append(e.startDateTime.hour)
-                append('#')
-                append(normalizeTitleForPattern(e.title))
-            }
+            val key =
+                buildString {
+                    append(e.startDateTime.dayOfWeek.name)
+                    append('#')
+                    append(e.startDateTime.hour)
+                    append('#')
+                    append(normalizeTitleForPattern(e.title))
+                }
             val existing = map[key]
             if (existing == null || e.startDateTime < existing.startDateTime) {
                 map[key] = e
@@ -387,14 +412,16 @@ class IcsTemplateRepositoryImpl(
         return map.values.toList()
     }
 
-    private fun normalizeTitleForPattern(raw: String): String = raw.lowercase()
-        .replace("（", "(")
-        .replace("）", ")")
-        .replace(Regex("[\\[\\]]"), "") // remove brackets
-        .replace(Regex("[\n\t]"), " ") // newline / tab -> space
-        .replace("\u3000", " ") // full-width space
-        .replace(Regex("\\s+"), " ") // collapse whitespace
-        .trim()
+    private fun normalizeTitleForPattern(raw: String): String =
+        raw
+            .lowercase()
+            .replace("（", "(")
+            .replace("）", ")")
+            .replace(Regex("[\\[\\]]"), "") // remove brackets
+            .replace(Regex("[\n\t]"), " ") // newline / tab -> space
+            .replace("\u3000", " ") // full-width space
+            .replace(Regex("\\s+"), " ") // collapse whitespace
+            .trim()
 
     private fun convertToDomainDayOfWeek(calendarDayOfWeek: CalendarDayOfWeek): DayOfWeek =
         when (calendarDayOfWeek) {

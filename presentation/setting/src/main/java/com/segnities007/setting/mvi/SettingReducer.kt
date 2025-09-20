@@ -3,8 +3,11 @@ package com.segnities007.setting.mvi
 import com.segnities007.ui.mvi.MviReducer
 
 class SettingReducer : MviReducer<SettingState, SettingIntent> {
-    override fun reduce(currentState: SettingState, intent: SettingIntent): SettingState {
-        return when (intent) {
+    override fun reduce(
+        currentState: SettingState,
+        intent: SettingIntent,
+    ): SettingState =
+        when (intent) {
             is SettingIntent.ShowIcsImportDialog -> currentState.copy(showIcsImportDialog = true)
             is SettingIntent.HideIcsImportDialog -> currentState.copy(showIcsImportDialog = false)
             is SettingIntent.DeleteAllData -> currentState.copy(showDeleteAllDataDialog = true)
@@ -17,8 +20,8 @@ class SettingReducer : MviReducer<SettingState, SettingIntent> {
             is SettingIntent.LinkWithGoogle,
             is SettingIntent.ChangeGoogleAccount,
             is SettingIntent.ImportData,
-            is SettingIntent.ExportData -> currentState
+            is SettingIntent.ExportData,
+            -> currentState
             else -> currentState
         }
-    }
 }

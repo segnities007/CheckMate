@@ -13,7 +13,7 @@ import org.koin.dsl.module
 
 val viewModelModule =
     module {
-    // reducers are created inside ViewModels; no DI required
+        // reducers are created inside ViewModels; no DI required
         viewModelOf(::LoginViewModel)
         viewModelOf(::AuthViewModel)
         viewModelOf(::HubViewModel)
