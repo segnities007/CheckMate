@@ -13,5 +13,8 @@ sealed interface TemplatesEffect : MviEffect {
 
     // ICS インポート用
     data object LaunchIcsPicker : TemplatesEffect
-    data class ShowIcsImportResult(val successCount: Int) : TemplatesEffect
+
+    data class ShowIcsImportResult(
+        val successCount: Int,
+    ) : TemplatesEffect
 }

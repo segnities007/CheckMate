@@ -14,7 +14,17 @@ class ItemsReducerTest {
     @Test
     fun setItems_replacesList() {
         val initial = ItemsUiState(items = emptyList())
-        val newItems = listOf(com.segnities007.model.item.Item(id = 1, name = "Item1", description = "", imagePath = "", category = com.segnities007.model.item.ItemCategory.OTHER, createdAt = 0L))
+        val newItems =
+            listOf(
+                com.segnities007.model.item.Item(
+                    id = 1,
+                    name = "Item1",
+                    description = "",
+                    imagePath = "",
+                    category = com.segnities007.model.item.ItemCategory.OTHER,
+                    createdAt = 0L,
+                ),
+            )
         val updated = ItemsReducer.reduce(initial, ItemsIntent.SetItems(newItems))
         assertEquals(1, updated.items.size)
         assertEquals("Item1", updated.items.first().name)

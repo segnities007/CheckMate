@@ -19,9 +19,10 @@ class DashboardViewModel(
     private val itemCheckStateRepository: ItemCheckStateRepository,
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
     private val reducer: DashboardReducer = DashboardReducer()
+
     init {
-    // schedule load via BaseViewModel.sendIntent
-    sendIntent(DashboardIntent.LoadDashboardData)
+        // schedule load via BaseViewModel.sendIntent
+        sendIntent(DashboardIntent.LoadDashboardData)
     }
 
     override suspend fun handleIntent(intent: DashboardIntent) {
@@ -32,7 +33,7 @@ class DashboardViewModel(
 
     @OptIn(ExperimentalTime::class)
     private suspend fun loadDashboardData() {
-    setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
+        setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
         try {
             val allItems = itemRepository.getAllItems()
             val itemCount = allItems.size

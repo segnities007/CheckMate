@@ -52,43 +52,43 @@ class HomeViewModel(
             )
         }
 
-    sendIntent(HomeIntent.GetAllItem)
-    sendIntent(HomeIntent.EnsureCheckHistory)
-    sendIntent(HomeIntent.LoadTodayData)
+        sendIntent(HomeIntent.GetAllItem)
+        sendIntent(HomeIntent.EnsureCheckHistory)
+        sendIntent(HomeIntent.LoadTodayData)
     }
 
     private suspend fun ensureCheckHistoryForToday() {
         val today =
-                Clock.System
-                    .now()
-                    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                    .date
-            val templatesForToday = withContext(Dispatchers.IO) { templateRepo.getTemplatesForDay(today.dayOfWeek.name) }
-            val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
-            val allItems = withContext(Dispatchers.IO) { itemRepo.getAllItems() }
-            val itemsScheduledForToday = allItems.filter { itemIdsForToday.contains(it.id) }
+            Clock.System
+                .now()
+                .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                .date
+        val templatesForToday = withContext(Dispatchers.IO) { templateRepo.getTemplatesForDay(today.dayOfWeek.name) }
+        val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
+        val allItems = withContext(Dispatchers.IO) { itemRepo.getAllItems() }
+        val itemsScheduledForToday = allItems.filter { itemIdsForToday.contains(it.id) }
 
-            for (item in itemsScheduledForToday) {
-                val existingState = withContext(Dispatchers.IO) { checkStateRepo.getCheckStateForItem(item.id) }
-                if (existingState == null) {
-                    val newCheckState =
-                        ItemCheckState(
-                            itemId = item.id,
-                            history = mutableListOf(ItemCheckRecord(date = today, isChecked = false)),
-                        )
-                    withContext(Dispatchers.IO) { checkStateRepo.saveCheckState(newCheckState) }
-                } else {
-                    val todayRecord = existingState.history.find { it.date == today }
-                    if (todayRecord == null) {
-                        val updatedHistory =
-                            existingState.history.toMutableList().apply {
-                                add(ItemCheckRecord(date = today, isChecked = false))
-                            }
-                        val updatedCheckState = existingState.copy(history = updatedHistory)
-                        withContext(Dispatchers.IO) { checkStateRepo.saveCheckState(updatedCheckState) }
-                    }
+        for (item in itemsScheduledForToday) {
+            val existingState = withContext(Dispatchers.IO) { checkStateRepo.getCheckStateForItem(item.id) }
+            if (existingState == null) {
+                val newCheckState =
+                    ItemCheckState(
+                        itemId = item.id,
+                        history = mutableListOf(ItemCheckRecord(date = today, isChecked = false)),
+                    )
+                withContext(Dispatchers.IO) { checkStateRepo.saveCheckState(newCheckState) }
+            } else {
+                val todayRecord = existingState.history.find { it.date == today }
+                if (todayRecord == null) {
+                    val updatedHistory =
+                        existingState.history.toMutableList().apply {
+                            add(ItemCheckRecord(date = today, isChecked = false))
+                        }
+                    val updatedCheckState = existingState.copy(history = updatedHistory)
+                    withContext(Dispatchers.IO) { checkStateRepo.saveCheckState(updatedCheckState) }
                 }
             }
+        }
     }
 
     private suspend fun getAllItems() {
@@ -128,12 +128,12 @@ class HomeViewModel(
                     state.itemId to (recordForDate?.isChecked ?: false)
                 }
 
-    val stateMap = itemCheckStatesByDate.getOrPut(date) { mutableStateMapOf() }
-    stateMap.clear()
-    stateMap.putAll(checkStates)
+        val stateMap = itemCheckStatesByDate.getOrPut(date) { mutableStateMapOf() }
+        stateMap.clear()
+        stateMap.putAll(checkStates)
 
-    // update state via reducer directly
-    setState { reducer.reduce(this, HomeIntent.SetItemCheckStates(date, stateMap.toMap())) }
+        // update state via reducer directly
+        setState { reducer.reduce(this, HomeIntent.SetItemCheckStates(date, stateMap.toMap())) }
         // templatesForToday and itemsForToday are still set directly because they are derived lists
         setState {
             copy(

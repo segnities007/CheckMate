@@ -20,90 +20,110 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
 
 private const val modelName = "gemini-2.5-flash-lite"
 private const val baseUrl = "https://generativelanguage.googleapis.com/v1beta"
 
 private const val PROMPT_VERSION = "pv2" // 変更時にキャッシュ無効化用
 private const val PROMPT_HEADER = "あなたは持ち物管理アシスタント。与えられたイベントごとに最適な持ち物ID(既存IDのみ)を3〜5個返す。"
-private val PROMPT_RULES = """
+private val PROMPT_RULES =
+    """
 出力条件:
 1.JSONのみ/説明禁止/Markdown禁止
 2.不明なら items は 空配列
 3.存在しないIDを含めない
 4.各イベント独立
 JSON形式: {"results":[{"index":0,"items":[1,2,3]}]}
-""".trimIndent()
+    """.trimIndent()
 
-class GeminiAiService(private val apiKey: String) {
+class GeminiAiService(
+    private val apiKey: String,
+) {
     // JSON デコード用（不要キー無視）
     private val batchJson = Json { ignoreUnknownKeys = true }
 
-    private val httpClient = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                },
-            )
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
-            connectTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
-            socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
-        }
-    }
-
-    suspend fun recommendItemsForEvent(event: CalendarEvent, availableItems: List<Item>): List<Int> =
-        if (apiKey.isBlank()) emptyList() else withContext(Dispatchers.IO) {
-            var attempt = 0
-            val maxAttempts = 3
-            while (attempt < maxAttempts) {
-                attempt++
-                val result = runCatching {
-                    val prompt = buildPrompt(event, availableItems)
-                    val request = GeminiRequest(
-                        contents = listOf(Content(parts = listOf(Part(text = prompt)))),
-                        generationConfig = GenerationConfig(temperature = 0.0, maxOutputTokens = 256),
-                    )
-                    val response = httpClient.post("$baseUrl/models/$modelName:generateContent?key=$apiKey") {
-                        contentType(ContentType.Application.Json)
-                        setBody(request)
-                    }
-                    val geminiResponse = response.body<GeminiResponse>()
-                    if (geminiResponse.error != null) {
-                        val code = geminiResponse.error?.code
-                        val status = geminiResponse.error?.status
-                        val message = geminiResponse.error?.message
-                        Log.e("GeminiAiService", "Gemini API error (attempt $attempt): $code $status $message")
-                        if (code == 503 || status == "UNAVAILABLE") {
-                            // transient -> retry
-                            null
-                        } else {
-                            // non-retryable
-                            return@withContext emptyList<Int>()
-                        }
-                    } else {
-                        val text = geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text.orEmpty()
-                        return@withContext parseAiResponse(text, availableItems)
-                    }
-                }.getOrElse { e ->
-                    Log.e("GeminiAiService", "Error calling Gemini API (attempt $attempt)", e)
-                    null
-                }
-                if (result != null) return@withContext result
-                if (attempt < maxAttempts) {
-                    delay(300L * attempt) // simple backoff
-                }
+    private val httpClient =
+        HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        ignoreUnknownKeys = true
+                    },
+                )
             }
+            install(HttpTimeout) {
+                requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
+                connectTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
+                socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
+            }
+        }
+
+    suspend fun recommendItemsForEvent(
+        event: CalendarEvent,
+        availableItems: List<Item>,
+    ): List<Int> =
+        if (apiKey.isBlank()) {
             emptyList()
+        } else {
+            withContext(Dispatchers.IO) {
+                var attempt = 0
+                val maxAttempts = 3
+                while (attempt < maxAttempts) {
+                    attempt++
+                    val result =
+                        runCatching {
+                            val prompt = buildPrompt(event, availableItems)
+                            val request =
+                                GeminiRequest(
+                                    contents = listOf(Content(parts = listOf(Part(text = prompt)))),
+                                    generationConfig = GenerationConfig(temperature = 0.0, maxOutputTokens = 256),
+                                )
+                            val response =
+                                httpClient.post("$baseUrl/models/$modelName:generateContent?key=$apiKey") {
+                                    contentType(ContentType.Application.Json)
+                                    setBody(request)
+                                }
+                            val geminiResponse = response.body<GeminiResponse>()
+                            if (geminiResponse.error != null) {
+                                val code = geminiResponse.error?.code
+                                val status = geminiResponse.error?.status
+                                val message = geminiResponse.error?.message
+                                Log.e("GeminiAiService", "Gemini API error (attempt $attempt): $code $status $message")
+                                if (code == 503 || status == "UNAVAILABLE") {
+                                    // transient -> retry
+                                    null
+                                } else {
+                                    // non-retryable
+                                    return@withContext emptyList<Int>()
+                                }
+                            } else {
+                                val text =
+                                    geminiResponse.candidates
+                                        ?.firstOrNull()
+                                        ?.content
+                                        ?.parts
+                                        ?.firstOrNull()
+                                        ?.text
+                                        .orEmpty()
+                                return@withContext parseAiResponse(text, availableItems)
+                            }
+                        }.getOrElse { e ->
+                            Log.e("GeminiAiService", "Error calling Gemini API (attempt $attempt)", e)
+                            null
+                        }
+                    if (result != null) return@withContext result
+                    if (attempt < maxAttempts) {
+                        delay(300L * attempt) // simple backoff
+                    }
+                }
+                emptyList()
+            }
         }
 
     /**
@@ -114,21 +134,26 @@ class GeminiAiService(private val apiKey: String) {
         events: List<CalendarEvent>,
         availableItems: List<Item>,
         chunkSize: Int = 25,
-    ): Map<String, List<Int>> = if (apiKey.isBlank() || events.isEmpty()) emptyMap() else withContext(Dispatchers.IO) {
-        val start = System.currentTimeMillis()
-        val allMetrics = mutableListOf<BatchMetrics>()
-        val combined = mutableMapOf<String, List<Int>>()
-        val chunks = if (events.size <= chunkSize) listOf(events) else events.chunked(chunkSize)
-        for ((ci, chunk) in chunks.withIndex()) {
-            val metrics = BatchMetrics(chunkCount = chunks.size, chunkIndex = ci, events = chunk.size)
-            val map = performSingleBatchWithRetry(chunk, availableItems, metrics)
-            combined += map
-            allMetrics += metrics
+    ): Map<String, List<Int>> =
+        if (apiKey.isBlank() || events.isEmpty()) {
+            emptyMap()
+        } else {
+            withContext(Dispatchers.IO) {
+                val start = System.currentTimeMillis()
+                val allMetrics = mutableListOf<BatchMetrics>()
+                val combined = mutableMapOf<String, List<Int>>()
+                val chunks = if (events.size <= chunkSize) listOf(events) else events.chunked(chunkSize)
+                for ((ci, chunk) in chunks.withIndex()) {
+                    val metrics = BatchMetrics(chunkCount = chunks.size, chunkIndex = ci, events = chunk.size)
+                    val map = performSingleBatchWithRetry(chunk, availableItems, metrics)
+                    combined += map
+                    allMetrics += metrics
+                }
+                val elapsed = System.currentTimeMillis() - start
+                logAggregated(allMetrics, elapsed, events.size)
+                combined
+            }
         }
-        val elapsed = System.currentTimeMillis() - start
-        logAggregated(allMetrics, elapsed, events.size)
-        combined
-    }
 
     private suspend fun performSingleBatchWithRetry(
         events: List<CalendarEvent>,
@@ -143,21 +168,23 @@ class GeminiAiService(private val apiKey: String) {
             attempt++
             metrics.attempts = attempt
             val prompt = buildBatchPrompt(remaining, items)
-            val request = GeminiRequest(
-                contents = listOf(Content(parts = listOf(Part(text = prompt)))),
-                generationConfig = GenerationConfig(temperature = 0.0, maxOutputTokens = 384),
-            )
-            val response = runCatching {
-                httpClient.post("$baseUrl/models/$modelName:generateContent?key=$apiKey") {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
+            val request =
+                GeminiRequest(
+                    contents = listOf(Content(parts = listOf(Part(text = prompt)))),
+                    generationConfig = GenerationConfig(temperature = 0.0, maxOutputTokens = 384),
+                )
+            val response =
+                runCatching {
+                    httpClient.post("$baseUrl/models/$modelName:generateContent?key=$apiKey") {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }
+                }.getOrElse { e ->
+                    Log.e("GeminiAiService", "Batch request failure (attempt=$attempt)", e)
+                    if (attempt == maxAttempts) return result
+                    delay(200L * attempt)
+                    continue
                 }
-            }.getOrElse { e ->
-                Log.e("GeminiAiService", "Batch request failure (attempt=$attempt)", e)
-                if (attempt == maxAttempts) return result
-                delay(200L * attempt)
-                continue
-            }
             val geminiResponse = response.body<GeminiResponse>()
             if (geminiResponse.error != null) {
                 val code = geminiResponse.error?.code
@@ -170,7 +197,14 @@ class GeminiAiService(private val apiKey: String) {
                     return result
                 }
             }
-            val text = geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text.orEmpty()
+            val text =
+                geminiResponse.candidates
+                    ?.firstOrNull()
+                    ?.content
+                    ?.parts
+                    ?.firstOrNull()
+                    ?.text
+                    .orEmpty()
             val parsed = parseBatchResponse(text, remaining, items)
             metrics.salvageUsed = metrics.salvageUsed || parsed.salvageUsed
             metrics.rawChars += text.length
@@ -190,8 +224,8 @@ class GeminiAiService(private val apiKey: String) {
     private fun buildPrompt(
         event: CalendarEvent,
         availableItems: List<Item>,
-    ): String {
-        return buildString {
+    ): String =
+        buildString {
             appendLine(PROMPT_HEADER)
             appendLine()
             appendLine("【イベント情報】")
@@ -210,54 +244,72 @@ class GeminiAiService(private val apiKey: String) {
             appendLine(PROMPT_RULES)
             append("回答:") // 末尾に余計な改行を増やさない
         }
-    }
 
-    private fun parseAiResponse(response: String, availableItems: List<Item>): List<Int> = try {
-        val allowed = availableItems.map { it.id }.toSet()
-        response.trim()
-            .split(',')
-            .mapNotNull { it.trim().toIntOrNull() }
-            .filter { it in allowed }
-            .distinct()
-    } catch (e: Exception) {
-        Log.e("GeminiAiService", "Error parsing AI response: $response", e)
-        emptyList()
-    }
+    private fun parseAiResponse(
+        response: String,
+        availableItems: List<Item>,
+    ): List<Int> =
+        try {
+            val allowed = availableItems.map { it.id }.toSet()
+            response
+                .trim()
+                .split(',')
+                .mapNotNull { it.trim().toIntOrNull() }
+                .filter { it in allowed }
+                .distinct()
+        } catch (e: Exception) {
+            Log.e("GeminiAiService", "Error parsing AI response: $response", e)
+            emptyList()
+        }
 
-    private fun buildBatchPrompt(events: List<CalendarEvent>, availableItems: List<Item>): String = buildString {
-        appendLine("version:$PROMPT_VERSION")
-        appendLine(PROMPT_HEADER)
-        appendLine(PROMPT_RULES)
-        appendLine("EVENTS:")
-        events.forEachIndexed { idx, e ->
-            val durMin = kotlin.runCatching { ((e.endDateTime.hour * 60 + e.endDateTime.minute) - (e.startDateTime.hour * 60 + e.startDateTime.minute)).coerceAtLeast(0) }.getOrDefault(0)
-            val desc = (e.description ?: "").replace("\n", " ").take(120)
-            append("[$idx]|t=")
-            append(e.title.take(60))
-            append("|wd=")
-            append(e.startDateTime.dayOfWeek.name.take(3))
-            append("|start=")
-            append(String.format("%02d:%02d", e.startDateTime.hour, e.startDateTime.minute))
-            append("|dur=")
-            append(durMin)
-            if (desc.isNotBlank()) {
-                append("|notes=")
-                append(desc)
+    private fun buildBatchPrompt(
+        events: List<CalendarEvent>,
+        availableItems: List<Item>,
+    ): String =
+        buildString {
+            appendLine("version:$PROMPT_VERSION")
+            appendLine(PROMPT_HEADER)
+            appendLine(PROMPT_RULES)
+            appendLine("EVENTS:")
+            events.forEachIndexed { idx, e ->
+                val durMin =
+                    kotlin
+                        .runCatching {
+                            (
+                                (e.endDateTime.hour * 60 + e.endDateTime.minute) -
+                                    (e.startDateTime.hour * 60 + e.startDateTime.minute)
+                            ).coerceAtLeast(0)
+                        }.getOrDefault(0)
+                val desc = (e.description ?: "").replace("\n", " ").take(120)
+                append("[$idx]|t=")
+                append(e.title.take(60))
+                append("|wd=")
+                append(
+                    e.startDateTime.dayOfWeek.name
+                        .take(3),
+                )
+                append("|start=")
+                append(String.format("%02d:%02d", e.startDateTime.hour, e.startDateTime.minute))
+                append("|dur=")
+                append(durMin)
+                if (desc.isNotBlank()) {
+                    append("|notes=")
+                    append(desc)
+                }
+                appendLine()
             }
-            appendLine()
+            appendLine("ITEMS:")
+            availableItems.take(50).forEach { item ->
+                append(item.id)
+                append(':')
+                append(item.name.replace('\n', ' ').take(40))
+                append('(')
+                append(item.category)
+                append(')')
+                appendLine()
+            }
+            append("ANSWER JSON ONLY:")
         }
-        appendLine("ITEMS:")
-        availableItems.take(50).forEach { item ->
-            append(item.id)
-            append(':')
-            append(item.name.replace('\n', ' ').take(40))
-            append('(')
-            append(item.category)
-            append(')')
-            appendLine()
-        }
-        append("ANSWER JSON ONLY:")
-    }
 
     private fun parseBatchResponse(
         response: String,
@@ -266,13 +318,14 @@ class GeminiAiService(private val apiKey: String) {
     ): ParsedBatchResult {
         val allowed = availableItems.map { it.id }.toSet()
         if (response.isBlank()) return ParsedBatchResult(emptyMap(), emptySet(), false, false)
-        val cleaned = response
-            .trim()
-            .removePrefix("```json")
-            .removePrefix("```JSON")
-            .removePrefix("````")
-            .removeSuffix("```")
-            .trim()
+        val cleaned =
+            response
+                .trim()
+                .removePrefix("```json")
+                .removePrefix("```JSON")
+                .removePrefix("````")
+                .removeSuffix("```")
+                .trim()
         // strict parse
         try {
             val parsed = batchJson.decodeFromString<BatchRecommendResponse>(cleaned)
@@ -299,10 +352,16 @@ class GeminiAiService(private val apiKey: String) {
             val idx = m.groupValues.getOrNull(1)?.toIntOrNull() ?: return@forEach
             if (idx !in events.indices) return@forEach
             val itemsPart = m.groupValues.getOrNull(2).orEmpty()
-            val ids = if (itemsPart.isBlank()) emptyList() else itemsPart.split(',')
-                .mapNotNull { it.trim().toIntOrNull() }
-                .filter { it in allowed }
-                .distinct()
+            val ids =
+                if (itemsPart.isBlank()) {
+                    emptyList()
+                } else {
+                    itemsPart
+                        .split(',')
+                        .mapNotNull { it.trim().toIntOrNull() }
+                        .filter { it in allowed }
+                        .distinct()
+                }
             result[events[idx].id] = ids
             matchedIdx += idx
         }
@@ -326,22 +385,27 @@ class GeminiAiService(private val apiKey: String) {
         return if (lastOk >= 0) src.substring(0, lastOk + 1) else src
     }
 
-    private fun logAggregated(metrics: List<BatchMetrics>, elapsedMs: Long, totalEvents: Int) {
+    private fun logAggregated(
+        metrics: List<BatchMetrics>,
+        elapsedMs: Long,
+        totalEvents: Int,
+    ) {
         val salvage = metrics.count { it.salvageUsed }
         val truncated = metrics.count { it.truncatedDetected }
         val attempts = metrics.maxOfOrNull { it.attempts } ?: 0
         val rawChars = metrics.sumOf { it.rawChars }
-        val json = "{" +
-            "\"phase\":\"ai_batch\"," +
-            "\"totalEvents\":$totalEvents," +
-            "\"chunks\":${metrics.size}," +
-            "\"elapsedMs\":$elapsedMs," +
-            "\"salvageChunks\":$salvage," +
-            "\"truncatedChunks\":$truncated," +
-            "\"maxAttempts\":$attempts," +
-            "\"rawChars\":$rawChars," +
-            "\"version\":\"$PROMPT_VERSION\"" +
-            "}"
+        val json =
+            "{" +
+                "\"phase\":\"ai_batch\"," +
+                "\"totalEvents\":$totalEvents," +
+                "\"chunks\":${metrics.size}," +
+                "\"elapsedMs\":$elapsedMs," +
+                "\"salvageChunks\":$salvage," +
+                "\"truncatedChunks\":$truncated," +
+                "\"maxAttempts\":$attempts," +
+                "\"rawChars\":$rawChars," +
+                "\"version\":\"$PROMPT_VERSION\"" +
+                "}"
         Log.i("GeminiAiService", json)
     }
 

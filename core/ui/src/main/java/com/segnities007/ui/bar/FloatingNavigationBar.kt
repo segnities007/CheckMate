@@ -32,7 +32,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,13 +47,16 @@ fun FloatingNavigationBar(
     currentHubRoute: HubRoute,
     onNavigate: (HubRoute) -> Unit,
 ) {
+    if (alpha == 0f) return
+
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .graphicsLayer(alpha = alpha)
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         FloatingActionBarUi(
-            alpha = alpha,
             currentHubRoute = currentHubRoute,
             onNavigate = onNavigate,
         )
@@ -60,7 +66,6 @@ fun FloatingNavigationBar(
 
 @Composable
 private fun FloatingActionBarUi(
-    alpha: Float,
     currentHubRoute: HubRoute,
     onNavigate: (HubRoute) -> Unit,
 ) {
@@ -73,34 +78,38 @@ private fun FloatingActionBarUi(
             HubRoute.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
         )
 
-    if (alpha > 0f) {
-        Surface(
-            shape = CircleShape,
-            shadowElevation = 12.dp,
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha),
-        ) {
-            Row(
-                modifier = Modifier.padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                info.forEach { (route, icons) ->
-                    NavItemButton(
-                        alpha = alpha,
-                        selectedIcon = icons[0],
-                        unselectedIcon = icons[1],
-                        selected = currentHubRoute == route,
-                        onClick = { onNavigate(route) },
-                    )
-                }
-            }
+    val brush =
+        Brush.verticalGradient(
+            colors =
+                listOf(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.primary.copy(0.3f),
+                ),
+        )
+
+    Row(
+        modifier =
+            Modifier
+                .shadow(12.dp, CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(brush, CircleShape)
+                .padding(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        info.forEach { (route, icons) ->
+            NavItemButton(
+                selectedIcon = icons[0],
+                unselectedIcon = icons[1],
+                selected = currentHubRoute == route,
+                onClick = { onNavigate(route) },
+            )
         }
     }
 }
 
 @Composable
 private fun NavItemButton(
-    alpha: Float,
     selectedIcon: ImageVector,
     unselectedIcon: ImageVector,
     selected: Boolean,
@@ -116,8 +125,8 @@ private fun NavItemButton(
             contentDescription = "",
             tint =
                 when (selected) {
-                    true -> MaterialTheme.colorScheme.primary.copy(alpha = alpha)
-                    false -> MaterialTheme.colorScheme.onSurface.copy(alpha = alpha * 0.4f)
+                    true -> MaterialTheme.colorScheme.primary
+                    false -> MaterialTheme.colorScheme.onSurface.copy(0.4f)
                 },
         )
     }

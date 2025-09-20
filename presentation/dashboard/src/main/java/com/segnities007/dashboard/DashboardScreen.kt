@@ -114,13 +114,27 @@ private fun DashboardUi(
                 StatCardWithPercentage(
                     title = "本日の完了率",
                     value = "${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
-                    progress = if (state.scheduledItemCountToday > 0) (state.checkedItemCountToday.toFloat() / state.scheduledItemCountToday) else 0f,
+                    progress =
+                        if (state.scheduledItemCountToday >
+                            0
+                        ) {
+                            (state.checkedItemCountToday.toFloat() / state.scheduledItemCountToday)
+                        } else {
+                            0f
+                        },
                     modifier = Modifier.weight(1f),
                 )
                 StatCardWithPercentage(
                     title = "累計完了率",
                     value = "${state.totalCheckedRecordsCount}/${state.totalRecordsCount}",
-                    progress = if (state.totalRecordsCount > 0) (state.totalCheckedRecordsCount.toFloat() / state.totalRecordsCount) else 0f,
+                    progress =
+                        if (state.totalRecordsCount >
+                            0
+                        ) {
+                            (state.totalCheckedRecordsCount.toFloat() / state.totalRecordsCount)
+                        } else {
+                            0f
+                        },
                     modifier = Modifier.weight(1f),
                 )
             }

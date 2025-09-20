@@ -50,9 +50,10 @@ fun TemplatesScreen(
     val navController = rememberNavController()
 
     // ICS ファイルピック用ランチャー（常に確保）
-    val icsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: android.net.Uri? ->
-        uri?.let { templatesViewModel.sendIntent(TemplatesIntent.ImportIcsTemplates(it)) }
-    }
+    val icsLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: android.net.Uri? ->
+            uri?.let { templatesViewModel.sendIntent(TemplatesIntent.ImportIcsTemplates(it)) }
+        }
 
     LaunchedEffect(Unit) {
         templatesViewModel.effect.collect { effect ->

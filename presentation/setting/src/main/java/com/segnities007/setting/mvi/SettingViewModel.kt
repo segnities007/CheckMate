@@ -30,9 +30,11 @@ class SettingViewModel(
     private val icsTemplateRepository: IcsTemplateRepository,
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
     private val reducer: SettingReducer = SettingReducer()
+
     init {
-    sendIntent(SettingIntent.LoadUserStatus)
+        sendIntent(SettingIntent.LoadUserStatus)
     }
+
     private suspend fun loadUserStatus() {
         try {
             val userStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
@@ -76,13 +78,14 @@ class SettingViewModel(
 
     private suspend fun importData(intent: SettingIntent.ImportData) {
         try {
-            val jsonString = withContext(Dispatchers.IO) {
-                appContext.contentResolver
-                    .openInputStream(intent.uri)
-                    ?.bufferedReader()
-                    ?.use { it.readText() }
-                    ?: throw IllegalStateException("ファイルが読み込めません")
-            }
+            val jsonString =
+                withContext(Dispatchers.IO) {
+                    appContext.contentResolver
+                        .openInputStream(intent.uri)
+                        ?.bufferedReader()
+                        ?.use { it.readText() }
+                        ?: throw IllegalStateException("ファイルが読み込めません")
+                }
             backupRepository.importData(jsonString)
             sendEffect { SettingEffect.ShowToast("インポート完了") }
         } catch (e: Exception) {
@@ -91,7 +94,7 @@ class SettingViewModel(
     }
 
     private fun showDeleteAllDataConfirmation() {
-    setState { reducer.reduce(this, SettingIntent.DeleteAllData) }
+        setState { reducer.reduce(this, SettingIntent.DeleteAllData) }
     }
 
     private suspend fun confirmDeleteAllData() {
@@ -111,7 +114,7 @@ class SettingViewModel(
     }
 
     private fun cancelDeleteAllData() {
-    setState { reducer.reduce(this, SettingIntent.CancelDeleteAllData) }
+        setState { reducer.reduce(this, SettingIntent.CancelDeleteAllData) }
     }
 
     private suspend fun linkWithGoogle() {
@@ -158,11 +161,11 @@ class SettingViewModel(
     }
 
     private fun showIcsImportDialog() {
-    setState { reducer.reduce(this, SettingIntent.ShowIcsImportDialog) }
+        setState { reducer.reduce(this, SettingIntent.ShowIcsImportDialog) }
     }
 
     private fun hideIcsImportDialog() {
-    setState { reducer.reduce(this, SettingIntent.HideIcsImportDialog) }
+        setState { reducer.reduce(this, SettingIntent.HideIcsImportDialog) }
     }
 
     private suspend fun saveToDownloads(

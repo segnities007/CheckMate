@@ -1,14 +1,14 @@
 package com.segnities007.templates.mvi
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.lifecycle.viewModelScope
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.IcsTemplateRepository
+import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -20,9 +20,10 @@ class TemplatesViewModel(
         initialState = TemplatesState(),
     ) {
     private val reducer: TemplatesReducer = TemplatesReducer()
+
     init {
-    sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
-    sendIntent(TemplatesIntent.GetAllItems)
+        sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
+        sendIntent(TemplatesIntent.GetAllItems)
     }
 
     override suspend fun handleIntent(intent: TemplatesIntent) {
@@ -133,7 +134,7 @@ class TemplatesViewModel(
                 SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
             }
 
-    setState { reducer.reduce(this, TemplatesIntent.SetFilteredItems(filteredItems)) }
+        setState { reducer.reduce(this, TemplatesIntent.SetFilteredItems(filteredItems)) }
     }
 
     private fun applyTemplateFilters() {
@@ -165,7 +166,7 @@ class TemplatesViewModel(
                 TemplateSortOrder.ITEM_COUNT_DESC -> filteredTemplates.sortedByDescending { it.itemIds.size }
             }
 
-    setState { reducer.reduce(this, TemplatesIntent.SetFilteredTemplates(filteredTemplates)) }
+        setState { reducer.reduce(this, TemplatesIntent.SetFilteredTemplates(filteredTemplates)) }
     }
 
     private suspend fun getAllItems() {
@@ -225,17 +226,18 @@ class TemplatesViewModel(
         sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
     }
 
-    private fun importIcs(uri: android.net.Uri) = viewModelScope.launch {
-        setState { copy(isImportingIcs = true) }
-        try {
-            val templates = withContext(Dispatchers.IO) { icsTemplateRepository.generateTemplatesFromIcs(uri) }
-            withContext(Dispatchers.IO) { icsTemplateRepository.saveGeneratedTemplates(templates) }
-            getAllWeeklyTemplates()
-            setState { copy(isImportingIcs = false) }
-            sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
-        } catch (e: Exception) {
-            setState { copy(isImportingIcs = false) }
-            sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }
+    private fun importIcs(uri: android.net.Uri) =
+        viewModelScope.launch {
+            setState { copy(isImportingIcs = true) }
+            try {
+                val templates = withContext(Dispatchers.IO) { icsTemplateRepository.generateTemplatesFromIcs(uri) }
+                withContext(Dispatchers.IO) { icsTemplateRepository.saveGeneratedTemplates(templates) }
+                getAllWeeklyTemplates()
+                setState { copy(isImportingIcs = false) }
+                sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
+            } catch (e: Exception) {
+                setState { copy(isImportingIcs = false) }
+                sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }
+            }
         }
-    }
 }

@@ -3,8 +3,11 @@ package com.segnities007.templates.mvi
 import com.segnities007.ui.mvi.MviReducer
 
 class TemplatesReducer : MviReducer<TemplatesState, TemplatesIntent> {
-    override fun reduce(currentState: TemplatesState, intent: TemplatesIntent): TemplatesState {
-        return when (intent) {
+    override fun reduce(
+        currentState: TemplatesState,
+        intent: TemplatesIntent,
+    ): TemplatesState =
+        when (intent) {
             TemplatesIntent.ShowBottomSheet -> currentState.copy(isShowingBottomSheet = true)
             TemplatesIntent.HideBottomSheet -> currentState.copy(isShowingBottomSheet = false)
             is TemplatesIntent.UpdateSearchQuery -> currentState.copy(searchQuery = intent.query)
@@ -22,5 +25,4 @@ class TemplatesReducer : MviReducer<TemplatesState, TemplatesIntent> {
             is TemplatesIntent.SetWeeklyTemplates -> currentState.copy(weeklyTemplates = intent.weeklyTemplates)
             else -> currentState
         }
-    }
 }

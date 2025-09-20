@@ -87,7 +87,10 @@ sealed interface TemplatesIntent : MviIntent {
     data class ImportIcsTemplates(
         val uri: android.net.Uri,
     ) : TemplatesIntent
+
     data object ShowIcsFilePicker : TemplatesIntent
+
     data object ImportIcsStarted : TemplatesIntent
+
     data object ImportIcsFinished : TemplatesIntent
 }
