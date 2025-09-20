@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Gradle build (presentation + core/ui)",
+			"type": "shell",
+			"command": "./gradlew :core:ui:assembleDebug :presentation:dashboard:assembleDebug :presentation:home:assembleDebug :presentation:items:assembleDebug :presentation:templates:assembleDebug",
+			"group": "build"
+		}
+	]
+}

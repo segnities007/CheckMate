@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="11">
-      <module name="CheckMate.core.common" target="21" />
-      <module name="CheckMate.core.navigation" target="21" />
-      <module name="CheckMate.core.ui" target="21" />
-      <module name="CheckMate.data.local" target="21" />
-      <module name="CheckMate.data.remote" target="21" />
-      <module name="CheckMate.data.repository" target="21" />
-      <module name="CheckMate.domain.model" target="21" />
-      <module name="CheckMate.domain.repository" target="21" />
-      <module name="CheckMate.presentation.auth" target="21" />
-      <module name="CheckMate.presentation.dashboard" target="21" />
-      <module name="CheckMate.presentation.home" target="21" />
-      <module name="CheckMate.presentation.hub" target="21" />
-      <module name="CheckMate.presentation.items" target="21" />
-      <module name="CheckMate.presentation.login" target="21" />
-      <module name="CheckMate.presentation.setting" target="21" />
-      <module name="CheckMate.presentation.splash" target="21" />
-      <module name="CheckMate.presentation.templates" target="21" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="17" />
   </component>
 </project>

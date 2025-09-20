@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import com.segnities007.home.component.CategoryBasedItemList
-import com.segnities007.home.component.EnhancedCalendarCard
-import com.segnities007.home.component.StatisticsCard
+import com.segnities007.ui.card.EnhancedCalendarCard
+import com.segnities007.ui.card.StatisticsCard
 import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item

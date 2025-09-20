@@ -1,4 +1,4 @@
-package com.segnities007.dashboard.component
+package com.segnities007.ui.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.item.Item
+import androidx.compose.ui.tooling.preview.Preview
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun UncheckedItemsCard(
@@ -35,13 +37,6 @@ fun UncheckedItemsCard(
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation =
-            CardDefaults.elevatedCardElevation(
-                defaultElevation = 6.dp, // Material3 Expressive: より大きなエレベーション
-                pressedElevation = 12.dp,
-                focusedElevation = 6.dp,
-                hoveredElevation = 8.dp,
-            ),
         colors =
             CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -54,7 +49,6 @@ fun UncheckedItemsCard(
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // ヘッダー
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -84,7 +78,6 @@ fun UncheckedItemsCard(
                 )
             }
 
-            // アイテムリスト
             if (items.isNotEmpty()) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -132,4 +125,17 @@ fun UncheckedItemsCard(
             }
         }
     }
+}
+
+@OptIn(ExperimentalTime::class)
+@Composable
+@Preview
+private fun UncheckedItemsCardPreview() {
+    val sample = listOf(
+        Item(id = 1, name = "水筒"),
+        Item(id = 2, name = "財布"),
+        Item(id = 3, name = "教科書"),
+        Item(id = 4, name = "弁当"),
+    )
+    UncheckedItemsCard(title = "未チェック", items = sample)
 }
