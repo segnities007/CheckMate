@@ -1,7 +1,6 @@
 package com.segnities007.ui.bar
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,12 +26,13 @@ import androidx.compose.material.icons.outlined.SpaceDashboard
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -76,8 +76,8 @@ private fun FloatingActionBarUi(
     if (alpha > 0f) {
         Surface(
             shape = CircleShape,
-            shadowElevation = 12.dp, // Material3 Expressive: より大きな影
-            color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
+            shadowElevation = 12.dp,
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha),
         ) {
             Row(
                 modifier = Modifier.padding(8.dp),
@@ -106,28 +106,18 @@ private fun NavItemButton(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    FloatingActionButton(
+    IconButton(
         onClick = onClick,
-        modifier = Modifier.size(72.dp), // Material3 Expressive: より大きなサイズ
-        containerColor =
-            if (selected) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha)
-            } else {
-                MaterialTheme.colorScheme.surface.copy(alpha = alpha * 0.5f) // より見やすく調整
-            },
-        contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
-        elevation = FloatingActionButtonDefaults.elevation(0.dp), // ボタン自体の影を削除
-        shape = CircleShape,
+        modifier = Modifier.size(64.dp),
     ) {
         Icon(
-            modifier = Modifier.size(36.dp), // Material3 Expressive: より大きなアイコン
+            modifier = Modifier.size(36.dp),
             imageVector = if (selected) selectedIcon else unselectedIcon,
             contentDescription = "",
             tint =
-                if (selected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha)
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+                when (selected) {
+                    true -> MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+                    false -> MaterialTheme.colorScheme.onSurface.copy(alpha = alpha * 0.4f)
                 },
         )
     }
