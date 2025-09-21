@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardDefaults.elevatedCardColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -57,6 +58,7 @@ fun TemplateSearchFilterSortBar(
             elevatedCardColors(
                 containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
             ),
+        elevation = CardDefaults.elevatedCardElevation(2.dp),
     ) {
         Column(
             modifier =

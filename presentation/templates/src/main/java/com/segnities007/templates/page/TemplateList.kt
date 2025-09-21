@@ -76,6 +76,7 @@ fun TemplateList(
                 FloatingActionButton(
                     modifier = Modifier.graphicsLayer(alpha = alpha),
                     onClick = { sendIntent(TemplatesIntent.ShowBottomSheet) },
+                    elevation = FloatingActionButtonDefaults.elevation(2.dp),
                     containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
                     contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
                 ) {
@@ -97,7 +98,6 @@ fun TemplateList(
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         TemplateListUi(
-            innerPadding = innerPadding,
             sendIntent = sendIntent,
             templates = templates,
             templateSearchQuery = templateSearchQuery,
@@ -114,7 +114,6 @@ fun TemplateList(
 
 @Composable
 private fun TemplateListUi(
-    innerPadding: PaddingValues,
     sendIntent: (TemplatesIntent) -> Unit,
     templates: List<WeeklyTemplate>,
     templateSearchQuery: String,
@@ -173,12 +172,7 @@ fun WeeklyTemplateListPreview() {
             ),
         )
 
-    TemplateList(
-        innerPadding = PaddingValues(0.dp),
-        setFab = {},
-        setTopBar = {},
-        setNavigationBar = {},
-        onNavigate = {},
+    TemplateListUi(
         sendIntent = {},
         templates = dummyTemplates,
         templateSearchQuery = "",
@@ -188,6 +182,5 @@ fun WeeklyTemplateListPreview() {
         onSearchQueryChange = {},
         onSortOrderChange = {},
         onDayOfWeekChange = {},
-        modifier = Modifier.fillMaxWidth(),
     )
 }

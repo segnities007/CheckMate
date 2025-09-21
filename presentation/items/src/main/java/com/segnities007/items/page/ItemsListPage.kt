@@ -68,7 +68,7 @@ fun ItemsListPage(
     val isVisible by rememberScrollVisibility(scrollState)
 
     val granted = {
-        // カメラ権限が許可された時の処理は何もしない
+        // TODO
     }
 
     val cameraPermissionLauncher =
@@ -100,6 +100,7 @@ fun ItemsListPage(
                     modifier = Modifier.graphicsLayer(alpha = alpha),
                     containerColor = FloatingActionButtonDefaults.containerColor,
                     contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
+                    elevation = FloatingActionButtonDefaults.elevation(2.dp),
                     onClick = {
                         sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
                         sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
