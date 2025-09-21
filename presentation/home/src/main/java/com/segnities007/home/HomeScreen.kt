@@ -71,8 +71,7 @@ fun HomeScreen(
 
         EnhancedHomeContent(
             selectedDate = state.selectedDate,
-            currentYear = state.currentYear,
-            currentMonth = state.currentMonth,
+            currentWeekCenter = state.currentWeekCenter,
             templates = state.templatesForToday,
             allItems = state.itemsForToday,
             itemCheckStates = state.itemCheckStates,
@@ -81,8 +80,6 @@ fun HomeScreen(
             },
             onDateSelected = { date ->
                 homeViewModel.sendIntent(HomeIntent.SelectDate(date))
-            },
-            onMonthChanged = { year, month ->
             },
             sendIntent = homeViewModel::sendIntent,
         )

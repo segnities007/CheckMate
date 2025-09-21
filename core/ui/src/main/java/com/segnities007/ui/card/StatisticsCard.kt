@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,42 +54,65 @@ fun StatisticsCard(
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "達成数",
-                        fontSize = 12.sp,
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = "今日の進捗",
+                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = "$checkedCount/$totalCount",
-                        fontSize = 36.sp,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        text = "$checkedCount / $totalCount",
+                        fontSize = 32.sp,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
 
+                // small circular with percentage
                 CircularProgressWithPercentage(progress = progress)
             }
 
+            if (totalCount == 0) {
+                Text(
+                    text = "今日は予定がありません",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                return@Column
+            }
+
             if (categoryStats.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    categoryStats.forEach { (category, stats) ->
+                // Show top 3 categories by remaining items to keep things compact
+                val sorted = categoryStats.entries
+                    .sortedByDescending { (cat, stats) -> stats.second - stats.first }
+                    .take(3)
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    sorted.forEach { (category, stats) ->
                         val (checked, total, p) = stats
                         CategoryProgressRow(
                             category = category,
                             checkedCount = checked,
                             totalCount = total,
                             progress = p,
+                        )
+                    }
+                    val remaining = categoryStats.size - sorted.size
+                    if (remaining > 0) {
+                        Text(
+                            text = "他 ${remaining}カテゴリ",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -119,7 +143,7 @@ private fun CategoryProgressRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -127,20 +151,22 @@ private fun CategoryProgressRow(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.weight(1.2f).height(6.dp).clip(RoundedCornerShape(4.dp)),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            strokeCap = StrokeCap.Round,
         )
 
         Text(
             text = "$checkedCount/$totalCount",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier.width(80.dp).height(8.dp).clip(RoundedCornerShape(4.dp)),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            strokeCap = StrokeCap.Round,
         )
     }
 }
