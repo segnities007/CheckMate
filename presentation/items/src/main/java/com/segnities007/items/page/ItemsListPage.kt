@@ -35,6 +35,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -95,10 +96,10 @@ fun ItemsListPage(
         }
         setTopBar {}
         setFab {
-            if (alpha > 0) {
                 FloatingActionButton(
-                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+                    modifier = Modifier.graphicsLayer(alpha = alpha),
+                    containerColor = FloatingActionButtonDefaults.containerColor,
+                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
                     onClick = {
                         sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
                         sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
@@ -110,7 +111,6 @@ fun ItemsListPage(
                         contentDescription = "アイテムを追加",
                     )
                 }
-            }
         }
     }
 

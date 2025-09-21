@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.DayOfWeek
@@ -72,8 +73,8 @@ fun TemplateList(
             )
         }
         setFab {
-            if (alpha > 0f) {
                 FloatingActionButton(
+                    modifier = Modifier.graphicsLayer(alpha = alpha),
                     onClick = { sendIntent(TemplatesIntent.ShowBottomSheet) },
                     containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
                     contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
@@ -83,7 +84,6 @@ fun TemplateList(
                         contentDescription = "Add Template",
                     )
                 }
-            }
         }
         setTopBar {}
     }

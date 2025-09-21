@@ -57,42 +57,26 @@ fun ConfirmBar(
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Cancel - Material3 Expressive
                 FloatingActionButton(
                     onClick = onCancel,
-                    modifier = Modifier.size(64.dp), // Material3 Expressive: より大きなサイズ
+                    modifier = Modifier.size(64.dp),
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    elevation =
-                        FloatingActionButtonDefaults.elevation(
-                            defaultElevation = 4.dp, // Material3 Expressive: より大きなエレベーション
-                            pressedElevation = 8.dp,
-                            focusedElevation = 4.dp,
-                            hoveredElevation = 6.dp,
-                        ),
                     shape = CircleShape,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Cancel",
-                        modifier = Modifier.size(32.dp), // Material3 Expressive: より大きなアイコン
+                        modifier = Modifier.size(32.dp),
                         tint = MaterialTheme.colorScheme.onErrorContainer,
                     )
                 }
 
-                // Confirm - Material3 Expressive
                 FloatingActionButton(
                     onClick = onConfirm,
-                    modifier = Modifier.size(64.dp), // Material3 Expressive: より大きなサイズ
+                    modifier = Modifier.size(64.dp),
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    elevation =
-                        FloatingActionButtonDefaults.elevation(
-                            defaultElevation = 4.dp, // Material3 Expressive: より大きなエレベーション
-                            pressedElevation = 8.dp,
-                            focusedElevation = 4.dp,
-                            hoveredElevation = 6.dp,
-                        ),
                     shape = CircleShape,
                 ) {
                     Icon(
