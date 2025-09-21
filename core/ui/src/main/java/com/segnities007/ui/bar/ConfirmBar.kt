@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.navigation.HubRoute
@@ -41,6 +42,7 @@ fun ConfirmBar(
     Column(
         modifier =
             Modifier
+                .graphicsLayer(alpha = alpha)
                 .fillMaxWidth(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,7 +50,7 @@ fun ConfirmBar(
         Surface(
             shape = CircleShape,
             shadowElevation = 8.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = alpha),
+            color = MaterialTheme.colorScheme.primary,
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
@@ -59,8 +61,8 @@ fun ConfirmBar(
                 FloatingActionButton(
                     onClick = onCancel,
                     modifier = Modifier.size(64.dp), // Material3 Expressive: より大きなサイズ
-                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = alpha),
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = alpha),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
                     elevation =
                         FloatingActionButtonDefaults.elevation(
                             defaultElevation = 4.dp, // Material3 Expressive: より大きなエレベーション
@@ -74,7 +76,7 @@ fun ConfirmBar(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Cancel",
                         modifier = Modifier.size(32.dp), // Material3 Expressive: より大きなアイコン
-                        tint = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = alpha),
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
                     )
                 }
 
@@ -82,8 +84,8 @@ fun ConfirmBar(
                 FloatingActionButton(
                     onClick = onConfirm,
                     modifier = Modifier.size(64.dp), // Material3 Expressive: より大きなサイズ
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha),
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     elevation =
                         FloatingActionButtonDefaults.elevation(
                             defaultElevation = 4.dp, // Material3 Expressive: より大きなエレベーション
@@ -96,8 +98,8 @@ fun ConfirmBar(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Confirm",
-                        modifier = Modifier.size(32.dp), // Material3 Expressive: より大きなアイコン
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = alpha),
+                        modifier = Modifier.size(32.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
