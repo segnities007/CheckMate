@@ -2,6 +2,7 @@ package com.segnities007.templates.page
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,11 +18,13 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,6 +67,14 @@ fun TemplateList(
         label = "navigationBarAlpha",
     )
 
+    val brush = verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(0.2f),
+        ),
+    )
+
+
     LaunchedEffect(Unit) {
         setNavigationBar {
             FloatingNavigationBar(
@@ -93,6 +104,7 @@ fun TemplateList(
         modifier =
             modifier
                 .fillMaxSize()
+                .background(brush)
                 .verticalScroll(listState)
                 .padding(horizontal = 16.dp),
     ) {

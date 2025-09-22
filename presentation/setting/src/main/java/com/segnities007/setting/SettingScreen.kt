@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,6 +59,13 @@ fun SettingScreen(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 500),
         label = "navigationBarAlpha",
+    )
+
+    val brash = verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(0.2f),
+        ),
     )
 
     LaunchedEffect(Unit) {
@@ -97,7 +105,7 @@ fun SettingScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(brash)
                 .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))

@@ -2,6 +2,7 @@ package com.segnities007.dashboard
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,7 +23,10 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.ui.card.StatCard
 import com.segnities007.ui.card.StatCardWithPercentage
 import com.segnities007.ui.card.UncheckedItemsCard
@@ -31,6 +35,7 @@ import com.segnities007.dashboard.mvi.DashboardViewModel
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,19 +50,11 @@ fun DashboardScreen(
     val dashboardViewModel: DashboardViewModel = koinInject()
     val state by dashboardViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
-
-    val targetAlpha by remember {
-        derivedStateOf {
-            when {
-                scrollState.value > 50 -> 0f // 50px以上スクロールしたら非表示
-                else -> (1f - scrollState.value / 50f).coerceIn(0f, 1f) // 0-50pxの範囲でフェード
-            }
-        }
-    }
+    val isVisible by rememberScrollVisibility(scrollState = scrollState)
 
     val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = tween(durationMillis = 200),
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(500),
         label = "navigationBarAlpha",
     )
 
@@ -74,12 +71,8 @@ fun DashboardScreen(
     }
 
     DashboardUi(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .verticalScroll(scrollState),
         state = state,
+        scrollState = scrollState,
         innerPadding = innerPadding,
     )
 }
@@ -87,11 +80,22 @@ fun DashboardScreen(
 @Composable
 private fun DashboardUi(
     innerPadding: PaddingValues,
-    modifier: Modifier = Modifier,
     state: DashboardState,
+    scrollState: ScrollState,
 ) {
+    val brash = verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(0.2f),
+        ),
+    )
+
     Column(
-        modifier = modifier.padding(horizontal = 16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .background(brash)
+            .padding(horizontal = 16.dp),
     ) {
         Spacer(Modifier.height(innerPadding.calculateTopPadding()))
         Column(
@@ -149,3 +153,25 @@ private fun DashboardUi(
         }
     }
 }
+
+@Preview
+@Composable
+fun DashboardUiPreview() {
+    DashboardUi(
+        innerPadding = PaddingValues(0.dp),
+        state = DashboardState(
+            itemCount = 10,
+            templateCount = 5,
+            checkedItemCountToday = 3,
+            scheduledItemCountToday = 5,
+            totalCheckedRecordsCount = 20,
+            totalRecordsCount = 30,
+            uncheckedItemsToday = listOf()
+        ),
+        scrollState = rememberScrollState(),
+    )
+}
+
+
+
+

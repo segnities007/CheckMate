@@ -35,6 +35,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -86,6 +87,14 @@ fun ItemsListPage(
         label = "navigationBarAlpha",
     )
 
+    val brash = verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(0.2f),
+        ),
+    )
+
+
     LaunchedEffect(Unit) {
         setNavigationBar {
             FloatingNavigationBar(
@@ -119,7 +128,7 @@ fun ItemsListPage(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(brash)
                 .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))

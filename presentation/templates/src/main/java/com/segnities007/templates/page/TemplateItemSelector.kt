@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -70,6 +71,13 @@ fun TemplateSelector(
                 }
             }
         }
+    val brash = verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(0.2f),
+        ),
+    )
+
 
     val scrollState = rememberScrollState()
     val alpha by remember {
@@ -104,6 +112,7 @@ fun TemplateSelector(
         modifier =
             Modifier
                 .fillMaxSize()
+                .background(brash)
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp),
     ) {
