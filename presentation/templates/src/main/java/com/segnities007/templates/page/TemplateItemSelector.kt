@@ -1,6 +1,5 @@
 package com.segnities007.templates.page
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +48,7 @@ import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.templates.mvi.TemplatesIntent
-import com.segnities007.ui.bar.ConfirmBar
+import com.segnities007.ui.bar.FloatingConfirmBar
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +89,7 @@ fun TemplateSelector(
         setFab {}
         setTopBar {}
         setNavigationBar {
-            ConfirmBar(
+            FloatingConfirmBar(
                 onConfirm = {
                     sendIntent(
                         TemplatesIntent.EditWeeklyTemplate(
