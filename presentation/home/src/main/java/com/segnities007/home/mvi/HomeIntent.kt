@@ -27,6 +27,11 @@ sealed interface HomeIntent : MviIntent {
         val month: Int,
     ) : HomeIntent
 
+    /** 週ナビゲーション（中心日を指定して移動） */
+    data class ChangeWeek(
+        val date: LocalDate,
+    ) : HomeIntent
+
     data object EnsureCheckHistory : HomeIntent
 
     // Reducer-only intents
@@ -35,7 +40,7 @@ sealed interface HomeIntent : MviIntent {
     ) : HomeIntent
 
     data class SetItemCheckStates(
-        val date: kotlinx.datetime.LocalDate,
+        val date: LocalDate,
         val itemCheckStates: Map<Int, Boolean>,
     ) : HomeIntent
 }

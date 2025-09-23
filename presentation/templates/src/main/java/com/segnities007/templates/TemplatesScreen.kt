@@ -49,7 +49,6 @@ fun TemplatesScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val navController = rememberNavController()
 
-    // ICS ファイルピック用ランチャー（常に確保）
     val icsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: android.net.Uri? ->
             uri?.let { templatesViewModel.sendIntent(TemplatesIntent.ImportIcsTemplates(it)) }
@@ -65,7 +64,6 @@ fun TemplatesScreen(
                 is TemplatesEffect.ShowToast ->
                     Toast.makeText(localContext, effect.message, Toast.LENGTH_SHORT).show()
                 TemplatesEffect.LaunchIcsPicker ->
-                    // ボトムシート表示中のみ起動（安全側）
                     if (state.isShowingBottomSheet) {
                         icsLauncher.launch(arrayOf("text/calendar"))
                     }

@@ -2,6 +2,7 @@ package com.segnities007.templates.page
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,11 +18,14 @@ import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.DayOfWeek
@@ -63,6 +67,14 @@ fun TemplateList(
         label = "navigationBarAlpha",
     )
 
+    val brush = verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(0.2f),
+        ),
+    )
+
+
     LaunchedEffect(Unit) {
         setNavigationBar {
             FloatingNavigationBar(
@@ -72,9 +84,10 @@ fun TemplateList(
             )
         }
         setFab {
-            if (alpha > 0f) {
                 FloatingActionButton(
+                    modifier = Modifier.graphicsLayer(alpha = alpha),
                     onClick = { sendIntent(TemplatesIntent.ShowBottomSheet) },
+                    elevation = FloatingActionButtonDefaults.elevation(2.dp),
                     containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
                     contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
                 ) {
@@ -83,7 +96,6 @@ fun TemplateList(
                         contentDescription = "Add Template",
                     )
                 }
-            }
         }
         setTopBar {}
     }
@@ -92,12 +104,12 @@ fun TemplateList(
         modifier =
             modifier
                 .fillMaxSize()
+                .background(brush)
                 .verticalScroll(listState)
                 .padding(horizontal = 16.dp),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         TemplateListUi(
-            innerPadding = innerPadding,
             sendIntent = sendIntent,
             templates = templates,
             templateSearchQuery = templateSearchQuery,
@@ -114,7 +126,6 @@ fun TemplateList(
 
 @Composable
 private fun TemplateListUi(
-    innerPadding: PaddingValues,
     sendIntent: (TemplatesIntent) -> Unit,
     templates: List<WeeklyTemplate>,
     templateSearchQuery: String,
@@ -145,12 +156,16 @@ private fun TemplateListUi(
                 onCreateClick = { sendIntent(TemplatesIntent.ShowBottomSheet) },
             )
         } else {
-            for (item in templates) {
-                TemplateCard(
-                    template = item,
-                    onClick = { onTemplateClick(item) },
-                    onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(item)) },
-                )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ){
+                templates.forEach { templates ->
+                    TemplateCard(
+                        template = templates,
+                        onClick = { onTemplateClick(templates) },
+                        onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(templates)) },
+                    )
+                }
             }
         }
     }
@@ -173,12 +188,7 @@ fun WeeklyTemplateListPreview() {
             ),
         )
 
-    TemplateList(
-        innerPadding = PaddingValues(0.dp),
-        setFab = {},
-        setTopBar = {},
-        setNavigationBar = {},
-        onNavigate = {},
+    TemplateListUi(
         sendIntent = {},
         templates = dummyTemplates,
         templateSearchQuery = "",
@@ -188,6 +198,5 @@ fun WeeklyTemplateListPreview() {
         onSearchQueryChange = {},
         onSortOrderChange = {},
         onDayOfWeekChange = {},
-        modifier = Modifier.fillMaxWidth(),
     )
 }

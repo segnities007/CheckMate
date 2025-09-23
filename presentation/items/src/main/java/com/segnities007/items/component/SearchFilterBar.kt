@@ -33,13 +33,7 @@ fun SearchFilterBar(
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation =
-            CardDefaults.elevatedCardElevation(
-                defaultElevation = 6.dp, // Material3 Expressive: より大きなエレベーション
-                pressedElevation = 12.dp,
-                focusedElevation = 6.dp,
-                hoveredElevation = 8.dp,
-            ),
+        elevation = CardDefaults.elevatedCardElevation(2.dp),
         colors =
             CardDefaults.elevatedCardColors(
                 containerColor = MaterialTheme.colorScheme.surface,

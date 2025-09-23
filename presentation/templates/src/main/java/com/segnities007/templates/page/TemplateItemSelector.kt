@@ -1,6 +1,5 @@
 package com.segnities007.templates.page
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +48,7 @@ import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.templates.mvi.TemplatesIntent
-import com.segnities007.ui.bar.ConfirmBar
+import com.segnities007.ui.bar.FloatingConfirmBar
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +70,13 @@ fun TemplateSelector(
                 }
             }
         }
+    val brash = verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(0.2f),
+        ),
+    )
+
 
     val scrollState = rememberScrollState()
     val alpha by remember {
@@ -82,7 +89,7 @@ fun TemplateSelector(
         setFab {}
         setTopBar {}
         setNavigationBar {
-            ConfirmBar(
+            FloatingConfirmBar(
                 onConfirm = {
                     sendIntent(
                         TemplatesIntent.EditWeeklyTemplate(
@@ -104,6 +111,7 @@ fun TemplateSelector(
         modifier =
             Modifier
                 .fillMaxSize()
+                .background(brash)
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp),
     ) {

@@ -33,6 +33,7 @@
             <option value="$PROJECT_DIR$/presentation/setting" />
             <option value="$PROJECT_DIR$/presentation/splash" />
             <option value="$PROJECT_DIR$/presentation/templates" />
+            <option value="$PROJECT_DIR$/widget" />
           </set>
         </option>
       </GradleProjectSettings>

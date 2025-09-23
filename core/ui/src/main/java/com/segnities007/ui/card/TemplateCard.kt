@@ -32,16 +32,16 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import androidx.compose.ui.tooling.preview.Preview
+import com.segnities007.ui.tag.CountTag
 
 @Composable
 fun TemplateCard(
     template: WeeklyTemplate,
     onClick: () -> Unit,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         ElevatedCard(
             modifier =
@@ -118,22 +118,10 @@ fun TemplateCard(
             }
         }
 
-        Box(
-            modifier =
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 8.dp, y = (-16).dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-        ) {
-            Text(
-                text = "${template.itemIds.size}アイテム",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
-        }
+        CountTag(
+            modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-12).dp),
+            count = template.itemIds.size,
+        )
     }
 }
 
