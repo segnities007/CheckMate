@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -23,11 +24,10 @@ fun CircularProgressWithPercentage(
         contentAlignment = Alignment.Center,
         modifier = modifier,
     ) {
-        val size = maxWidth // 親のサイズ
-        val stroke = size * 0.12f // Material3 Expressive: サイズの12%をストローク幅に
-        val fontSize = size * 0.24f // サイズの24%をフォントサイズに
+        val size = maxWidth
+        val stroke = size * 0.12f
+        val fontSize = size * 0.2f
 
-        // プログレスインジケータ - Material3 Expressive
         CircularProgressIndicator(
             progress = { progress },
             strokeWidth = stroke,
@@ -35,7 +35,6 @@ fun CircularProgressWithPercentage(
             strokeCap = StrokeCap.Round,
         )
 
-        // 中央のパーセント表示
         Text(
             text = "${(progress * 100).toInt()}%",
             fontSize = fontSize.value.sp,
@@ -44,4 +43,10 @@ fun CircularProgressWithPercentage(
             color = MaterialTheme.colorScheme.primary,
         )
     }
+}
+
+@Preview
+@Composable
+fun CircularProgressWithPercentagePreview() {
+    CircularProgressWithPercentage(progress = 0.75f)
 }

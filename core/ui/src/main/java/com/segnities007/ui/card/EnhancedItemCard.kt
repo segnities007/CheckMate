@@ -39,7 +39,7 @@ fun EnhancedItemCard(
 ) {
     val scale by animateFloatAsState(
         targetValue = if (checked) 0.975f else 1f,
-        animationSpec = tween(durationMillis = 200),
+        animationSpec = tween(durationMillis = 150),
         label = "scale",
     )
 

@@ -156,12 +156,16 @@ private fun TemplateListUi(
                 onCreateClick = { sendIntent(TemplatesIntent.ShowBottomSheet) },
             )
         } else {
-            for (item in templates) {
-                TemplateCard(
-                    template = item,
-                    onClick = { onTemplateClick(item) },
-                    onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(item)) },
-                )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ){
+                templates.forEach { templates ->
+                    TemplateCard(
+                        template = templates,
+                        onClick = { onTemplateClick(templates) },
+                        onDelete = { sendIntent(TemplatesIntent.DeleteWeeklyTemplate(templates)) },
+                    )
+                }
             }
         }
     }
