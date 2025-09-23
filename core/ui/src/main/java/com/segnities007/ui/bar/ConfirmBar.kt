@@ -15,19 +15,34 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SpaceDashboard
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.SpaceDashboard
+import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,65 +55,72 @@ fun ConfirmBar(
     onCancel: () -> Unit,
 ) {
     Column(
-        modifier =
-            Modifier
-                .graphicsLayer(alpha = alpha)
-                .fillMaxWidth(),
+        modifier = Modifier
+            .graphicsLayer(alpha = alpha)
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Surface(
-            shape = CircleShape,
-            shadowElevation = 8.dp,
-            color = MaterialTheme.colorScheme.primary,
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                FloatingActionButton(
-                    onClick = onCancel,
-                    modifier = Modifier.size(64.dp),
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                    shape = CircleShape,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Cancel",
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.onErrorContainer,
-                    )
-                }
-
-                FloatingActionButton(
-                    onClick = onConfirm,
-                    modifier = Modifier.size(64.dp),
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    shape = CircleShape,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Confirm",
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-            }
-        }
+        FloatingActionBarUi(
+            onConfirm = onConfirm,
+            onCancel = onCancel,
+        )
         Spacer(modifier = Modifier.height(64.dp))
+    }
+}
+
+@Composable
+private fun FloatingActionBarUi(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val brush =
+        Brush.verticalGradient(
+            colors =
+                listOf(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.primary.copy(0.2f),
+                ),
+        )
+
+    Row(
+        modifier =
+            Modifier
+                .shadow(2.dp, CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(brush, CircleShape)
+                .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(
+            onClick = onCancel,
+            modifier = Modifier.size(64.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Cancel",
+                modifier = Modifier.size(32.dp),
+                tint = Color.Red,
+            )
+        }
+        IconButton(
+            onClick = onConfirm,
+            modifier = Modifier.size(64.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = "Confirm",
+                modifier = Modifier
+                    .size(32.dp),
+                tint = Color.Blue,
+               )
+        }
     }
 }
 
 @Preview
 @Composable
 fun ConfirmBarPreview() {
-    Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-    ) {
-    }
     ConfirmBar(
         onConfirm = {},
         onCancel = {},

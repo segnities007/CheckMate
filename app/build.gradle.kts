@@ -68,6 +68,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
+    implementation(project(":widget"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

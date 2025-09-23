@@ -1,4 +1,4 @@
-package com.segnities007.ui.card
+package com.segnities007.ui.card.statistics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

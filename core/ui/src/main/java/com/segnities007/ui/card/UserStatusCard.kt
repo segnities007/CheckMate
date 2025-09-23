@@ -142,12 +142,5 @@ private fun UserInfoSection(
 @Composable
 @Preview
 private fun UserStatusCardPreview() {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface),
-    ) {
-        UserStatusCard(UserStatus())
-    }
+    UserStatusCard(UserStatus())
 }
