@@ -7,8 +7,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.ui.button.CheckBoxButton
 import com.segnities007.ui.card.EmptyStateCard
-import com.segnities007.ui.card.EnhancedItemCard
+import com.segnities007.ui.card.ItemCard
 import com.segnities007.ui.divider.HorizontalStatDivider
 import kotlin.time.ExperimentalTime
 
@@ -38,7 +39,7 @@ private fun CategoryBasedItemListUi(
     val selectedItems = itemList.filter { allItemIdsForSelectedDate.contains(it.id) }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
             HorizontalStatDivider(
                 label = "今日の持ち物",
@@ -48,12 +49,20 @@ private fun CategoryBasedItemListUi(
 
         itemList.forEach{ item ->
             val isChecked = itemCheckStates[item.id] ?: false
-            EnhancedItemCard(
+            ItemCard(
                 item = item,
-                checked = isChecked,
-                onCheckedChange = { checked ->
-                    onCheckItem(item.id, checked)
+                isChecked = isChecked,
+                onCardClick = {
+                    onCheckItem(item.id, !isChecked)
                 },
+                endContent = {
+                    CheckBoxButton(
+                        isChecked = isChecked,
+                        onCheckedChange = { checked ->
+                            onCheckItem(item.id, checked)
+                        },
+                    )
+                }
             )
         }
     }

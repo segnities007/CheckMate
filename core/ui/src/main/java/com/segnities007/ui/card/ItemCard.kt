@@ -35,47 +35,72 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun ItemCard(
     item: Item,
+    isChecked: Boolean? = null,
     modifier: Modifier = Modifier,
     onCardClick: () -> Unit = {},
     endContent: @Composable () -> Unit = {},
 ) {
-    Box{
+    val rowBrush = when(isChecked){
+        false -> Brush.horizontalGradient(
+            0.0f to MaterialTheme.colorScheme.surface,
+            1.0f to MaterialTheme.colorScheme.surface,
+        )
+        else -> Brush.horizontalGradient(
+            0.0f to MaterialTheme.colorScheme.surface,
+            1.0f to getCategoryColor(item.category).copy(0.6f),
+        )
+    }
+    Box(
+        modifier = modifier
+    ){
         ElevatedCard(
-            modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().clickable(onClick = onCardClick).padding(12.dp),
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onCardClick).background(brush = rowBrush),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 ItemIcon(item)
-
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
                     Text(text = item.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
                     Text(text = item.description, fontSize = 12.sp, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.secondary)
                 }
                 endContent()
+                Spacer(Modifier.width(2.dp))
             }
         }
-        CategoryTag(modifier = Modifier.align(Alignment.TopEnd).offset(x = 6.dp, y = (-12).dp), category = item.category)
+        CategoryTag(
+            modifier = Modifier.
+            align(Alignment.TopStart)
+                .offset(x = (-6).dp, y = (-12).dp),
+            category = item.category
+        )
     }
 }
 
 @Composable
 private fun ItemIcon(item: Item){
     Box(
-        modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).background(
-            Brush.verticalGradient(
-                colors = listOf(getCategoryColor(item.category).copy(alpha = 0.1f), getCategoryColor(item.category).copy(alpha = 0.05f)),
-            ),
-        ),
+        modifier = Modifier.size((64+16).dp),
         contentAlignment = Alignment.Center,
     ) {
         when(item.imagePath.isNotEmpty()){
-            true -> AsyncImage(model = item.imagePath, contentDescription = item.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-            false -> Icon(imageVector = Icons.Filled.Inventory, contentDescription = "Item Icon", tint = getCategoryColor(item.category), modifier = Modifier.size(32.dp))
+            true -> AsyncImage(
+                model = item.imagePath,
+                contentDescription = item.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            false -> Icon(
+                imageVector = Icons.Filled.Inventory,
+                contentDescription = Icons.Filled.Inventory.toString(),
+                tint = getCategoryColor(item.category),
+                modifier = Modifier.size(32.dp)
+            )
         }
     }
 }
@@ -86,6 +111,7 @@ private fun ItemIcon(item: Item){
 private fun ItemCardPreview() {
     ItemCard(
         item = Item(id = 2, name = "教科書", category = ItemCategory.STUDY_SUPPLIES),
+        isChecked = true,
         onCardClick = {},
     ){
     }
@@ -97,6 +123,7 @@ private fun ItemCardPreview() {
 private fun ItemCardWithDeleteButtonPreview() {
     ItemCard(
         item = Item(id = 2, name = "教科書", category = ItemCategory.STUDY_SUPPLIES),
+        isChecked = false,
         onCardClick = {},
     ){
         IconButton(
