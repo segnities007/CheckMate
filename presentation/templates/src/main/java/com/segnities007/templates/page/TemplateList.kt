@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +44,7 @@ import com.segnities007.ui.util.rememberScrollVisibility
 @Composable
 fun TemplateList(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -66,14 +68,6 @@ fun TemplateList(
         animationSpec = tween(durationMillis = 200),
         label = "navigationBarAlpha",
     )
-
-    val brush = verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.primary.copy(0.2f),
-        ),
-    )
-
 
     LaunchedEffect(Unit) {
         setNavigationBar {
@@ -104,7 +98,7 @@ fun TemplateList(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(brush)
+                .background(backgroundBrush)
                 .verticalScroll(listState)
                 .padding(horizontal = 16.dp),
     ) {

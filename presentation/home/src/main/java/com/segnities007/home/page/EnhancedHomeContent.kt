@@ -8,11 +8,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.home.component.CategoryBasedItemList
 import com.segnities007.ui.card.statistics.StatisticsCard
 import com.segnities007.home.mvi.HomeIntent
-import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.ui.card.CenteredWeekCalendarCard
+import com.segnities007.ui.card.WeekCalendarCard
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
 
@@ -34,7 +33,7 @@ fun EnhancedHomeContent(
             itemsForToday = allItems,
             itemCheckStates = itemCheckStates,
         )
-        CenteredWeekCalendarCard(
+        WeekCalendarCard(
             selectedDate = selectedDate,
             templates = templates,
             onDateSelected = onDateSelected,

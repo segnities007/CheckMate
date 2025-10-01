@@ -28,7 +28,7 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 @Composable
-fun CenteredWeekCalendarCard(
+fun WeekCalendarCard(
     selectedDate: LocalDate?,
     templates: List<WeeklyTemplate>,
     onDateSelected: (LocalDate) -> Unit,
@@ -47,7 +47,7 @@ fun CenteredWeekCalendarCard(
     val start = centerDate.minus(3, DateTimeUnit.DAY)
     val days: List<LocalDate> = (0..6).map { start.plus(it, DateTimeUnit.DAY) }
 
-    ElevatedCard(
+    Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -245,12 +245,12 @@ private fun WeekDaysRow(
 @OptIn(ExperimentalTime::class)
 @Preview
 @Composable
-private fun CenteredWeekCalendarCardPreview() {
+private fun WeekCalendarCardPreview() {
     val today = Clock.System
         .now()
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .date
-    CenteredWeekCalendarCard(
+    WeekCalendarCard(
         selectedDate = today,
         templates = emptyList(),
         onDateSelected = {},

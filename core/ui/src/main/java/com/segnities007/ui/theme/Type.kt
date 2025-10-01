@@ -1,4 +1,4 @@
-package com.segnities007.checkmate.ui.theme
+package com.segnities007.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

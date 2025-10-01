@@ -34,27 +34,32 @@ import kotlin.time.ExperimentalTime
 
 @Composable
 fun ItemCard(
+    modifier: Modifier = Modifier,
     item: Item,
     isChecked: Boolean? = null,
-    modifier: Modifier = Modifier,
     onCardClick: () -> Unit = {},
     endContent: @Composable () -> Unit = {},
 ) {
+    val backgroundAlpha = 0.7f
+
     val rowBrush = when(isChecked){
         false -> Brush.horizontalGradient(
-            0.0f to MaterialTheme.colorScheme.surface,
-            1.0f to MaterialTheme.colorScheme.surface,
+            0.0f to Color.Transparent,
+            1.0f to MaterialTheme.colorScheme.surface.copy(backgroundAlpha),
         )
         else -> Brush.horizontalGradient(
-            0.0f to MaterialTheme.colorScheme.surface,
-            1.0f to getCategoryColor(item.category).copy(0.6f),
+            0.0f to Color.Transparent,
+            1.0f to getCategoryColor(item.category),
         )
     }
     Box(
         modifier = modifier
     ){
-        ElevatedCard(
+        Card(
             modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(0.3f),
+            ),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth().clickable(onClick = onCardClick).background(brush = rowBrush),

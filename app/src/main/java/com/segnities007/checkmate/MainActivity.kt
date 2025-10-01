@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,7 +13,7 @@ import com.segnities007.auth.AuthNavigation
 import com.segnities007.checkmate.mvi.MainEffect
 import com.segnities007.checkmate.mvi.MainIntent
 import com.segnities007.checkmate.mvi.MainViewModel
-import com.segnities007.checkmate.ui.theme.CheckMateTheme
+import com.segnities007.ui.theme.CheckMateTheme
 import com.segnities007.hub.HubNavigation
 import com.segnities007.navigation.Route
 import org.koin.compose.koinInject

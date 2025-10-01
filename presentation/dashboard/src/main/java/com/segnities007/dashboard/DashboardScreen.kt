@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +40,7 @@ import org.koin.compose.koinInject
 @Composable
 fun DashboardScreen(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -71,27 +73,23 @@ fun DashboardScreen(
         state = state,
         scrollState = scrollState,
         innerPadding = innerPadding,
+        backgroundBrush = backgroundBrush,
     )
 }
 
 @Composable
 private fun DashboardUi(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     state: DashboardState,
     scrollState: ScrollState,
 ) {
-    val brash = verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.primary.copy(0.2f),
-        ),
-    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(brash)
+            .background(backgroundBrush)
             .padding(horizontal = 16.dp),
     ) {
         Spacer(Modifier.height(innerPadding.calculateTopPadding()))
@@ -166,6 +164,12 @@ fun DashboardUiPreview() {
             uncheckedItemsToday = listOf()
         ),
         scrollState = rememberScrollState(),
+        backgroundBrush = verticalGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.primary,
+                MaterialTheme.colorScheme.secondary,
+            ),
+        ),
     )
 }
 

@@ -28,12 +28,19 @@ import com.segnities007.setting.SettingScreen
 import com.segnities007.templates.TemplatesScreen
 import org.koin.compose.koinInject
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun HubNavigation(onTopNavigate: (Route) -> Unit) {
     val hubNavController = rememberNavController()
     val hubViewModel: HubViewModel = koinInject()
     val state by hubViewModel.state.collectAsState()
+    val backgroundBrush = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            Color.Yellow.copy(0.3f),
+        ),
+    )
     LaunchedEffect(Unit) {
         hubViewModel.effect.collect { effect ->
             when (effect) {
@@ -58,6 +65,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
             composable<HubRoute.Home> {
                 HomeScreen(
                     innerPadding = innerPadding,
+                    backgroundBrush = backgroundBrush,
                     setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
@@ -67,6 +75,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
             composable<HubRoute.Items> {
                 ItemsScreen(
                     innerPadding = innerPadding,
+                    backgroundBrush = backgroundBrush,
                     setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
@@ -76,6 +85,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
             composable<HubRoute.Dashboard> {
                 DashboardScreen(
                     innerPadding = innerPadding,
+                    backgroundBrush = backgroundBrush,
                     setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
@@ -85,6 +95,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
             composable<HubRoute.Templates> {
                 TemplatesScreen(
                     innerPadding = innerPadding,
+                    backgroundBrush = backgroundBrush,
                     setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
@@ -94,6 +105,7 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
             composable<HubRoute.Setting> {
                 SettingScreen(
                     innerPadding = innerPadding,
+                    backgroundBrush = backgroundBrush,
                     setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
                     setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
                     setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },

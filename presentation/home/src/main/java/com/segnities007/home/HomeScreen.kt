@@ -35,6 +35,7 @@ import org.koin.compose.koinInject
 @Composable
 fun HomeScreen(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -49,13 +50,6 @@ fun HomeScreen(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(500),
         label = "navigationBarAlpha",
-    )
-
-    val brash = verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.primary.copy(0.2f),
-        ),
     )
 
     LaunchedEffect(Unit) {
@@ -75,7 +69,7 @@ fun HomeScreen(
         innerPadding = innerPadding,
         state = state,
         scrollState = scrollState,
-        brash = brash,
+        brash = backgroundBrush,
         sendIntent = homeViewModel::sendIntent,
     )
 }

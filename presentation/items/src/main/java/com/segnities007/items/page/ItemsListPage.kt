@@ -35,6 +35,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +59,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun ItemsListPage(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -87,13 +89,6 @@ fun ItemsListPage(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 300),
         label = "navigationBarAlpha",
-    )
-
-    val brash = verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.primary.copy(0.2f),
-        ),
     )
 
     // 上部バーやFABを親から設定
@@ -130,7 +125,7 @@ fun ItemsListPage(
     ItemListUi(
         innerPadding = innerPadding,
         scrollState = scrollState,
-        brash = brash,
+        brash = backgroundBrush,
         state = state,
         sendIntent = sendIntent,
     )
@@ -189,7 +184,7 @@ fun ItemsListPage(
 private fun ItemListUi(
     innerPadding: PaddingValues,
     scrollState: androidx.compose.foundation.ScrollState,
-    brash: androidx.compose.ui.graphics.Brush,
+    brash: Brush,
     state: ItemsState,
     sendIntent: (ItemsIntent) -> Unit,
 ) {

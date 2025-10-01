@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -38,6 +39,7 @@ import org.koin.compose.koinInject
 @Composable
 fun TemplatesScreen(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -84,6 +86,7 @@ fun TemplatesScreen(
         composable<TemplatesRoute.WeeklyTemplateList> {
             TemplateList(
                 innerPadding = innerPadding,
+                backgroundBrush = backgroundBrush,
                 setFab = setFab,
                 setTopBar = setTopBar,
                 setNavigationBar = setNavigationBar,
@@ -101,6 +104,7 @@ fun TemplatesScreen(
         }
         composable<TemplatesRoute.WeeklyTemplateSelector> {
             TemplateSelector(
+                backgroundBrush = backgroundBrush,
                 sendIntent = templatesViewModel::sendIntent,
                 innerPadding = innerPadding,
                 setNavigationBar = setNavigationBar,

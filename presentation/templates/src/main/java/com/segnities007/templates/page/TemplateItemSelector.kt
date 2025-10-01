@@ -55,6 +55,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun TemplateSelector(
     template: WeeklyTemplate,
+    backgroundBrush: Brush,
     allItems: List<Item>,
     innerPadding: PaddingValues,
     sendIntent: (TemplatesIntent) -> Unit,
@@ -70,13 +71,6 @@ fun TemplateSelector(
                 }
             }
         }
-    val brash = verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.primary.copy(0.2f),
-        ),
-    )
-
 
     val scrollState = rememberScrollState()
     val alpha by remember {
@@ -111,7 +105,7 @@ fun TemplateSelector(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(brash)
+                .background(backgroundBrush)
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp),
     ) {
@@ -400,5 +394,12 @@ fun WeeklyTemplateSelectorPreview() {
         setFab = {},
         setTopBar = {},
         setNavigationBar = {},
+        backgroundBrush = verticalGradient(
+            colors =
+                listOf(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.primary.copy(0.2f),
+                ),
+        ),
     )
 }

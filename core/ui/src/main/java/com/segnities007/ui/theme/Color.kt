@@ -1,4 +1,4 @@
-package com.segnities007.checkmate.ui.theme
+package com.segnities007.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
