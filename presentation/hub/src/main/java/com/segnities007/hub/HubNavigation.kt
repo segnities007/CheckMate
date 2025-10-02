@@ -1,17 +1,14 @@
 package com.segnities007.hub
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -27,8 +24,6 @@ import com.segnities007.navigation.Route
 import com.segnities007.setting.SettingScreen
 import com.segnities007.templates.TemplatesScreen
 import org.koin.compose.koinInject
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun HubNavigation(onTopNavigate: (Route) -> Unit) {
@@ -38,9 +33,11 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
             MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primaryContainer,
             Color.Yellow.copy(0.3f),
         ),
     )
+
     LaunchedEffect(Unit) {
         hubViewModel.effect.collect { effect ->
             when (effect) {

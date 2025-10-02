@@ -5,9 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -31,8 +29,8 @@ import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
 import com.segnities007.templates.mvi.TemplatesEffect
 import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.templates.mvi.TemplatesViewModel
-import com.segnities007.templates.page.TemplateList
-import com.segnities007.templates.page.TemplateSelector
+import com.segnities007.templates.page.TemplateListPage
+import com.segnities007.templates.page.TemplateItemSelectPage
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +82,7 @@ fun TemplatesScreen(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         composable<TemplatesRoute.WeeklyTemplateList> {
-            TemplateList(
+            TemplateListPage(
                 innerPadding = innerPadding,
                 backgroundBrush = backgroundBrush,
                 setFab = setFab,
@@ -103,7 +101,7 @@ fun TemplatesScreen(
             )
         }
         composable<TemplatesRoute.WeeklyTemplateSelector> {
-            TemplateSelector(
+            TemplateItemSelectPage(
                 backgroundBrush = backgroundBrush,
                 sendIntent = templatesViewModel::sendIntent,
                 innerPadding = innerPadding,
