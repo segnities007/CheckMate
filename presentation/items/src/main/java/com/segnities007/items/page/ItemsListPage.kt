@@ -125,7 +125,7 @@ fun ItemsListPage(
     ItemListUi(
         innerPadding = innerPadding,
         scrollState = scrollState,
-        brash = backgroundBrush,
+        brush = backgroundBrush,
         state = state,
         sendIntent = sendIntent,
     )
@@ -184,14 +184,14 @@ fun ItemsListPage(
 private fun ItemListUi(
     innerPadding: PaddingValues,
     scrollState: androidx.compose.foundation.ScrollState,
-    brash: Brush,
+    brush: Brush,
     state: ItemsState,
     sendIntent: (ItemsIntent) -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(brash)
+            .background(brush)
             .verticalScroll(scrollState),
     ) {
         // Top Padding
@@ -241,7 +241,7 @@ fun ItemListUiPreview() {
     ItemListUi(
         innerPadding = PaddingValues(0.dp),
         scrollState = rememberScrollState(),
-        brash = verticalGradient(
+        brush = verticalGradient(
             colors = listOf(
                 MaterialTheme.colorScheme.primaryContainer,
                 MaterialTheme.colorScheme.primary.copy(0.2f),
