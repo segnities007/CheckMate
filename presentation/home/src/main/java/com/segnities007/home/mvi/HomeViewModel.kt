@@ -29,6 +29,7 @@ class HomeViewModel(
         when (intent) {
             is HomeIntent.LoadTodayData -> loadTodayData()
             is HomeIntent.SelectDate -> selectDate(intent.date)
+            is HomeIntent.ChangeWeek -> setState { copy(currentWeekCenter = intent.date) }
             is HomeIntent.CheckItem -> checkItem(intent.itemId, intent.checked)
             is HomeIntent.SetAllItems -> setState { reducer.reduce(this, intent) }
             is HomeIntent.SetItemCheckStates -> setState { reducer.reduce(this, intent) }
@@ -49,6 +50,7 @@ class HomeViewModel(
             copy(
                 currentYear = today.year,
                 currentMonth = today.monthNumber,
+                currentWeekCenter = today,
             )
         }
 

@@ -6,18 +6,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,114 +29,96 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import androidx.compose.ui.tooling.preview.Preview
+import com.segnities007.ui.tag.CountTag
 
 @Composable
 fun TemplateCard(
-    template: WeeklyTemplate,
-    onClick: () -> Unit,
-    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    template: WeeklyTemplate,
+    onClick: () -> Unit = {},
+    endContent: @Composable () -> Unit = {},
 ) {
+    val backgroundAlpha = 0.7f
+
+    val rowBrush = Brush.horizontalGradient(
+        0.0f to Color.Transparent,
+        1.0f to MaterialTheme.colorScheme.surface.copy(backgroundAlpha),
+    )
+
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
     ) {
-        ElevatedCard(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable { onClick() },
-            shape = RoundedCornerShape(16.dp),
-            colors =
-                CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(0.3f),
+            ),
         ) {
             Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).background(brush = rowBrush),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                TemplateIcon(template)
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = template.title,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-
+                    
                     if (template.daysOfWeek.isNotEmpty()) {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            items(template.daysOfWeek.toList()) { dayOfWeek ->
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
-                                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                                ) {
-                                    Text(
-                                        text = getDayOfWeekDisplayName(dayOfWeek),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                    )
-                                }
-                            }
-                        }
+                        val daysText = template.daysOfWeek.toList()
+                            .sortedBy { it.ordinal }
+                            .joinToString("、") { getDayOfWeekDisplayName(it) }
+                        Text(
+                            text = daysText,
+                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     }
                 }
-
-                IconButton(
-                    onClick = onDelete,
-                    modifier =
-                        Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "削除",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
+                endContent()
+                Spacer(Modifier.width(2.dp))
             }
         }
+        CountTag(
+            modifier = Modifier.align(Alignment.TopStart).offset(x = (-6).dp, y = (-12).dp),
+            count = template.itemIds.size,
+        )
+    }
+}
 
-        Box(
-            modifier =
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 8.dp, y = (-16).dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-        ) {
-            Text(
-                text = "${template.itemIds.size}アイテム",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
-        }
+@Composable
+private fun TemplateIcon(template: WeeklyTemplate) {
+    Box(
+        modifier = Modifier.size((64+16).dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Schedule,
+            contentDescription = template.title,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(32.dp)
+        )
     }
 }
 
@@ -157,5 +142,25 @@ private fun TemplateCardPreview() {
         daysOfWeek = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
         itemIds = listOf(1, 2, 3),
     )
-    TemplateCard(template = template, onClick = {}, onDelete = {})
+    TemplateCard(template = template, onClick = {}) {
+    }
+}
+
+@Composable
+@Preview
+private fun TemplateCardWithDeleteButtonPreview() {
+    val template = WeeklyTemplate(
+        id = 1,
+        title = "月水金セット",
+        daysOfWeek = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
+        itemIds = listOf(1, 2, 3),
+    )
+    TemplateCard(template = template, onClick = {}) {
+        IconButton(
+            onClick = {},
+            modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+        ) {
+            Icon(imageVector = Icons.Default.Delete, contentDescription = "削除", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+        }
+    }
 }

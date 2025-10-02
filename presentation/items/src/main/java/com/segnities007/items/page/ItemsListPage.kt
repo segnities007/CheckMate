@@ -35,8 +35,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.segnities007.items.component.CreateBottomSheet
 import com.segnities007.items.component.ItemsList
@@ -44,16 +48,18 @@ import com.segnities007.items.component.SearchFilterBar
 import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsState
 import com.segnities007.model.item.Item
+import com.segnities007.model.item.ItemCategory
 import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsListPage(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -67,7 +73,7 @@ fun ItemsListPage(
     val isVisible by rememberScrollVisibility(scrollState)
 
     val granted = {
-        // カメラ権限が許可された時の処理は何もしない
+        // TODO カメラパーミッション許可後の処理
     }
 
     val cameraPermissionLauncher =
@@ -85,6 +91,7 @@ fun ItemsListPage(
         label = "navigationBarAlpha",
     )
 
+    // 上部バーやFABを親から設定
     LaunchedEffect(Unit) {
         setNavigationBar {
             FloatingNavigationBar(
@@ -95,70 +102,35 @@ fun ItemsListPage(
         }
         setTopBar {}
         setFab {
-            if (alpha > 0) {
-                FloatingActionButton(
-                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                    onClick = {
-                        sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
-                        sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
-                        sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "アイテムを追加",
-                    )
-                }
-            }
-        }
-    }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .verticalScroll(scrollState),
-    ) {
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // 検索・フィルタ・ソートバー
-            SearchFilterBar(
-                searchQuery = state.searchQuery,
-                selectedCategory = state.selectedCategory,
-                sortOrder = state.sortOrder,
-                onSearchQueryChange = { query ->
-                    sendIntent(ItemsIntent.UpdateSearchQuery(query))
-                },
-                onCategoryChange = { category ->
-                    sendIntent(ItemsIntent.UpdateSelectedCategory(category))
-                },
-                onSortOrderChange = { sortOrder ->
-                    sendIntent(ItemsIntent.UpdateSortOrder(sortOrder))
-                },
-            )
-
-            HorizontalDividerWithLabel("アイテム一覧")
-
-            ItemsList(
-                state = state.copy(items = state.filteredItems),
-                onDeleteItem = { itemToDelete ->
-                    sendIntent(ItemsIntent.DeleteItems(itemToDelete.id))
-                },
-                onCreateClick = {
+            FloatingActionButton(
+                modifier = Modifier.graphicsLayer(alpha = alpha),
+                containerColor = FloatingActionButtonDefaults.containerColor,
+                contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
+                elevation = FloatingActionButtonDefaults.elevation(2.dp),
+                onClick = {
                     sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
                     sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
                     sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
                 },
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "アイテムを追加",
+                )
+            }
         }
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 
+    // UI部分を切り出し
+    ItemListUi(
+        innerPadding = innerPadding,
+        scrollState = scrollState,
+        brush = backgroundBrush,
+        state = state,
+        sendIntent = sendIntent,
+    )
+
+    // BottomSheet
     if (state.isShowBottomSheet) {
         val bottomSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -169,13 +141,7 @@ fun ItemsListPage(
                 sendIntent(ItemsIntent.ClearProductInfo)
             },
             onCreateItem = { name, description, category, _ ->
-                // バーコードスキャンで取得した表紙画像URLがある場合はそれを使用、ない場合は撮影した画像を使用
                 val imagePath = state.productInfo?.imageUrl ?: state.capturedTempPathForViewModel
-
-                android.util.Log.d("ItemsListPage", "Creating item with imagePath: $imagePath")
-                android.util.Log.d("ItemsListPage", "productInfo.imageUrl: ${state.productInfo?.imageUrl}")
-                android.util.Log.d("ItemsListPage", "capturedTempPathForViewModel: ${state.capturedTempPathForViewModel}")
-
                 val newItem =
                     Item(
                         name = name,
@@ -212,4 +178,83 @@ fun ItemsListPage(
             shouldClearForm = state.shouldClearForm,
         )
     }
+}
+
+@Composable
+private fun ItemListUi(
+    innerPadding: PaddingValues,
+    scrollState: androidx.compose.foundation.ScrollState,
+    brush: Brush,
+    state: ItemsState,
+    sendIntent: (ItemsIntent) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(brush)
+            .verticalScroll(scrollState),
+    ) {
+        // Top Padding
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            // 検索・フィルタ・ソートバー
+            SearchFilterBar(
+                searchQuery = state.searchQuery,
+                selectedCategory = state.selectedCategory,
+                sortOrder = state.sortOrder,
+                onSearchQueryChange = { query ->
+                    sendIntent(ItemsIntent.UpdateSearchQuery(query))
+                },
+                onCategoryChange = { category ->
+                    sendIntent(ItemsIntent.UpdateSelectedCategory(category))
+                },
+                onSortOrderChange = { sortOrder ->
+                    sendIntent(ItemsIntent.UpdateSortOrder(sortOrder))
+                },
+            )
+
+            HorizontalDividerWithLabel("アイテム一覧")
+
+            ItemsList(
+                state = state.copy(items = state.filteredItems),
+                onCreateClick = {
+                    sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
+                    sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
+                    sendIntent(ItemsIntent.UpdateCapturedTempPathForViewModel(""))
+                },
+            )
+        }
+
+        // Bottom Padding
+        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+    }
+}
+
+@OptIn(ExperimentalTime::class)
+@Preview
+@Composable
+fun ItemListUiPreview() {
+    ItemListUi(
+        innerPadding = PaddingValues(0.dp),
+        scrollState = rememberScrollState(),
+        brush = verticalGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.primaryContainer,
+                MaterialTheme.colorScheme.primary.copy(0.2f),
+            ),
+        ),
+        state = ItemsState(
+            filteredItems = listOf(
+                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
+                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
+                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
+                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
+            )
+        ),
+        sendIntent = {},
+    )
 }

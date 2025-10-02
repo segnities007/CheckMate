@@ -3,6 +3,7 @@ package com.segnities007.home
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,8 +19,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.home.mvi.HomeIntent
+import com.segnities007.home.mvi.HomeState
 import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.home.page.EnhancedHomeContent
 import com.segnities007.navigation.HubRoute
@@ -30,6 +35,7 @@ import org.koin.compose.koinInject
 @Composable
 fun HomeScreen(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -59,33 +65,64 @@ fun HomeScreen(
         Log.d("HomeScreen", state.toString())
     }
 
+    HomeUi(
+        innerPadding = innerPadding,
+        state = state,
+        scrollState = scrollState,
+        brash = backgroundBrush,
+        sendIntent = homeViewModel::sendIntent,
+    )
+}
+
+@Composable
+private fun HomeUi(
+    innerPadding: PaddingValues,
+    state: HomeState,
+    scrollState: ScrollState,
+    brash: Brush,
+    sendIntent: (HomeIntent) -> Unit,
+){
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
+                .background(brash)
                 .verticalScroll(scrollState)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(horizontal = 16.dp),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
 
         EnhancedHomeContent(
             selectedDate = state.selectedDate,
-            currentYear = state.currentYear,
-            currentMonth = state.currentMonth,
+            currentWeekCenter = state.currentWeekCenter,
             templates = state.templatesForToday,
             allItems = state.itemsForToday,
             itemCheckStates = state.itemCheckStates,
             onCheckItem = { itemId, checked ->
-                homeViewModel.sendIntent(HomeIntent.CheckItem(itemId, checked))
+                sendIntent(HomeIntent.CheckItem(itemId, checked))
             },
             onDateSelected = { date ->
-                homeViewModel.sendIntent(HomeIntent.SelectDate(date))
+                sendIntent(HomeIntent.SelectDate(date))
             },
-            onMonthChanged = { year, month ->
-            },
-            sendIntent = homeViewModel::sendIntent,
+            sendIntent = sendIntent,
         )
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
+}
+
+@Preview
+@Composable
+private fun HomeScreenPreview() {
+        HomeUi(
+            innerPadding = PaddingValues(0.dp),
+            state = HomeState(),
+            scrollState = rememberScrollState(),
+            brash = verticalGradient(
+                colors = listOf(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.primary.copy(0.6f),
+                )
+            ),
+            sendIntent = {},
+        )
 }

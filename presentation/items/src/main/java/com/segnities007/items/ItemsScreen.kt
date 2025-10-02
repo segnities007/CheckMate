@@ -6,6 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
@@ -25,6 +26,7 @@ import org.koin.compose.koinInject
 @Composable
 fun ItemsScreen(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -63,6 +65,7 @@ fun ItemsScreen(
         composable<ItemsRoute.ItemsList> {
             ItemsListPage(
                 innerPadding = innerPadding,
+                backgroundBrush = backgroundBrush,
                 setNavigationBar = setNavigationBar,
                 setFab = setFab,
                 onNavigate = onNavigate,

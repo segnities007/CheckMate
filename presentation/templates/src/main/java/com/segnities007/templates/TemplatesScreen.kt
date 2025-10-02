@@ -5,9 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,14 +29,15 @@ import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
 import com.segnities007.templates.mvi.TemplatesEffect
 import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.templates.mvi.TemplatesViewModel
-import com.segnities007.templates.page.TemplateList
-import com.segnities007.templates.page.TemplateSelector
+import com.segnities007.templates.page.TemplateListPage
+import com.segnities007.templates.page.TemplateItemSelectPage
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplatesScreen(
     innerPadding: PaddingValues,
+    backgroundBrush: Brush,
     setFab: (@Composable () -> Unit) -> Unit,
     setTopBar: (@Composable () -> Unit) -> Unit,
     setNavigationBar: (@Composable () -> Unit) -> Unit,
@@ -49,7 +49,6 @@ fun TemplatesScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val navController = rememberNavController()
 
-    // ICS ファイルピック用ランチャー（常に確保）
     val icsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: android.net.Uri? ->
             uri?.let { templatesViewModel.sendIntent(TemplatesIntent.ImportIcsTemplates(it)) }
@@ -65,7 +64,6 @@ fun TemplatesScreen(
                 is TemplatesEffect.ShowToast ->
                     Toast.makeText(localContext, effect.message, Toast.LENGTH_SHORT).show()
                 TemplatesEffect.LaunchIcsPicker ->
-                    // ボトムシート表示中のみ起動（安全側）
                     if (state.isShowingBottomSheet) {
                         icsLauncher.launch(arrayOf("text/calendar"))
                     }
@@ -84,8 +82,9 @@ fun TemplatesScreen(
                 .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         composable<TemplatesRoute.WeeklyTemplateList> {
-            TemplateList(
+            TemplateListPage(
                 innerPadding = innerPadding,
+                backgroundBrush = backgroundBrush,
                 setFab = setFab,
                 setTopBar = setTopBar,
                 setNavigationBar = setNavigationBar,
@@ -102,7 +101,8 @@ fun TemplatesScreen(
             )
         }
         composable<TemplatesRoute.WeeklyTemplateSelector> {
-            TemplateSelector(
+            TemplateItemSelectPage(
+                backgroundBrush = backgroundBrush,
                 sendIntent = templatesViewModel::sendIntent,
                 innerPadding = innerPadding,
                 setNavigationBar = setNavigationBar,

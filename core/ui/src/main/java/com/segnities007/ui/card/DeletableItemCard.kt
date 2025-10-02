@@ -26,6 +26,10 @@ import coil3.compose.AsyncImage
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import androidx.compose.ui.tooling.preview.Preview
+import com.segnities007.ui.dialog.ItemDetailDialog
+import com.segnities007.ui.tag.CategoryTag
+import com.segnities007.ui.util.getCategoryColor
+import com.segnities007.ui.util.getCategoryDisplayName
 import kotlin.time.ExperimentalTime
 
 @Composable
@@ -89,77 +93,3 @@ private fun DeletableItemCardPreview() {
         onDelete = {},
     )
 }
-
-@OptIn(ExperimentalTime::class)
-@Composable
-private fun ItemDetailDialog(item: Item, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = item.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                CategoryTag(category = item.category)
-                if (item.description.isNotEmpty()) {
-                    Column {
-                        Text(text = "メモ", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(text = item.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
-                    }
-                }
-                Column {
-                    Text(text = "登録日", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = item.createdAt.toString(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("閉じる") } },
-    )
-}
-
-@Composable
-private fun CategoryTag(category: ItemCategory) {
-    Box(
-        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(getCategoryColor(category).copy(alpha = 0.1f)).padding(horizontal = 8.dp, vertical = 4.dp),
-    ) {
-        Text(
-            text = getCategoryDisplayName(category),
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium,
-            color = getCategoryColor(category),
-            fontSize = 12.sp,
-        )
-    }
-}
-
-private fun getCategoryDisplayName(category: ItemCategory): String =
-    when (category) {
-        ItemCategory.STUDY_SUPPLIES -> "学業用品"
-        ItemCategory.DAILY_SUPPLIES -> "生活用品"
-        ItemCategory.CLOTHING_SUPPLIES -> "衣類用品"
-        ItemCategory.FOOD_SUPPLIES -> "食事用品"
-        ItemCategory.HEALTH_SUPPLIES -> "健康用品"
-        ItemCategory.BEAUTY_SUPPLIES -> "美容用品"
-        ItemCategory.EVENT_SUPPLIES -> "イベント用品"
-        ItemCategory.HOBBY_SUPPLIES -> "趣味用品"
-        ItemCategory.TRANSPORT_SUPPLIES -> "交通用品"
-        ItemCategory.CHARGING_SUPPLIES -> "充電用品"
-        ItemCategory.WEATHER_SUPPLIES -> "天候対策用品"
-        ItemCategory.ID_SUPPLIES -> "証明用品"
-        ItemCategory.OTHER_SUPPLIES -> "その他用品"
-    }
-
-private fun getCategoryColor(category: ItemCategory): Color =
-    when (category) {
-        ItemCategory.STUDY_SUPPLIES -> Color(0xFF2196F3)
-        ItemCategory.DAILY_SUPPLIES -> Color(0xFF4CAF50)
-        ItemCategory.CLOTHING_SUPPLIES -> Color(0xFF9C27B0)
-        ItemCategory.FOOD_SUPPLIES -> Color(0xFFFF9800)
-        ItemCategory.HEALTH_SUPPLIES -> Color(0xFFF44336)
-        ItemCategory.BEAUTY_SUPPLIES -> Color(0xFFE91E63)
-        ItemCategory.EVENT_SUPPLIES -> Color(0xFF673AB7)
-        ItemCategory.HOBBY_SUPPLIES -> Color(0xFF3F51B5)
-        ItemCategory.TRANSPORT_SUPPLIES -> Color(0xFF009688)
-        ItemCategory.CHARGING_SUPPLIES -> Color(0xFF795548)
-        ItemCategory.WEATHER_SUPPLIES -> Color(0xFF607D8B)
-        ItemCategory.ID_SUPPLIES -> Color(0xFF8BC34A)
-        ItemCategory.OTHER_SUPPLIES -> Color(0xFF607D8B)
-    }
