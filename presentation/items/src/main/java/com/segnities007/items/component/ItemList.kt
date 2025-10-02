@@ -20,19 +20,24 @@ fun ItemsList(
     state: ItemsState,
     onCreateClick: (() -> Unit)? = null,
 ) {
-    when(state.items){
-        listOf<Item>() -> ItemsEmptyStateCard(onCreateClick = onCreateClick)
-        else -> Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ){
-            state.items.forEach { item ->
-                ItemCard(
-                    item = item,
-                    modifier = Modifier.fillMaxWidth(),
-                ){
-                    //TODO
-                }
+    when{
+        state.items.isEmpty() -> ItemsEmptyStateCard(onCreateClick = onCreateClick)
+        else -> ItemsListUi(state)
+    }
+}
+
+@Composable
+private fun ItemsListUi(state: ItemsState){
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ){
+        state.items.forEach { item ->
+            ItemCard(
+                item = item,
+                modifier = Modifier.fillMaxWidth(),
+            ){
+                //TODO
             }
         }
     }
