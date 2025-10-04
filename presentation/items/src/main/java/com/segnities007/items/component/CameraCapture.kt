@@ -3,7 +3,6 @@ package com.segnities007.items.component
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -81,7 +80,6 @@ fun CameraCapture(
                 val targetZoom = 0.8f
                 val clampedZoom = targetZoom.coerceIn(it.minZoomRatio, it.maxZoomRatio)
                 camera.cameraControl.setZoomRatio(clampedZoom)
-                Log.d("CameraX", "Zoom set to $clampedZoom (range: ${it.minZoomRatio} - ${it.maxZoomRatio})")
             }
         } catch (exc: Exception) {
             Toast
@@ -188,7 +186,6 @@ fun CameraCapture(
                                             "写真撮影に失敗しました: ${exception.message}",
                                             Toast.LENGTH_LONG,
                                         ).show()
-                                    Log.e("CameraCapture", "takePicture onError: ${exception.message}", exception)
                                 }
                             },
                         )

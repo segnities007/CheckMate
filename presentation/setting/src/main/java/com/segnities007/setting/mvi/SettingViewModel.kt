@@ -5,15 +5,17 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.lifecycle.viewModelScope
-import com.segnities007.repository.BackupRepository
-import com.segnities007.repository.IcsTemplateRepository
-import com.segnities007.repository.ItemCheckStateRepository
-import com.segnities007.repository.ItemRepository
-import com.segnities007.repository.UserRepository
-import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import com.segnities007.usecase.backup.ExportDataUseCase
+import com.segnities007.usecase.backup.ImportDataUseCase
+import com.segnities007.usecase.checkstate.ClearAllCheckStatesUseCase
+import com.segnities007.usecase.ics.GenerateTemplatesFromIcsUseCase
+import com.segnities007.usecase.ics.SaveGeneratedTemplatesUseCase
+import com.segnities007.usecase.item.ClearAllItemsUseCase
+import com.segnities007.usecase.template.ClearAllTemplatesUseCase
+import com.segnities007.usecase.user.GetUserStatusUseCase
+import com.segnities007.usecase.user.LoginWithGoogleUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,13 +23,16 @@ import org.koin.core.component.KoinComponent
 import java.io.File
 
 class SettingViewModel(
-    private val backupRepository: BackupRepository,
+    private val exportDataUseCase: ExportDataUseCase,
+    private val importDataUseCase: ImportDataUseCase,
+    private val clearAllItemsUseCase: ClearAllItemsUseCase,
+    private val clearAllCheckStatesUseCase: ClearAllCheckStatesUseCase,
+    private val clearAllTemplatesUseCase: ClearAllTemplatesUseCase,
+    private val getUserStatusUseCase: GetUserStatusUseCase,
+    private val loginWithGoogleUseCase: LoginWithGoogleUseCase,
+    private val generateTemplatesFromIcsUseCase: GenerateTemplatesFromIcsUseCase,
+    private val saveGeneratedTemplatesUseCase: SaveGeneratedTemplatesUseCase,
     private val appContext: Context,
-    private val itemRepository: ItemRepository,
-    private val itemCheckStateRepository: ItemCheckStateRepository,
-    private val weeklyTemplateRepository: WeeklyTemplateRepository,
-    private val userRepository: UserRepository,
-    private val icsTemplateRepository: IcsTemplateRepository,
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
     private val reducer: SettingReducer = SettingReducer()
 
@@ -36,12 +41,14 @@ class SettingViewModel(
     }
 
     private suspend fun loadUserStatus() {
-        try {
-            val userStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
-            setState { copy(userStatus = userStatus) }
-        } catch (e: Exception) {
-            Log.e("SettingViewModel", "Failed to load user status", e)
-        }
+        getUserStatusUseCase().fold(
+            onSuccess = { userStatus ->
+                setState { copy(userStatus = userStatus) }
+            },
+            onFailure = { e ->
+                // エラーはData層でログ出力される
+            }
+        )
     }
 
     override suspend fun handleIntent(intent: SettingIntent) {
@@ -66,14 +73,20 @@ class SettingViewModel(
     }
 
     private suspend fun exportData() {
-        try {
-            val jsonString = withContext(Dispatchers.IO) { backupRepository.exportData() }
-            saveToDownloads("backup.json", jsonString)
-            sendEffect { SettingEffect.ShowToast("バックアップ完了") }
-        } catch (e: Exception) {
-            sendEffect { SettingEffect.ShowToast("バックアップ失敗: ${e.message}") }
-            Log.e("SettingViewModel", "バックアップ失敗", e)
-        }
+        val result = exportDataUseCase()
+        result.fold(
+            onSuccess = { jsonString ->
+                try {
+                    saveToDownloads("backup.json", jsonString)
+                    sendEffect { SettingEffect.ShowToast("バックアップ完了") }
+                } catch (e: Exception) {
+                    sendEffect { SettingEffect.ShowToast("バックアップ失敗: ${e.message}") }
+                }
+            },
+            onFailure = { e ->
+                sendEffect { SettingEffect.ShowToast("バックアップ失敗: ${e.message}") }
+            }
+        )
     }
 
     private suspend fun importData(intent: SettingIntent.ImportData) {
@@ -86,8 +99,15 @@ class SettingViewModel(
                         ?.use { it.readText() }
                         ?: throw IllegalStateException("ファイルが読み込めません")
                 }
-            backupRepository.importData(jsonString)
-            sendEffect { SettingEffect.ShowToast("インポート完了") }
+            val result = importDataUseCase(jsonString)
+            result.fold(
+                onSuccess = {
+                    sendEffect { SettingEffect.ShowToast("インポート完了") }
+                },
+                onFailure = { e ->
+                    sendEffect { SettingEffect.ShowToast("インポート失敗: ${e.message}") }
+                }
+            )
         } catch (e: Exception) {
             sendEffect { SettingEffect.ShowToast("インポート失敗: ${e.message}") }
         }
@@ -98,19 +118,23 @@ class SettingViewModel(
     }
 
     private suspend fun confirmDeleteAllData() {
-        try {
-            withContext(Dispatchers.IO) {
-                // Repositoryを使用して全データを削除
-                itemCheckStateRepository.clearAllCheckStates()
-                weeklyTemplateRepository.clearAllTemplates()
-                itemRepository.clearAllItems()
-            }
-            setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
-            sendEffect { SettingEffect.ShowToast("全データを削除しました") }
-        } catch (e: Exception) {
-            sendEffect { SettingEffect.ShowToast("データ削除失敗: ${e.message}") }
-            Log.e("SettingViewModel", "データ削除失敗", e)
+        clearAllCheckStatesUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast("チェック状態削除失敗: ${e.message}") }
+            return
         }
+
+        clearAllTemplatesUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast("テンプレート削除失敗: ${e.message}") }
+            return
+        }
+
+        clearAllItemsUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast("アイテム削除失敗: ${e.message}") }
+            return
+        }
+
+        setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
+        sendEffect { SettingEffect.ShowToast("全データを削除しました") }
     }
 
     private fun cancelDeleteAllData() {
@@ -118,45 +142,58 @@ class SettingViewModel(
     }
 
     private suspend fun linkWithGoogle() {
-        try {
-            withContext(Dispatchers.IO) { userRepository.loginWithGoogle() }
-            val updatedUserStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
-            setState { copy(userStatus = updatedUserStatus) }
-            sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
-        } catch (e: Exception) {
-            sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
-        }
+        performGoogleAuthentication(
+            successMessage = "Googleアカウントと連携しました",
+            failureMessage = "Google連携に失敗しました"
+        )
     }
 
     private suspend fun changeGoogleAccount() {
-        try {
-            withContext(Dispatchers.IO) { userRepository.loginWithGoogle() }
-            val updatedUserStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
-            setState { copy(userStatus = updatedUserStatus) }
-            sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
-        } catch (e: Exception) {
-            sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
+        performGoogleAuthentication(
+            successMessage = "Googleアカウントを変更しました",
+            failureMessage = "アカウント変更に失敗しました"
+        )
+    }
+
+    private suspend fun performGoogleAuthentication(
+        successMessage: String,
+        failureMessage: String
+    ) {
+        loginWithGoogleUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast(failureMessage) }
+            return
         }
+
+        val updatedUserStatus = getUserStatusUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast(failureMessage) }
+            return
+        }
+
+        setState { copy(userStatus = updatedUserStatus) }
+        sendEffect { SettingEffect.ShowToast(successMessage) }
     }
 
     private suspend fun importIcsFile(intent: SettingIntent.ImportIcsFile) {
-        try {
-            setState { reducer.reduce(this, intent) }
+        setState { reducer.reduce(this, intent) }
 
-            val templates = withContext(Dispatchers.IO) { icsTemplateRepository.generateTemplatesFromIcs(intent.uri) }
-            withContext(Dispatchers.IO) { icsTemplateRepository.saveGeneratedTemplates(templates) }
-
-            setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
-            sendEffect {
-                SettingEffect.ShowIcsImportResult(
-                    successCount = templates.size,
-                    totalCount = templates.size,
-                )
-            }
-        } catch (e: Exception) {
+        val templates = generateTemplatesFromIcsUseCase(intent.uri).getOrElse { e ->
             setState { copy(isImportingIcs = false) }
             sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
-            Log.e("SettingViewModel", "ICSインポート失敗", e)
+            return
+        }
+
+        saveGeneratedTemplatesUseCase(templates).getOrElse { e ->
+            setState { copy(isImportingIcs = false) }
+            sendEffect { SettingEffect.ShowToast("テンプレート保存に失敗しました: ${e.message}") }
+            return
+        }
+
+        setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
+        sendEffect {
+            SettingEffect.ShowIcsImportResult(
+                successCount = templates.size,
+                totalCount = templates.size,
+            )
         }
     }
 

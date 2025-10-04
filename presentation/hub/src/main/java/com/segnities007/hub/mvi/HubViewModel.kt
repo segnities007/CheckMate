@@ -1,13 +1,13 @@
 package com.segnities007.hub.mvi
 
-import com.segnities007.repository.UserRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import com.segnities007.usecase.user.GetUserStatusUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 
 class HubViewModel(
-    private val userRepository: UserRepository,
+    private val getUserStatusUseCase: GetUserStatusUseCase,
 ) : BaseViewModel<HubIntent, HubState, HubEffect>(HubState()),
     KoinComponent {
     private val reducer: HubReducer = HubReducer()
@@ -29,8 +29,14 @@ class HubViewModel(
     }
 
     private suspend fun loadUserStatus() {
-        val userStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
-        setState { copy(userStatus = userStatus) }
+        getUserStatusUseCase().fold(
+            onSuccess = { userStatus ->
+                setState { copy(userStatus = userStatus) }
+            },
+            onFailure = { e ->
+                sendEffect { HubEffect.ShowToast("ユーザー情報の読み込みに失敗しました") }
+            }
+        )
     }
 
     private fun setBottomBar(intent: HubIntent.SetBottomBar) {

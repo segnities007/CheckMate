@@ -1,9 +1,13 @@
 package com.segnities007.items.mvi
-import com.segnities007.repository.ImageRepository
-import com.segnities007.repository.ItemRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import com.segnities007.usecase.image.DeleteImageUseCase
+import com.segnities007.usecase.image.SaveImageUseCase
+import com.segnities007.usecase.item.AddItemUseCase
+import com.segnities007.usecase.item.DeleteItemUseCase
+import com.segnities007.usecase.item.GetAllItemsUseCase
+import com.segnities007.usecase.item.GetItemByIdUseCase
+import com.segnities007.usecase.item.GetProductInfoByBarcodeUseCase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import kotlin.time.ExperimentalTime
@@ -11,8 +15,13 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class ItemsViewModel(
-    private val itemRepository: ItemRepository,
-    private val imageRepository: ImageRepository,
+    private val getAllItemsUseCase: GetAllItemsUseCase,
+    private val getItemByIdUseCase: GetItemByIdUseCase,
+    private val addItemUseCase: AddItemUseCase,
+    private val deleteItemUseCase: DeleteItemUseCase,
+    private val getProductInfoByBarcodeUseCase: GetProductInfoByBarcodeUseCase,
+    private val saveImageUseCase: SaveImageUseCase,
+    private val deleteImageUseCase: DeleteImageUseCase,
 ) : BaseViewModel<ItemsIntent, ItemsState, ItemsEffect>(ItemsState()),
     KoinComponent {
     private val reducer: ItemsReducer = ItemsReducer()
@@ -112,102 +121,127 @@ class ItemsViewModel(
     }
 
     private suspend fun getAllItems() {
-        val items = withContext(Dispatchers.IO) { itemRepository.getAllItems() }
-        // apply state directly via reducer in the current coroutine
-        setState { reducer.reduce(this, ItemsIntent.SetItems(items)) }
-        applyFilters()
+        getAllItemsUseCase().fold(
+            onSuccess = { items ->
+                // apply state directly via reducer in the current coroutine
+                setState { reducer.reduce(this, ItemsIntent.SetItems(items)) }
+                applyFilters()
+            },
+            onFailure = { e ->
+                sendEffect { ItemsEffect.ShowToast("アイテムの読み込みに失敗しました") }
+            }
+        )
     }
 
     private suspend fun getItemById(intent: ItemsIntent.GetItemsById) {
-        val item = withContext(Dispatchers.IO) { itemRepository.getItemById(intent.id) }
-        if (item != null) {
-            // set items via reducer directly
-            setState { reducer.reduce(this, ItemsIntent.SetItems(listOf(item))) }
-            applyFilters()
-        } else {
-            sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
-        }
+        getItemByIdUseCase(intent.id).fold(
+            onSuccess = { item ->
+                if (item != null) {
+                    // set items via reducer directly
+                    setState { reducer.reduce(this, ItemsIntent.SetItems(listOf(item))) }
+                    applyFilters()
+                } else {
+                    sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
+                }
+            },
+            onFailure = { e ->
+                sendEffect { ItemsEffect.ShowToast("アイテムの取得に失敗しました") }
+            }
+        )
     }
 
     @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
     private suspend fun insertItem(intent: ItemsIntent.InsertItems) {
-        if (intent.item.name.isBlank()) {
-            sendEffect { ItemsEffect.ShowToast("アイテム名を入力してください") }
-            return
-        }
         val newItem =
             withContext(Dispatchers.IO) {
                 val finalImagePath =
                     if (intent.item.imagePath.isNotBlank()) {
-                        // URLの場合はそのまま使用、ローカルファイルパスの場合は保存
                         if (intent.item.imagePath.startsWith("http://") || intent.item.imagePath.startsWith("https://")) {
-                            android.util.Log.d("ItemsViewModel", "Using URL as imagePath: ${intent.item.imagePath}")
                             intent.item.imagePath
                         } else {
-                            android.util.Log.d("ItemsViewModel", "Saving local image: ${intent.item.imagePath}")
-                            imageRepository.saveImage(intent.item.imagePath, "${Uuid.random()}.jpg")
+                            val result = saveImageUseCase(intent.item.imagePath, "${Uuid.random()}.jpg")
+                            result.getOrElse { e ->
+                                sendEffect { ItemsEffect.ShowToast("画像の保存に失敗しました") }
+                                return@withContext null
+                            }
                         }
                     } else {
                         ""
                     }
                 intent.item.copy(imagePath = finalImagePath)
             }
-        itemRepository.insertItem(newItem)
-        sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }
-        // refresh
-        getAllItems()
+
+        if (newItem == null) {
+            return
+        }
+        
+        val result = addItemUseCase(newItem)
+        result.fold(
+            onSuccess = {
+                sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }
+                getAllItems()
+            },
+            onFailure = { error ->
+                sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの追加に失敗しました") }
+            }
+        )
     }
 
     private suspend fun deleteItem(intent: ItemsIntent.DeleteItems) {
-        val itemToDelete = withContext(Dispatchers.IO) { itemRepository.getItemById(intent.id) }
-        if (itemToDelete != null) {
-            itemToDelete.imagePath?.let { imageRepository.deleteImage(it) }
-            withContext(Dispatchers.IO) { itemRepository.deleteItem(intent.id) }
-            sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
-        } else {
-            sendEffect { ItemsEffect.ShowToast("削除対象のアイテムが見つかりません") }
+        val itemToDelete = getItemByIdUseCase(intent.id).getOrElse { error ->
+            sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの取得に失敗しました") }
+            return
         }
-        // refresh
+
+        if (itemToDelete == null) {
+            sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
+            return
+        }
+
+        if (itemToDelete.imagePath.isNotBlank()) {
+            deleteImageUseCase(itemToDelete.imagePath).getOrElse { }
+        }
+
+        deleteItemUseCase(intent.id).getOrElse { error ->
+            sendEffect { ItemsEffect.ShowToast(error.message ?: "削除に失敗しました") }
+            return
+        }
+
+        sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
         getAllItems()
     }
 
     private fun handleBarcodeDetected(intent: ItemsIntent.BarcodeDetected) {
-        // update scanned barcode info via reducer
         sendIntent(ItemsIntent.SetScannedBarcodeInfo(intent.barcodeInfo))
-        // バーコード検出後、自動的に商品情報を取得
         sendIntent(ItemsIntent.GetProductInfo(intent.barcodeInfo))
     }
 
     private suspend fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
-        // set loading via reducer
         setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(true)) }
-        try {
-            val productInfo = withContext(Dispatchers.IO) { itemRepository.getProductInfoByBarcode(intent.barcodeInfo) }
-            // set product info and loading flag via reducer
-            setState { reducer.reduce(this, ItemsIntent.SetProductInfo(productInfo)) }
-            setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
+        
+        val result = getProductInfoByBarcodeUseCase(intent.barcodeInfo)
+        result.fold(
+            onSuccess = { productInfo ->
+                setState { reducer.reduce(this, ItemsIntent.SetProductInfo(productInfo)) }
+                setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
 
-            if (productInfo != null) {
-                // 商品情報が取得できた場合、ボトムシートの状態を reset via reducer
-                setState { reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(false)) }
-                setState { reducer.reduce(this, ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
-                setState { reducer.reduce(this, ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
-                setState { reducer.reduce(this, ItemsIntent.SetShouldClearForm(true)) }
-
-                // 少し遅延を入れてからボトムシートを表示（状態リセットのため）
-                kotlinx.coroutines.delay(100)
-                setState { reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(true)) }
-
-                // フォームクリアフラグをリセット（productInfoは保持）
-                kotlinx.coroutines.delay(200)
-                setState { reducer.reduce(this, ItemsIntent.SetShouldClearForm(false)) }
-            } else {
-                sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
+                if (productInfo != null) {
+                    setState {
+                        reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(false))
+                            .let { reducer.reduce(it, ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
+                            .let { reducer.reduce(it, ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
+                            .let { reducer.reduce(it, ItemsIntent.SetShouldClearForm(true)) }
+                    }
+                    sendEffect { ItemsEffect.ReopenBottomSheetWithProductInfo }
+                } else {
+                    sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
+                }
+            },
+            onFailure = { error ->
+                setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
+                sendEffect { ItemsEffect.ShowToast("商品情報の取得に失敗しました: ${error.message}") }
             }
-        } catch (e: Exception) {
-            setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
-            sendEffect { ItemsEffect.ShowToast("商品情報の取得に失敗しました: ${e.message}") }
-        }
+        )
     }
 
     private fun clearProductInfo() {

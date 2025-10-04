@@ -1,7 +1,6 @@
 package com.segnities007.items.component
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -96,9 +95,7 @@ fun CreateBottomSheet(
 
     // フォームクリアフラグが設定された場合、フォームをクリア
     LaunchedEffect(shouldClearForm) {
-        Log.d("CreateBottomSheet", "shouldClearForm changed to: $shouldClearForm")
         if (shouldClearForm) {
-            Log.d("CreateBottomSheet", "Clearing form due to shouldClearForm flag")
             itemName = ""
             itemDescription = ""
             selectedCategory = null
@@ -109,11 +106,7 @@ fun CreateBottomSheet(
 
     // 商品情報が提供された場合、自動的に入力
     LaunchedEffect(productInfo, shouldClearForm) {
-        Log.d("CreateBottomSheet", "LaunchedEffect triggered - productInfo: ${productInfo?.name}, shouldClearForm: $shouldClearForm")
         if (productInfo != null && !shouldClearForm) {
-            Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Name: ${productInfo.name}")
-            Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Description: ${productInfo.description}")
-            Log.d("CreateBottomSheet", "Setting form fields with ProductInfo - Category: ${productInfo.category}")
 
             itemName = productInfo.name
             itemDescription = productInfo.description
@@ -122,8 +115,6 @@ fun CreateBottomSheet(
             imageUriForPreview = null
             // 表紙画像を表示する
             showProductCover = true
-        } else {
-            Log.d("CreateBottomSheet", "Not setting form fields - productInfo: ${productInfo?.name}, shouldClearForm: $shouldClearForm")
         }
     }
 
@@ -228,14 +219,8 @@ fun CreateBottomSheet(
                                     .clip(RoundedCornerShape(16.dp)),
                             contentScale = ContentScale.Crop,
                             onError = { state ->
-                                Log.e("CreateBottomSheet", "Failed to load image: ${productInfo.imageUrl}")
-                                Log.e("CreateBottomSheet", "Error: ${state.result}")
                                 // 画像読み込みに失敗した場合、表紙画像を非表示にする
                                 showProductCover = false
-                            },
-                            onSuccess = { state ->
-                                Log.d("CreateBottomSheet", "Successfully loaded image: ${productInfo.imageUrl}")
-                                Log.d("CreateBottomSheet", "Image size: ${state.painter.intrinsicSize}")
                             },
                         )
 

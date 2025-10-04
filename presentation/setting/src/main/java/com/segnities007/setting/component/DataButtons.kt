@@ -1,6 +1,7 @@
 package com.segnities007.setting.component
 
-import android.util.Log
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

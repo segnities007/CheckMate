@@ -1,7 +1,6 @@
 package com.segnities007.items.component
 
 import android.content.Context
-import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
@@ -125,7 +124,6 @@ fun BarcodeScanner(
                 camera.cameraControl.setZoomRatio(clampedZoom)
             }
         } catch (exc: Exception) {
-            Log.e("BarcodeScanner", "カメラの起動に失敗しました", exc)
             onCancel()
         }
     }

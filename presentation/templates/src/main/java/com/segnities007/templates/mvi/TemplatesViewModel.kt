@@ -2,10 +2,14 @@ package com.segnities007.templates.mvi
 
 import androidx.lifecycle.viewModelScope
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.repository.IcsTemplateRepository
-import com.segnities007.repository.ItemRepository
-import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import com.segnities007.usecase.ics.GenerateTemplatesFromIcsUseCase
+import com.segnities007.usecase.ics.SaveGeneratedTemplatesUseCase
+import com.segnities007.usecase.item.GetAllItemsUseCase
+import com.segnities007.usecase.template.AddTemplateUseCase
+import com.segnities007.usecase.template.DeleteTemplateUseCase
+import com.segnities007.usecase.template.GetAllTemplatesUseCase
+import com.segnities007.usecase.template.UpdateTemplateUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -13,9 +17,13 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class TemplatesViewModel(
-    private val weeklyTemplateRepository: WeeklyTemplateRepository,
-    private val itemRepository: ItemRepository,
-    private val icsTemplateRepository: IcsTemplateRepository,
+    private val getAllTemplatesUseCase: GetAllTemplatesUseCase,
+    private val addTemplateUseCase: AddTemplateUseCase,
+    private val updateTemplateUseCase: UpdateTemplateUseCase,
+    private val deleteTemplateUseCase: DeleteTemplateUseCase,
+    private val getAllItemsUseCase: GetAllItemsUseCase,
+    private val generateTemplatesFromIcsUseCase: GenerateTemplatesFromIcsUseCase,
+    private val saveGeneratedTemplatesUseCase: SaveGeneratedTemplatesUseCase,
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
         initialState = TemplatesState(),
     ) {
@@ -170,37 +178,60 @@ class TemplatesViewModel(
     }
 
     private suspend fun getAllItems() {
-        val items = withContext(Dispatchers.IO) { itemRepository.getAllItems() }
-        setState { reducer.reduce(this, TemplatesIntent.SetAllItems(items)) }
-        applyFilters()
+        getAllItemsUseCase().fold(
+            onSuccess = { items ->
+                setState { reducer.reduce(this, TemplatesIntent.SetAllItems(items)) }
+                applyFilters()
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("アイテムの読み込みに失敗しました") }
+            }
+        )
     }
 
     private suspend fun getAllWeeklyTemplates() {
-        val templates = withContext(Dispatchers.IO) { weeklyTemplateRepository.getAllTemplates() }
-        setState { reducer.reduce(this, TemplatesIntent.SetWeeklyTemplates(templates)) }
-        applyTemplateFilters()
+        getAllTemplatesUseCase().fold(
+            onSuccess = { templates ->
+                setState { reducer.reduce(this, TemplatesIntent.SetWeeklyTemplates(templates)) }
+                applyTemplateFilters()
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("テンプレートの読み込みに失敗しました") }
+            }
+        )
     }
 
     private suspend fun addWeeklyTemplate(
         title: String,
         daysOfWeek: Set<com.segnities007.model.DayOfWeek>,
     ) {
-        withContext(Dispatchers.IO) {
-            weeklyTemplateRepository.insertTemplate(
-                WeeklyTemplate(
-                    title = title,
-                    daysOfWeek = daysOfWeek,
-                    itemIds = emptyList(), // 追加時は空で作成し、後から編集で詰める
-                ),
-            )
-        }
-        getAllWeeklyTemplates()
+        val template = WeeklyTemplate(
+            title = title,
+            daysOfWeek = daysOfWeek,
+            itemIds = emptyList(), // 追加時は空で作成し、後から編集で詰める
+        )
+        addTemplateUseCase(template).fold(
+            onSuccess = {
+                getAllWeeklyTemplates()
+                sendEffect { TemplatesEffect.ShowToast("「${template.title}」を追加しました") }
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("テンプレートの追加に失敗しました: ${e.message}") }
+            }
+        )
     }
 
     private suspend fun editWeeklyTemplate(template: WeeklyTemplate) {
-        withContext(Dispatchers.IO) { weeklyTemplateRepository.updateTemplate(template) }
-        getAllWeeklyTemplates()
-        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+        updateTemplateUseCase(template).fold(
+            onSuccess = {
+                getAllWeeklyTemplates()
+                sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+                sendEffect { TemplatesEffect.ShowToast("「${template.title}」を更新しました") }
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("テンプレートの更新に失敗しました: ${e.message}") }
+            }
+        )
     }
 
     private fun showDeleteConfirmation(template: WeeklyTemplate) {
@@ -210,10 +241,16 @@ class TemplatesViewModel(
     private suspend fun confirmDeleteTemplate() {
         val templateToDelete = state.value.templateToDelete
         if (templateToDelete != null) {
-            withContext(Dispatchers.IO) { weeklyTemplateRepository.deleteTemplate(templateToDelete) }
-            setState { reducer.reduce(this, TemplatesIntent.ConfirmDeleteTemplate) }
-            getAllWeeklyTemplates()
-            sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
+            deleteTemplateUseCase(templateToDelete).fold(
+                onSuccess = {
+                    setState { reducer.reduce(this, TemplatesIntent.ConfirmDeleteTemplate) }
+                    getAllWeeklyTemplates()
+                    sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
+                },
+                onFailure = { e ->
+                    sendEffect { TemplatesEffect.ShowToast("削除失敗: ${e.message}") }
+                }
+            )
         }
     }
 
@@ -229,15 +266,21 @@ class TemplatesViewModel(
     private fun importIcs(uri: android.net.Uri) =
         viewModelScope.launch {
             setState { copy(isImportingIcs = true) }
-            try {
-                val templates = withContext(Dispatchers.IO) { icsTemplateRepository.generateTemplatesFromIcs(uri) }
-                withContext(Dispatchers.IO) { icsTemplateRepository.saveGeneratedTemplates(templates) }
-                getAllWeeklyTemplates()
-                setState { copy(isImportingIcs = false) }
-                sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
-            } catch (e: Exception) {
+
+            val templates = generateTemplatesFromIcsUseCase(uri).getOrElse { e ->
                 setState { copy(isImportingIcs = false) }
                 sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }
+                return@launch
             }
+
+            saveGeneratedTemplatesUseCase(templates).getOrElse { e ->
+                setState { copy(isImportingIcs = false) }
+                sendEffect { TemplatesEffect.ShowToast("テンプレート保存失敗: ${e.message}") }
+                return@launch
+            }
+
+            getAllWeeklyTemplates()
+            setState { copy(isImportingIcs = false) }
+            sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
         }
 }

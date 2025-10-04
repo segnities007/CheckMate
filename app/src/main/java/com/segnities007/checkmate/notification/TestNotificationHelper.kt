@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit
  * テスト用：すぐに通知を送るヘルパー
  */
 object TestNotificationHelper {
+    private const val TEST_UNCHECKED_ITEMS_COUNT = 5
+    
     /**
      * テスト用：15秒後に通知を送る
      */
@@ -27,6 +29,6 @@ object TestNotificationHelper {
      * テスト用：即座に通知を表示（Worker経由ではなく直接）
      */
     fun showTestNotificationNow(context: Context) {
-        NotificationHelper.showDailyReminder(context, 5)
+        NotificationHelper.showDailyReminder(context, TEST_UNCHECKED_ITEMS_COUNT)
     }
 }

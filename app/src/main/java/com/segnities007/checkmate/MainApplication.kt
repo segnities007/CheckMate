@@ -8,6 +8,7 @@ import com.segnities007.checkmate.notification.NotificationScheduler
 import com.segnities007.common.module.databaseModule
 import com.segnities007.common.module.remoteModule
 import com.segnities007.common.module.repositoryModule
+import com.segnities007.common.module.useCaseModule
 import com.segnities007.common.module.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -32,7 +33,7 @@ class MainApplication : Application() {
             // Reference Android context
             androidContext(this@MainApplication)
             // Load modules
-            modules(remoteModule, repositoryModule, viewModelModule, mainModule, databaseModule)
+            modules(remoteModule, repositoryModule, useCaseModule, viewModelModule, mainModule, databaseModule)
         }
 
         // 通知チャンネルを作成
