@@ -1002,6 +1002,90 @@ when (intent) {
 } // sealed classなので全ケース網羅を強制
 ```
 
+### ログ出力ルール（Log.d, Log.e など）
+
+**基本方針: ログは Data 層でのみ出力する**
+
+ログ出力は問題の根本原因を特定するために、データアクセスレベルで行うべきです。
+
+#### ✅ ログ出力が許可される場所
+
+- **Data 層（`data/`）のみ:**
+  - Repository 実装クラス
+  - Room DAO の実装
+  - Ktor API Client
+  - データ変換処理（`toDomain()`, `toEntity()`）
+
+**実装例:**
+
+```kotlin
+// ✅ Data層でのログ出力（推奨）
+class ItemRepositoryImpl(
+    private val itemDao: ItemDao,
+) : ItemRepository {
+    override suspend fun getAllItems(): List<Item> {
+        Log.d("ItemRepository", "getAllItems() called")
+        return try {
+            val entities = itemDao.getAll()
+            Log.d("ItemRepository", "Fetched ${entities.size} items from database")
+            entities.map { it.toDomain() }
+        } catch (e: Exception) {
+            Log.e("ItemRepository", "Failed to fetch items", e)
+            throw e
+        }
+    }
+}
+```
+
+#### ❌ ログ出力が禁止される場所
+
+- **Presentation 層（`presentation/`）:**
+  - ViewModel
+  - Composable（Screen、Component）
+  - MVI（Intent、State、Effect、Reducer）
+
+- **Domain 層（`domain/`）:**
+  - Use Case
+  - Entity（ドメインモデル）
+  - Repository Interface
+
+- **Core 層（`core/`）:**
+  - 共通UIコンポーネント
+  - BaseViewModel
+
+**理由:**
+
+1. **関心の分離:** UI層やビジネスロジック層はログ出力の責任を持たない
+2. **デバッグ効率:** データアクセスレベルでのログのみで、問題の根本原因を特定できる
+3. **パフォーマンス:** 不要なログ出力を削減
+4. **Clean Architecture:** 各層の責務を明確に保つ
+
+**悪い例:**
+
+```kotlin
+// ❌ Presentation層でのログ出力（禁止）
+class DashboardViewModel(...) : BaseViewModel(...) {
+    private suspend fun loadData() {
+        Log.d("DashboardViewModel", "Loading data...")  // ❌ 削除すべき
+        val items = getAllItemsUseCase()
+        Log.d("DashboardViewModel", "Loaded ${items.size} items")  // ❌ 削除すべき
+    }
+}
+
+// ❌ Domain層でのログ出力（禁止）
+class GetAllItemsUseCase(private val repository: ItemRepository) {
+    suspend operator fun invoke(): Result<List<Item>> {
+        Log.d("GetAllItemsUseCase", "Executing...")  // ❌ 削除すべき
+        return try {
+            Result.success(repository.getAllItems())
+        } catch (e: Exception) {
+            Log.e("GetAllItemsUseCase", "Error", e)  // ❌ 削除すべき
+            Result.failure(e)
+        }
+    }
+}
+```
+
 ### エラーハンドリング
 
 - **try-catch は必要最小限に**（Repository 呼び出しなど）
@@ -1166,16 +1250,3 @@ private suspend fun loadDashboardData() {
 - **使用場所:** Domain 層（`domain/usecase/`）
 - **目的:** ビジネスロジ
   **特に重要:** このプロジェクトでは**Use Case パターンを必ず使用**してください。ViewModel から直接 Repository を呼び出すことは禁止です。全てのビジネスロジックは Use Case を通じて実行してください。
-
-## Use Case 導入の移行ガイド
-
-### 段階的な移行手順
-
-1. **domain/usecase モジュールの作成**
-2. **既存の Repository 呼び出しを特定**
-3. **各ビジネスアクションを Use Case に抽出**
-4. **Koin の UseCaseModule を作成**
-5. **ViewModel のコンストラクタを Use Case に置き換え**
-6. **ViewModel 内の Repository 直接呼び出しを Use Case 呼び出しに置き換え**
-7. **Unit Test の作成**
-8. **リファクタリング後の動作確認**

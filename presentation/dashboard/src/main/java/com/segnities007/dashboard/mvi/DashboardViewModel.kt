@@ -22,6 +22,13 @@ class DashboardViewModel(
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
     private val reducer: DashboardReducer = DashboardReducer()
 
+    companion object {
+        /**
+         * パーセンテージ変換用の定数（0.0～1.0 → 0～100）
+         */
+        private const val PERCENTAGE_MULTIPLIER = 100.0
+    }
+
     init {
         // schedule load via BaseViewModel.sendIntent
         sendIntent(DashboardIntent.LoadDashboardData)
@@ -115,7 +122,7 @@ class DashboardViewModel(
                 }
             val completionRateToday =
                 if (scheduledItemCountToday > 0) {
-                    ((checkedItemCountToday.toDouble() / scheduledItemCountToday.toDouble()) * 100.0).toInt()
+                    ((checkedItemCountToday.toDouble() / scheduledItemCountToday.toDouble()) * PERCENTAGE_MULTIPLIER).toInt()
                 } else {
                     0
                 }
@@ -138,7 +145,7 @@ class DashboardViewModel(
                     val totalCheckedRecordsCount = allCheckStates.sumOf { state -> state.history.count { record -> record.isChecked } }
                     val historicalCompletionRate =
                         if (totalRecordsCount > 0) {
-                            ((totalCheckedRecordsCount.toDouble() / totalRecordsCount.toDouble()) * 100.0).toInt()
+                            ((totalCheckedRecordsCount.toDouble() / totalRecordsCount.toDouble()) * PERCENTAGE_MULTIPLIER).toInt()
                         } else {
                             0
                         }

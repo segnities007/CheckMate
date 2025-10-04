@@ -34,7 +34,7 @@ class HubViewModel(
                 setState { copy(userStatus = userStatus) }
             },
             onFailure = { e ->
-                // エラーハンドリング: ログ出力またはEffect発行
+                sendEffect { HubEffect.ShowToast("ユーザー情報の読み込みに失敗しました") }
             }
         )
     }

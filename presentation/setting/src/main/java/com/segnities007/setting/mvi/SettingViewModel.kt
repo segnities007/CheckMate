@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.backup.ExportDataUseCase
@@ -47,7 +46,7 @@ class SettingViewModel(
                 setState { copy(userStatus = userStatus) }
             },
             onFailure = { e ->
-                Log.e("SettingViewModel", "Failed to load user status", e)
+                // エラーはData層でログ出力される
             }
         )
     }
@@ -82,12 +81,10 @@ class SettingViewModel(
                     sendEffect { SettingEffect.ShowToast("バックアップ完了") }
                 } catch (e: Exception) {
                     sendEffect { SettingEffect.ShowToast("バックアップ失敗: ${e.message}") }
-                    Log.e("SettingViewModel", "バックアップ失敗", e)
                 }
             },
             onFailure = { e ->
                 sendEffect { SettingEffect.ShowToast("バックアップ失敗: ${e.message}") }
-                Log.e("SettingViewModel", "バックアップ失敗", e)
             }
         )
     }
@@ -133,19 +130,16 @@ class SettingViewModel(
                             },
                             onFailure = { e ->
                                 sendEffect { SettingEffect.ShowToast("アイテム削除失敗: ${e.message}") }
-                                Log.e("SettingViewModel", "アイテム削除失敗", e)
                             }
                         )
                     },
                     onFailure = { e ->
                         sendEffect { SettingEffect.ShowToast("テンプレート削除失敗: ${e.message}") }
-                        Log.e("SettingViewModel", "テンプレート削除失敗", e)
                     }
                 )
             },
             onFailure = { e ->
                 sendEffect { SettingEffect.ShowToast("チェック状態削除失敗: ${e.message}") }
-                Log.e("SettingViewModel", "チェック状態削除失敗", e)
             }
         )
     }
@@ -213,14 +207,12 @@ class SettingViewModel(
                     onFailure = { e ->
                         setState { copy(isImportingIcs = false) }
                         sendEffect { SettingEffect.ShowToast("テンプレート保存に失敗しました: ${e.message}") }
-                        Log.e("SettingViewModel", "テンプレート保存失敗", e)
                     }
                 )
             },
             onFailure = { e ->
                 setState { copy(isImportingIcs = false) }
                 sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
-                Log.e("SettingViewModel", "ICSインポート失敗", e)
             }
         )
     }

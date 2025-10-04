@@ -158,10 +158,8 @@ class ItemsViewModel(
                     if (intent.item.imagePath.isNotBlank()) {
                         // URLの場合はそのまま使用、ローカルファイルパスの場合は保存
                         if (intent.item.imagePath.startsWith("http://") || intent.item.imagePath.startsWith("https://")) {
-                            android.util.Log.d("ItemsViewModel", "Using URL as imagePath: ${intent.item.imagePath}")
                             intent.item.imagePath
                         } else {
-                            android.util.Log.d("ItemsViewModel", "Saving local image: ${intent.item.imagePath}")
                             val result = saveImageUseCase(intent.item.imagePath, "${Uuid.random()}.jpg")
                             result.getOrElse { "" }
                         }

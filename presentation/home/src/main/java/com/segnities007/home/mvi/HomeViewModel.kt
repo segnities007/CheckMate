@@ -74,7 +74,7 @@ class HomeViewModel(
                 // チェック履歴の確保に成功
             },
             onFailure = { e ->
-                // エラーハンドリング: ログ出力
+                // エラーはData層でログ出力される
             }
         )
     }
@@ -86,7 +86,7 @@ class HomeViewModel(
                 setState { reducer.reduce(this, HomeIntent.SetAllItems(allItems)) }
             },
             onFailure = { e ->
-                // エラーハンドリング: ログ出力またはEffect発行
+                sendEffect { HomeEffect.ShowError("アイテムの読み込みに失敗しました") }
             }
         )
     }
@@ -139,17 +139,17 @@ class HomeViewModel(
                                 }
                             },
                             onFailure = { e ->
-                                // エラーハンドリング
+                                sendEffect { HomeEffect.ShowError("チェック状態の読み込みに失敗しました") }
                             }
                         )
                     },
                     onFailure = { e ->
-                        // エラーハンドリング
+                        sendEffect { HomeEffect.ShowError("アイテムの読み込みに失敗しました") }
                     }
                 )
             },
             onFailure = { e ->
-                // エラーハンドリング
+                sendEffect { HomeEffect.ShowError("テンプレートの読み込みに失敗しました") }
             }
         )
     }
