@@ -3,16 +3,16 @@ package com.segnities007.auth.mvi
 import androidx.lifecycle.viewModelScope
 import com.segnities007.navigation.AuthRoute
 import com.segnities007.navigation.Route
-import com.segnities007.repository.UserRepository
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.ui.mvi.MviState
+import com.segnities007.usecase.user.IsAccountCreatedUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 
 class AuthViewModel(
-    private val userRepository: UserRepository,
+    private val isAccountCreatedUseCase: IsAccountCreatedUseCase,
 ) : BaseViewModel<AuthIntent, MviState, AuthEffect>(object : MviState {}),
     KoinComponent {
     override suspend fun handleIntent(intent: AuthIntent) {
@@ -33,7 +33,7 @@ class AuthViewModel(
     }
 
     private suspend fun checkAccount() {
-        val result = withContext(Dispatchers.IO) { userRepository.isAccountCreated() }
+        val result = isAccountCreatedUseCase()
         if (result) {
             topNavigate(AuthIntent.TopNavigate(Route.Hub))
         } else {

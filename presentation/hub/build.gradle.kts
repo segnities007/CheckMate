@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
+    implementation(project(":domain:usecase"))
     implementation(project(":presentation:home"))
     implementation(project(":presentation:items"))
     implementation(project(":presentation:dashboard"))

@@ -1,10 +1,11 @@
 package com.segnities007.dashboard.mvi
 
 import androidx.lifecycle.viewModelScope
-import com.segnities007.repository.ItemCheckStateRepository
-import com.segnities007.repository.ItemRepository
-import com.segnities007.repository.WeeklyTemplateRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import com.segnities007.usecase.checkstate.GetCheckStatesForItemsUseCase
+import com.segnities007.usecase.item.GetAllItemsUseCase
+import com.segnities007.usecase.template.GetAllTemplatesUseCase
+import com.segnities007.usecase.template.GetTemplatesForDayUseCase
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
@@ -14,9 +15,10 @@ import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 class DashboardViewModel(
-    private val itemRepository: ItemRepository,
-    private val weeklyTemplateRepository: WeeklyTemplateRepository,
-    private val itemCheckStateRepository: ItemCheckStateRepository,
+    private val getAllItemsUseCase: GetAllItemsUseCase,
+    private val getAllTemplatesUseCase: GetAllTemplatesUseCase,
+    private val getTemplatesForDayUseCase: GetTemplatesForDayUseCase,
+    private val getCheckStatesForItemsUseCase: GetCheckStatesForItemsUseCase,
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
     private val reducer: DashboardReducer = DashboardReducer()
 
@@ -35,19 +37,24 @@ class DashboardViewModel(
     private suspend fun loadDashboardData() {
         setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
         try {
-            val allItems = itemRepository.getAllItems()
+            // Use Caseを通じてデータ取得
+            val allItems = getAllItemsUseCase()
             val itemCount = allItems.size
-            val templateCount = weeklyTemplateRepository.getAllTemplates().size
-            val uncheckedItems = itemRepository.getUncheckedItemsForToday()
+            val templateCount = getAllTemplatesUseCase().size
+            
             val today =
                 Clock.System
                     .now()
                     .toLocalDateTime(TimeZone.currentSystemDefault())
                     .date
-            val templatesForToday = weeklyTemplateRepository.getTemplatesForDay(today.dayOfWeek.name)
+            
+            // 今日のテンプレートとアイテムを取得
+            val templatesForToday = getTemplatesForDayUseCase(today.dayOfWeek.name)
             val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
             val scheduledItemCountToday = itemIdsForToday.size
-            val checkStates = itemCheckStateRepository.getCheckStatesForItems(itemIdsForToday)
+            
+            // 今日のチェック状態を取得して完了率を計算
+            val checkStates = getCheckStatesForItemsUseCase(itemIdsForToday)
             val checkedItemCountToday =
                 checkStates.count { state ->
                     state.history.any { it.date == today && it.isChecked }
@@ -58,10 +65,19 @@ class DashboardViewModel(
                 } else {
                     0
                 }
+            
+            // 今日の未チェックアイテムを算出
+            val itemsForToday = allItems.filter { itemIdsForToday.contains(it.id) }
+            val checkStateMapByItemId = checkStates.associateBy { it.itemId }
+            val uncheckedItems = itemsForToday.filter { item ->
+                val state = checkStateMapByItemId[item.id]
+                val record = state?.history?.find { it.date == today }
+                record?.isChecked != true
+            }
 
-            // Historical completion stats across all recorded histories
+            // 全履歴からの完了率を計算
             val allItemIds = allItems.map { it.id }
-            val allCheckStates = itemCheckStateRepository.getCheckStatesForItems(allItemIds)
+            val allCheckStates = getCheckStatesForItemsUseCase(allItemIds)
             val totalRecordsCount = allCheckStates.sumOf { it.history.size }
             val totalCheckedRecordsCount = allCheckStates.sumOf { state -> state.history.count { record -> record.isChecked } }
             val historicalCompletionRate =
@@ -71,18 +87,17 @@ class DashboardViewModel(
                     0
                 }
 
-            // Unchecked items for tomorrow
+            // 明日の未チェックアイテムを算出
             val tomorrow = today.plus(1, DateTimeUnit.DAY)
-            val templatesForTomorrow = weeklyTemplateRepository.getTemplatesForDay(tomorrow.dayOfWeek.name)
+            val templatesForTomorrow = getTemplatesForDayUseCase(tomorrow.dayOfWeek.name)
             val itemIdsForTomorrow = templatesForTomorrow.flatMap { it.itemIds }.distinct()
             val itemsForTomorrow = allItems.filter { itemIdsForTomorrow.contains(it.id) }
-            val checkStatesForTomorrow = itemCheckStateRepository.getCheckStatesForItems(itemIdsForTomorrow)
-            val checkStateMapByItemId = checkStatesForTomorrow.associateBy { it.itemId }
+            val checkStatesForTomorrow = getCheckStatesForItemsUseCase(itemIdsForTomorrow)
+            val checkStateMapByItemIdTomorrow = checkStatesForTomorrow.associateBy { it.itemId }
             val uncheckedItemsTomorrow =
                 itemsForTomorrow.filter { item ->
-                    val state = checkStateMapByItemId[item.id]
+                    val state = checkStateMapByItemIdTomorrow[item.id]
                     val record = state?.history?.find { it.date == tomorrow }
-                    // Missing record means unchecked; existing false also unchecked
                     record?.isChecked != true
                 }
 
