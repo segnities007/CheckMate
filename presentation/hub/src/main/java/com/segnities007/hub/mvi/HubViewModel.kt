@@ -29,8 +29,14 @@ class HubViewModel(
     }
 
     private suspend fun loadUserStatus() {
-        val userStatus = getUserStatusUseCase()
-        setState { copy(userStatus = userStatus) }
+        getUserStatusUseCase().fold(
+            onSuccess = { userStatus ->
+                setState { copy(userStatus = userStatus) }
+            },
+            onFailure = { e ->
+                // エラーハンドリング: ログ出力またはEffect発行
+            }
+        )
     }
 
     private fun setBottomBar(intent: HubIntent.SetBottomBar) {

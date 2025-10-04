@@ -9,7 +9,12 @@ import com.segnities007.repository.ItemRepository
 class GetItemByIdUseCase(
     private val itemRepository: ItemRepository
 ) {
-    suspend operator fun invoke(id: Int): Item? {
-        return itemRepository.getItemById(id)
+    suspend operator fun invoke(id: Int): Result<Item?> {
+        return try {
+            val item = itemRepository.getItemById(id)
+            Result.success(item)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

@@ -42,12 +42,14 @@ class SettingViewModel(
     }
 
     private suspend fun loadUserStatus() {
-        try {
-            val userStatus = getUserStatusUseCase()
-            setState { copy(userStatus = userStatus) }
-        } catch (e: Exception) {
-            Log.e("SettingViewModel", "Failed to load user status", e)
-        }
+        getUserStatusUseCase().fold(
+            onSuccess = { userStatus ->
+                setState { copy(userStatus = userStatus) }
+            },
+            onFailure = { e ->
+                Log.e("SettingViewModel", "Failed to load user status", e)
+            }
+        )
     }
 
     override suspend fun handleIntent(intent: SettingIntent) {
@@ -141,9 +143,15 @@ class SettingViewModel(
         val result = loginWithGoogleUseCase()
         result.fold(
             onSuccess = {
-                val updatedUserStatus = getUserStatusUseCase()
-                setState { copy(userStatus = updatedUserStatus) }
-                sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
+                getUserStatusUseCase().fold(
+                    onSuccess = { updatedUserStatus ->
+                        setState { copy(userStatus = updatedUserStatus) }
+                        sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
+                    },
+                    onFailure = { e ->
+                        sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
+                    }
+                )
             },
             onFailure = {
                 sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
@@ -155,9 +163,15 @@ class SettingViewModel(
         val result = loginWithGoogleUseCase()
         result.fold(
             onSuccess = {
-                val updatedUserStatus = getUserStatusUseCase()
-                setState { copy(userStatus = updatedUserStatus) }
-                sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
+                getUserStatusUseCase().fold(
+                    onSuccess = { updatedUserStatus ->
+                        setState { copy(userStatus = updatedUserStatus) }
+                        sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
+                    },
+                    onFailure = { e ->
+                        sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
+                    }
+                )
             },
             onFailure = {
                 sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }

@@ -9,7 +9,12 @@ import com.segnities007.repository.UserRepository
 class GetUserStatusUseCase(
     private val userRepository: UserRepository
 ) {
-    suspend operator fun invoke(): UserStatus {
-        return userRepository.getUserStatus()
+    suspend operator fun invoke(): Result<UserStatus> {
+        return try {
+            val status = userRepository.getUserStatus()
+            Result.success(status)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

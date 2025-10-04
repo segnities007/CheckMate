@@ -33,14 +33,19 @@ class AuthViewModel(
     }
 
     private suspend fun checkAccount() {
-        val result = isAccountCreatedUseCase()
-        if (result) {
-            topNavigate(AuthIntent.TopNavigate(Route.Hub))
-        } else {
-            navigate(
-                AuthIntent.Navigate(AuthRoute.Login),
-            )
-        }
+        isAccountCreatedUseCase().fold(
+            onSuccess = { isCreated ->
+                if (isCreated) {
+                    topNavigate(AuthIntent.TopNavigate(Route.Hub))
+                } else {
+                    navigate(AuthIntent.Navigate(AuthRoute.Login))
+                }
+            },
+            onFailure = { e ->
+                // エラー時はログイン画面に遷移
+                navigate(AuthIntent.Navigate(AuthRoute.Login))
+            }
+        )
     }
 
     private fun navigate(intent: AuthIntent.Navigate) {

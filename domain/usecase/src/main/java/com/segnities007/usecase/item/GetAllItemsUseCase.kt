@@ -10,7 +10,12 @@ import com.segnities007.repository.ItemRepository
 class GetAllItemsUseCase(
     private val itemRepository: ItemRepository
 ) {
-    suspend operator fun invoke(): List<Item> {
-        return itemRepository.getAllItems()
+    suspend operator fun invoke(): Result<List<Item>> {
+        return try {
+            val items = itemRepository.getAllItems()
+            Result.success(items)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

@@ -121,21 +121,33 @@ class ItemsViewModel(
     }
 
     private suspend fun getAllItems() {
-        val items = getAllItemsUseCase()
-        // apply state directly via reducer in the current coroutine
-        setState { reducer.reduce(this, ItemsIntent.SetItems(items)) }
-        applyFilters()
+        getAllItemsUseCase().fold(
+            onSuccess = { items ->
+                // apply state directly via reducer in the current coroutine
+                setState { reducer.reduce(this, ItemsIntent.SetItems(items)) }
+                applyFilters()
+            },
+            onFailure = { e ->
+                sendEffect { ItemsEffect.ShowToast("アイテムの読み込みに失敗しました") }
+            }
+        )
     }
 
     private suspend fun getItemById(intent: ItemsIntent.GetItemsById) {
-        val item = getItemByIdUseCase(intent.id)
-        if (item != null) {
-            // set items via reducer directly
-            setState { reducer.reduce(this, ItemsIntent.SetItems(listOf(item))) }
-            applyFilters()
-        } else {
-            sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
-        }
+        getItemByIdUseCase(intent.id).fold(
+            onSuccess = { item ->
+                if (item != null) {
+                    // set items via reducer directly
+                    setState { reducer.reduce(this, ItemsIntent.SetItems(listOf(item))) }
+                    applyFilters()
+                } else {
+                    sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
+                }
+            },
+            onFailure = { e ->
+                sendEffect { ItemsEffect.ShowToast("アイテムの取得に失敗しました") }
+            }
+        )
     }
 
     @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
@@ -173,28 +185,35 @@ class ItemsViewModel(
     }
 
     private suspend fun deleteItem(intent: ItemsIntent.DeleteItems) {
-        val itemToDelete = getItemByIdUseCase(intent.id)
-        if (itemToDelete != null) {
-            // 画像を削除
-            if (itemToDelete.imagePath.isNotBlank()) {
-                deleteImageUseCase(itemToDelete.imagePath)
-            }
-            
-            // アイテムを削除
-            val result = deleteItemUseCase(intent.id)
-            result.fold(
-                onSuccess = {
-                    sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
-                    // refresh
-                    getAllItems()
-                },
-                onFailure = { error ->
-                    sendEffect { ItemsEffect.ShowToast(error.message ?: "削除に失敗しました") }
+        getItemByIdUseCase(intent.id).fold(
+            onSuccess = { itemToDelete ->
+                if (itemToDelete == null) {
+                    sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
+                    return
                 }
-            )
-        } else {
-            sendEffect { ItemsEffect.ShowToast("削除対象のアイテムが見つかりません") }
-        }
+                
+                // 画像を削除
+                if (itemToDelete.imagePath.isNotBlank()) {
+                    deleteImageUseCase(itemToDelete.imagePath)
+                }
+
+                // アイテムを削除
+                val result = deleteItemUseCase(intent.id)
+                result.fold(
+                    onSuccess = {
+                        sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
+                        // refresh
+                        getAllItems()
+                    },
+                    onFailure = { error ->
+                        sendEffect { ItemsEffect.ShowToast(error.message ?: "削除に失敗しました") }
+                    }
+                )
+            },
+            onFailure = { error ->
+                sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの取得に失敗しました") }
+            }
+        )
     }
 
     private fun handleBarcodeDetected(intent: ItemsIntent.BarcodeDetected) {

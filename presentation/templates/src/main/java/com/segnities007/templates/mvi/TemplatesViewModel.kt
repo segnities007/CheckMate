@@ -178,15 +178,27 @@ class TemplatesViewModel(
     }
 
     private suspend fun getAllItems() {
-        val items = getAllItemsUseCase()
-        setState { reducer.reduce(this, TemplatesIntent.SetAllItems(items)) }
-        applyFilters()
+        getAllItemsUseCase().fold(
+            onSuccess = { items ->
+                setState { reducer.reduce(this, TemplatesIntent.SetAllItems(items)) }
+                applyFilters()
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("アイテムの読み込みに失敗しました") }
+            }
+        )
     }
 
     private suspend fun getAllWeeklyTemplates() {
-        val templates = getAllTemplatesUseCase()
-        setState { reducer.reduce(this, TemplatesIntent.SetWeeklyTemplates(templates)) }
-        applyTemplateFilters()
+        getAllTemplatesUseCase().fold(
+            onSuccess = { templates ->
+                setState { reducer.reduce(this, TemplatesIntent.SetWeeklyTemplates(templates)) }
+                applyTemplateFilters()
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("テンプレートの読み込みに失敗しました") }
+            }
+        )
     }
 
     private suspend fun addWeeklyTemplate(

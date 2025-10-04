@@ -9,7 +9,12 @@ import com.segnities007.repository.WeeklyTemplateRepository
 class GetAllTemplatesUseCase(
     private val weeklyTemplateRepository: WeeklyTemplateRepository
 ) {
-    suspend operator fun invoke(): List<WeeklyTemplate> {
-        return weeklyTemplateRepository.getAllTemplates()
+    suspend operator fun invoke(): Result<List<WeeklyTemplate>> {
+        return try {
+            val templates = weeklyTemplateRepository.getAllTemplates()
+            Result.success(templates)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

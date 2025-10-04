@@ -9,7 +9,7 @@
 ### 技術スタック
 
 - **言語**: Kotlin 2.2.20
-- **UI**: Jetpack Compose  
+- **UI**: Jetpack Compose
 - **DI**: Koin
 - **非同期処理**: Coroutines + Flow
 - **データ永続化**: Room Database
@@ -267,7 +267,7 @@ class AddItemUseCase(
             if (!item.isValid()) {
                 return Result.failure(IllegalArgumentException("無効なアイテム"))
             }
-            
+
             // 保存
             itemRepository.insertItem(item)
             Result.success(Unit)
@@ -289,7 +289,7 @@ class AddItemUseCase(
 
 **重要な注意点:**
 
-- **Use Case は1つのビジネスアクションのみ実行**（単一責任の原則）
+- **Use Case は 1 つのビジネスアクションのみ実行**（単一責任の原則）
 - **ViewModel は Use Case を通じてビジネスロジックを実行**
 - **Repository は Use Case 内でのみ呼び出す**（ViewModel から直接呼ばない）
 - Entity にビジネスロジックを含めることは許可（Anemic Domain Model を避ける）
@@ -363,7 +363,7 @@ fun Item.toEntity(): ItemEntity = ItemEntity(
 interface ItemDao {
     @Query("SELECT * FROM items")
     suspend fun getAll(): List<ItemEntity>
-    
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ItemEntity)
 }
@@ -379,13 +379,13 @@ import com.segnities007.model.item.Item
 class ItemRepositoryImpl(
     private val itemDao: ItemDao,
 ) : ItemRepository {
-    override suspend fun getAllItems(): List<Item> = 
+    override suspend fun getAllItems(): List<Item> =
         itemDao.getAll().map { it.toDomain() }
 
     override suspend fun insertItem(item: Item) {
         itemDao.insert(item.toEntity())
     }
-    
+
     // 他のメソッド実装...
 }
 ```
@@ -438,7 +438,7 @@ sealed interface DashboardEffect : MviEffect {
 class DashboardReducer {
     fun reduce(state: DashboardState, intent: DashboardIntent): DashboardState {
         return when (intent) {
-            is DashboardIntent.LoadDashboardData -> 
+            is DashboardIntent.LoadDashboardData ->
                 state.copy(isLoading = true, error = null)
         }
     }
@@ -467,13 +467,13 @@ class DashboardViewModel(
             // ⭐ Use Caseを通じてビジネスロジックを実行
             val items = getAllItemsUseCase()
             val templateCount = getTemplateCountUseCase()
-            
-            setState { 
+
+            setState {
                 copy(
-                    isLoading = false, 
+                    isLoading = false,
                     itemCount = items.size,
                     templateCount = templateCount
-                ) 
+                )
             }
         } catch (e: Exception) {
             setState { copy(isLoading = false, error = e.message) }
@@ -486,7 +486,7 @@ class DashboardViewModel(
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    
+
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -496,7 +496,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel()) {
             }
         }
     }
-    
+
     if (state.isLoading) {
         LoadingIndicator()
     } else {
@@ -547,7 +547,7 @@ abstract class BaseViewModel<I : MviIntent, S : MviState, E : MviEffect>(
 ) : ViewModel() {
     val state: StateFlow<S>          // UI監視用の状態
     val effect: Flow<E>               // 一度きりのイベント（Toast、ナビゲーション等）
-    
+
     fun sendIntent(intent: I)        // Intentを送信
     protected fun setState(reducer: S.() -> S)  // State更新
     protected fun sendEffect(builder: () -> E)  // Effect発行
@@ -632,9 +632,9 @@ sealed interface DashboardEffect : MviEffect {
 class DashboardReducer {
     fun reduce(state: DashboardState, intent: DashboardIntent): DashboardState {
         return when (intent) {
-            is DashboardIntent.LoadDashboardData -> 
+            is DashboardIntent.LoadDashboardData ->
                 state.copy(isLoading = true, error = null)
-            is DashboardIntent.UpdateFilter -> 
+            is DashboardIntent.UpdateFilter ->
                 state.copy(filter = intent.filter)
         }
     }
@@ -651,7 +651,7 @@ class DashboardViewModel(
     private val getAllTemplatesUseCase: GetAllTemplatesUseCase,
     private val getUncheckedItemsForTodayUseCase: GetUncheckedItemsForTodayUseCase,
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
-    
+
     private val reducer = DashboardReducer()
 
     init {
@@ -669,13 +669,13 @@ class DashboardViewModel(
     private suspend fun loadDashboardData() {
         // 1. Reducerで同期的な状態更新（ローディング開始）
         setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
-        
+
         try {
             // 2. Use Caseを通じてビジネスロジック実行（副作用）⭐
             val items = getAllItemsUseCase()
             val templates = getAllTemplatesUseCase()
             val uncheckedItems = getUncheckedItemsForTodayUseCase()
-            
+
             // 3. 成功時の状態更新
             setState {
                 copy(
@@ -718,7 +718,7 @@ fun DashboardScreen(
     onNavigateToDetail: (Int) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    
+
     // Effect処理
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -735,7 +735,7 @@ fun DashboardScreen(
             }
         }
     }
-    
+
     // State-driven UI
     when {
         state.isLoading -> {
@@ -765,7 +765,7 @@ fun DashboardScreen(
 - ✅ Effect は一度きりのイベントに使用
 - ✅ Reducer は純粋関数として実装
 - ✅ ViewModel は Use Case を通じてビジネスロジックを実行 ⭐
-- ✅ Use Case は単一責任（1つのビジネスアクション）
+- ✅ Use Case は単一責任（1 つのビジネスアクション）
 - ✅ エラーハンドリングは必須
 
 **DON'T（非推奨）:**
@@ -804,7 +804,7 @@ val useCaseModule = module {
     factory { GetUncheckedItemsForTodayUseCase(get()) }
     factory { AddItemUseCase(get()) }
     factory { DeleteItemUseCase(get()) }
-    
+
     // Template関連Use Case
     factory { GetAllTemplatesUseCase(get()) }
     factory { GetTemplateCountUseCase(get()) }
@@ -870,7 +870,7 @@ fun DashboardScreen(
 
 - **使用場所:** Domain 層（`domain/usecase/`）
 - **目的:** ビジネスロジックのカプセル化、単一責任の実現
-- **実装:** 1つの Use Case = 1つのビジネスアクション
+- **実装:** 1 つの Use Case = 1 つのビジネスアクション
 - **命名:** `動詞 + 名詞 + UseCase` (例: `GetAllItemsUseCase`)
 
 #### 3. Dependency Injection (Koin)
@@ -914,7 +914,7 @@ fun DashboardScreen(
 ### Kotlin 命名規則
 
 - **クラス名:** PascalCase、名詞（例: `ItemRepository`, `DashboardViewModel`）
-- **Use Case名:** `動詞 + 名詞 + UseCase`（例: `GetAllItemsUseCase`, `AddItemUseCase`）
+- **Use Case 名:** `動詞 + 名詞 + UseCase`（例: `GetAllItemsUseCase`, `AddItemUseCase`）
 - **関数名:** camelCase、動詞（例: `getAllItems()`, `loadDashboardData()`）
 - **プロパティ名:** camelCase（例: `isLoading`, `itemCount`）
 - **定数:** UPPER_SNAKE_CASE（例: `MAX_RETRY_COUNT`）
@@ -1039,12 +1039,14 @@ private suspend fun loadDashboardData() {
 ### テストの種類と対象
 
 - **Unit Test:**
+
   - **Use Case（最も重要）** ⭐
   - Reducer（純粋関数）
   - Entity（ドメインロジック）
   - 拡張関数（変換ロジック）
 
 - **Integration Test:**
+
   - Repository 実装
   - Room DAO
   - Ktor API Client
@@ -1060,7 +1062,7 @@ private suspend fun loadDashboardData() {
 ❌ **Domain 層で Android SDK/フレームワークに依存**（kotlinx-datetime は例外）
 ❌ **内側のレイヤーが外側のレイヤーを参照**
 ❌ **ViewModel から直接 Repository を呼び出す**（必ず Use Case を経由）⭐
-❌ **1つの Use Case に複数の責任を持たせる**
+❌ **1 つの Use Case に複数の責任を持たせる**
 ❌ **Composable にビジネスロジックを記述**
 ❌ **State を mutable（`var`）で定義**
 ❌ **Reducer 内で副作用（Repository 呼び出し等）**
@@ -1090,7 +1092,7 @@ private suspend fun loadDashboardData() {
 - [ ] 各クラスは単一の責任のみを持っているか？
 - [ ] 依存の方向は内側（Domain）に向いているか？
 - [ ] Domain 層は Android SDK 非依存か（kotlinx-datetime 除く）？
-- [ ] **Use Case は1つのビジネスアクションのみ実行しているか？** ⭐
+- [ ] **Use Case は 1 つのビジネスアクションのみ実行しているか？** ⭐
 - [ ] **ViewModel は Use Case を通じてビジネスロジックを実行しているか？** ⭐
 - [ ] **ViewModel から直接 Repository を呼び出していないか？** ⭐
 - [ ] Repository インターフェース（Domain）と実装（Data）が分離されているか？
@@ -1156,14 +1158,14 @@ private suspend fun loadDashboardData() {
 ---
 
 **このドキュメントは必ず守ってください。設計原則の違反は技術的負債を生み、長期的な保守性を損ないます。**
-**最重要****最重要**
+**最重要\*\***最重要\*\*
 
 - **使用場所:** Domain 層（`domain/usecase/`）
 - **目的:** ビジネスロジ
 
 - **使用場所:** Domain 層（`domain/usecase/`）
 - **目的:** ビジネスロジ
-**特に重要:** このプロジェクトでは**Use Case パターンを必ず使用**してください。ViewModel から直接 Repository を呼び出すことは禁止です。全てのビジネスロジックは Use Case を通じて実行してください。
+  **特に重要:** このプロジェクトでは**Use Case パターンを必ず使用**してください。ViewModel から直接 Repository を呼び出すことは禁止です。全てのビジネスロジックは Use Case を通じて実行してください。
 
 ## Use Case 導入の移行ガイド
 

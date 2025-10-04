@@ -9,7 +9,12 @@ import com.segnities007.repository.ItemCheckStateRepository
 class GetCheckStateForItemUseCase(
     private val itemCheckStateRepository: ItemCheckStateRepository
 ) {
-    suspend operator fun invoke(itemId: Int): ItemCheckState? {
-        return itemCheckStateRepository.getCheckStateForItem(itemId)
+    suspend operator fun invoke(itemId: Int): Result<ItemCheckState?> {
+        return try {
+            val state = itemCheckStateRepository.getCheckStateForItem(itemId)
+            Result.success(state)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

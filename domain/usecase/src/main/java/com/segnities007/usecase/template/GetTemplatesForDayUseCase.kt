@@ -9,7 +9,12 @@ import com.segnities007.repository.WeeklyTemplateRepository
 class GetTemplatesForDayUseCase(
     private val weeklyTemplateRepository: WeeklyTemplateRepository
 ) {
-    suspend operator fun invoke(dayOfWeek: String): List<WeeklyTemplate> {
-        return weeklyTemplateRepository.getTemplatesForDay(dayOfWeek)
+    suspend operator fun invoke(dayOfWeek: String): Result<List<WeeklyTemplate>> {
+        return try {
+            val templates = weeklyTemplateRepository.getTemplatesForDay(dayOfWeek)
+            Result.success(templates)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
