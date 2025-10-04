@@ -24,7 +24,6 @@ class ItemsViewModel(
     private val deleteImageUseCase: DeleteImageUseCase,
 ) : BaseViewModel<ItemsIntent, ItemsState, ItemsEffect>(ItemsState()),
     KoinComponent {
-    private val reducer: ItemsReducer = ItemsReducer()
 
     init {
         sendIntent(ItemsIntent.GetAllItems)
@@ -45,12 +44,12 @@ class ItemsViewModel(
             is ItemsIntent.BarcodeDetected -> handleBarcodeDetected(intent)
             is ItemsIntent.GetProductInfo -> getProductInfo(intent)
             ItemsIntent.ClearProductInfo -> clearProductInfo()
-            is ItemsIntent.SetFilteredItems -> setState { reducer.reduce(this, intent) }
-            is ItemsIntent.SetItems -> setState { reducer.reduce(this, intent) }
-            is ItemsIntent.SetScannedBarcodeInfo -> setState { reducer.reduce(this, intent) }
-            is ItemsIntent.SetProductInfoLoading -> setState { reducer.reduce(this, intent) }
-            is ItemsIntent.SetProductInfo -> setState { reducer.reduce(this, intent) }
-            is ItemsIntent.SetShouldClearForm -> setState { reducer.reduce(this, intent) }
+            is ItemsIntent.SetFilteredItems -> setState { reduce(intent) }
+            is ItemsIntent.SetItems -> setState { reduce(intent) }
+            is ItemsIntent.SetScannedBarcodeInfo -> setState { reduce(intent) }
+            is ItemsIntent.SetProductInfoLoading -> setState { reduce(intent) }
+            is ItemsIntent.SetProductInfo -> setState { reduce(intent) }
+            is ItemsIntent.SetShouldClearForm -> setState { reduce(intent) }
             is ItemsIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is ItemsIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
             is ItemsIntent.UpdateSortOrder -> updateSortOrder(intent)
@@ -58,29 +57,29 @@ class ItemsViewModel(
     }
 
     private fun updateIsShowBottomSheet(intent: ItemsIntent.UpdateIsShowBottomSheet) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
     }
 
     private fun updateCapturedImageUriForBottomSheet(intent: ItemsIntent.UpdateCapturedImageUriForBottomSheet) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
     }
 
     private fun updateCapturedTempPathForViewModel(intent: ItemsIntent.UpdateCapturedTempPathForViewModel) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
     }
 
     private fun updateSearchQuery(intent: ItemsIntent.UpdateSearchQuery) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyFilters()
     }
 
     private fun updateSelectedCategory(intent: ItemsIntent.UpdateSelectedCategory) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyFilters()
     }
 
     private fun updateSortOrder(intent: ItemsIntent.UpdateSortOrder) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyFilters()
     }
 
@@ -117,14 +116,13 @@ class ItemsViewModel(
                 SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
             }
 
-        setState { reducer.reduce(this, ItemsIntent.SetFilteredItems(filteredItems)) }
+        setState { reduce(ItemsIntent.SetFilteredItems(filteredItems)) }
     }
 
     private suspend fun getAllItems() {
         getAllItemsUseCase().fold(
             onSuccess = { items ->
-                // apply state directly via reducer in the current coroutine
-                setState { reducer.reduce(this, ItemsIntent.SetItems(items)) }
+                setState { reduce(ItemsIntent.SetItems(items)) }
                 applyFilters()
             },
             onFailure = { e ->
@@ -137,8 +135,7 @@ class ItemsViewModel(
         getItemByIdUseCase(intent.id).fold(
             onSuccess = { item ->
                 if (item != null) {
-                    // set items via reducer directly
-                    setState { reducer.reduce(this, ItemsIntent.SetItems(listOf(item))) }
+                    setState { reduce(ItemsIntent.SetItems(listOf(item))) }
                     applyFilters()
                 } else {
                     sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
@@ -217,28 +214,26 @@ class ItemsViewModel(
     }
 
     private suspend fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
-        setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(true)) }
+        setState { reduce(ItemsIntent.SetProductInfoLoading(true)) }
         
         val result = getProductInfoByBarcodeUseCase(intent.barcodeInfo)
         result.fold(
             onSuccess = { productInfo ->
-                setState { reducer.reduce(this, ItemsIntent.SetProductInfo(productInfo)) }
-                setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
+                setState { reduce(ItemsIntent.SetProductInfo(productInfo)) }
+                setState { reduce(ItemsIntent.SetProductInfoLoading(false)) }
 
                 if (productInfo != null) {
-                    setState {
-                        reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(false))
-                            .let { reducer.reduce(it, ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
-                            .let { reducer.reduce(it, ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
-                            .let { reducer.reduce(it, ItemsIntent.SetShouldClearForm(true)) }
-                    }
+                    setState { reduce(ItemsIntent.UpdateIsShowBottomSheet(false)) }
+                    setState { reduce(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
+                    setState { reduce(ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
+                    setState { reduce(ItemsIntent.SetShouldClearForm(true)) }
                     sendEffect { ItemsEffect.ReopenBottomSheetWithProductInfo }
                 } else {
                     sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
                 }
             },
             onFailure = { error ->
-                setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
+                setState { reduce(ItemsIntent.SetProductInfoLoading(false)) }
                 sendEffect { ItemsEffect.ShowToast("商品情報の取得に失敗しました: ${error.message}") }
             }
         )
@@ -251,5 +246,36 @@ class ItemsViewModel(
                 scannedBarcodeInfo = null,
             )
         }
+    }
+}
+
+// =============================================================================
+// Reducer Function
+// =============================================================================
+
+private fun ItemsState.reduce(intent: ItemsIntent): ItemsState {
+    return when (intent) {
+        // ボトムシート関連
+        is ItemsIntent.UpdateIsShowBottomSheet -> copy(isShowBottomSheet = intent.isShowBottomSheet)
+        is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> copy(capturedImageUriForBottomSheet = intent.capturedImageUriForBottomSheet)
+        is ItemsIntent.UpdateCapturedTempPathForViewModel -> copy(capturedTempPathForViewModel = intent.capturedTempPathForViewModel)
+        
+        // 検索・フィルター関連
+        is ItemsIntent.UpdateSearchQuery -> copy(searchQuery = intent.query)
+        is ItemsIntent.UpdateSelectedCategory -> copy(selectedCategory = intent.category)
+        is ItemsIntent.UpdateSortOrder -> copy(sortOrder = intent.sortOrder)
+        is ItemsIntent.SetFilteredItems -> copy(filteredItems = intent.filteredItems)
+        
+        // アイテム関連
+        is ItemsIntent.SetItems -> copy(items = intent.items)
+        
+        // バーコード・商品情報関連
+        is ItemsIntent.SetScannedBarcodeInfo -> copy(scannedBarcodeInfo = intent.barcodeInfo)
+        is ItemsIntent.SetProductInfoLoading -> copy(isLoadingProductInfo = intent.isLoading)
+        is ItemsIntent.SetProductInfo -> copy(productInfo = intent.productInfo)
+        is ItemsIntent.SetShouldClearForm -> copy(shouldClearForm = intent.shouldClear)
+        
+        // 他のIntentはViewModelで処理（非同期処理など）
+        else -> this
     }
 }

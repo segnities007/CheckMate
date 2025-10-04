@@ -29,7 +29,6 @@ class TemplatesViewModel(
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
         initialState = TemplatesState(),
     ) {
-    private val reducer: TemplatesReducer = TemplatesReducer()
 
     init {
         sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
@@ -50,13 +49,13 @@ class TemplatesViewModel(
 
             TemplatesIntent.GetAllWeeklyTemplates -> getAllWeeklyTemplates()
             TemplatesIntent.GetAllItems -> getAllItems()
-            is TemplatesIntent.SetAllItems -> setState { reducer.reduce(this, intent) }
-            is TemplatesIntent.SetWeeklyTemplates -> setState { reducer.reduce(this, intent) }
-            is TemplatesIntent.SetFilteredItems -> setState { reducer.reduce(this, intent) }
-            is TemplatesIntent.SetFilteredTemplates -> setState { reducer.reduce(this, intent) }
+            is TemplatesIntent.SetAllItems -> setState { reduce(intent) }
+            is TemplatesIntent.SetWeeklyTemplates -> setState { reduce(intent) }
+            is TemplatesIntent.SetFilteredItems -> setState { reduce(intent) }
+            is TemplatesIntent.SetFilteredTemplates -> setState { reduce(intent) }
 
-            TemplatesIntent.ShowBottomSheet -> setState { reducer.reduce(this, TemplatesIntent.ShowBottomSheet) }
-            TemplatesIntent.HideBottomSheet -> setState { reducer.reduce(this, TemplatesIntent.HideBottomSheet) }
+            TemplatesIntent.ShowBottomSheet -> setState { reduce(TemplatesIntent.ShowBottomSheet) }
+            TemplatesIntent.HideBottomSheet -> setState { reduce(TemplatesIntent.HideBottomSheet) }
 
             TemplatesIntent.NavigateToWeeklyTemplateList ->
                 sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
@@ -82,32 +81,32 @@ class TemplatesViewModel(
     }
 
     private fun updateSearchQuery(intent: TemplatesIntent.UpdateSearchQuery) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyFilters()
     }
 
     private fun updateSelectedCategory(intent: TemplatesIntent.UpdateSelectedCategory) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyFilters()
     }
 
     private fun updateSortOrder(intent: TemplatesIntent.UpdateSortOrder) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyFilters()
     }
 
     private fun updateTemplateSearchQuery(intent: TemplatesIntent.UpdateTemplateSearchQuery) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyTemplateFilters()
     }
 
     private fun updateTemplateSortOrder(intent: TemplatesIntent.UpdateTemplateSortOrder) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyTemplateFilters()
     }
 
     private fun updateSelectedDayOfWeek(intent: TemplatesIntent.UpdateSelectedDayOfWeek) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         applyTemplateFilters()
     }
 
@@ -119,7 +118,7 @@ class TemplatesViewModel(
             selectedCategory = currentState.selectedCategory,
             sortOrder = currentState.sortOrder,
         )
-        setState { reducer.reduce(this, TemplatesIntent.SetFilteredItems(filteredItems)) }
+        setState { reduce(TemplatesIntent.SetFilteredItems(filteredItems)) }
     }
 
     private fun applyTemplateFilters() {
@@ -130,13 +129,13 @@ class TemplatesViewModel(
             selectedDayOfWeek = currentState.selectedDayOfWeek,
             sortOrder = currentState.templateSortOrder,
         )
-        setState { reducer.reduce(this, TemplatesIntent.SetFilteredTemplates(filteredTemplates)) }
+        setState { reduce(TemplatesIntent.SetFilteredTemplates(filteredTemplates)) }
     }
 
     private suspend fun getAllItems() {
         getAllItemsUseCase().fold(
             onSuccess = { items ->
-                setState { reducer.reduce(this, TemplatesIntent.SetAllItems(items)) }
+                setState { reduce(TemplatesIntent.SetAllItems(items)) }
                 applyFilters()
             },
             onFailure = { e ->
@@ -148,7 +147,7 @@ class TemplatesViewModel(
     private suspend fun getAllWeeklyTemplates() {
         getAllTemplatesUseCase().fold(
             onSuccess = { templates ->
-                setState { reducer.reduce(this, TemplatesIntent.SetWeeklyTemplates(templates)) }
+                setState { reduce(TemplatesIntent.SetWeeklyTemplates(templates)) }
                 applyTemplateFilters()
             },
             onFailure = { e ->
@@ -191,7 +190,7 @@ class TemplatesViewModel(
     }
 
     private fun showDeleteConfirmation(template: WeeklyTemplate) {
-        setState { reducer.reduce(this, TemplatesIntent.DeleteWeeklyTemplate(template)) }
+        setState { reduce(TemplatesIntent.DeleteWeeklyTemplate(template)) }
     }
 
     private suspend fun confirmDeleteTemplate() {
@@ -199,7 +198,7 @@ class TemplatesViewModel(
         if (templateToDelete != null) {
             deleteTemplateUseCase(templateToDelete).fold(
                 onSuccess = {
-                    setState { reducer.reduce(this, TemplatesIntent.ConfirmDeleteTemplate) }
+                    setState { reduce(TemplatesIntent.ConfirmDeleteTemplate) }
                     getAllWeeklyTemplates()
                     sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
                 },
@@ -211,11 +210,11 @@ class TemplatesViewModel(
     }
 
     private fun cancelDeleteTemplate() {
-        setState { reducer.reduce(this, TemplatesIntent.CancelDeleteTemplate) }
+        setState { reduce(TemplatesIntent.CancelDeleteTemplate) }
     }
 
     private fun selectTemplate(template: WeeklyTemplate) {
-        setState { reducer.reduce(this, TemplatesIntent.SelectTemplate(template)) }
+        setState { reduce(TemplatesIntent.SelectTemplate(template)) }
         sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
     }
 
@@ -239,4 +238,41 @@ class TemplatesViewModel(
             setState { copy(isImportingIcs = false) }
             sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
         }
+}
+
+// =============================================================================
+// Reducer Function
+// =============================================================================
+
+private fun TemplatesState.reduce(intent: TemplatesIntent): TemplatesState {
+    return when (intent) {
+        // ボトムシート関連
+        TemplatesIntent.ShowBottomSheet -> copy(isShowingBottomSheet = true)
+        TemplatesIntent.HideBottomSheet -> copy(isShowingBottomSheet = false)
+        
+        // 検索・フィルター関連（アイテム）
+        is TemplatesIntent.UpdateSearchQuery -> copy(searchQuery = intent.query)
+        is TemplatesIntent.UpdateSelectedCategory -> copy(selectedCategory = intent.category)
+        is TemplatesIntent.UpdateSortOrder -> copy(sortOrder = intent.sortOrder)
+        
+        // 検索・フィルター関連（テンプレート）
+        is TemplatesIntent.UpdateTemplateSearchQuery -> copy(templateSearchQuery = intent.query)
+        is TemplatesIntent.UpdateTemplateSortOrder -> copy(templateSortOrder = intent.sortOrder)
+        is TemplatesIntent.UpdateSelectedDayOfWeek -> copy(selectedDayOfWeek = intent.dayOfWeek)
+        
+        // データ設定
+        is TemplatesIntent.SetFilteredItems -> copy(filteredItems = intent.filteredItems)
+        is TemplatesIntent.SetFilteredTemplates -> copy(filteredTemplates = intent.filteredTemplates)
+        is TemplatesIntent.SetAllItems -> copy(allItems = intent.allItems)
+        is TemplatesIntent.SetWeeklyTemplates -> copy(weeklyTemplates = intent.weeklyTemplates)
+        
+        // テンプレート選択・削除
+        is TemplatesIntent.SelectTemplate -> copy(selectedTemplate = intent.weeklyTemplate)
+        is TemplatesIntent.DeleteWeeklyTemplate -> copy(templateToDelete = intent.weeklyTemplate)
+        TemplatesIntent.ConfirmDeleteTemplate -> copy(templateToDelete = null)
+        TemplatesIntent.CancelDeleteTemplate -> copy(templateToDelete = null)
+        
+        // 他のIntentはViewModelで処理（非同期処理など）
+        else -> this
+    }
 }

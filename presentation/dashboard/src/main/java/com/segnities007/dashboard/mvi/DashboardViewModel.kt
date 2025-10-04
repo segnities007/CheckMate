@@ -22,7 +22,6 @@ class DashboardViewModel(
     private val getTemplatesForDayUseCase: GetTemplatesForDayUseCase,
     private val getCheckStatesForItemsUseCase: GetCheckStatesForItemsUseCase,
 ) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
-    private val reducer: DashboardReducer = DashboardReducer()
 
     companion object {
         /**
@@ -43,7 +42,7 @@ class DashboardViewModel(
 
     @OptIn(ExperimentalTime::class)
     private suspend fun loadDashboardData() {
-        setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
+        setState { copy(isLoading = true, error = null) }
 
         val allItems = getAllItemsUseCase().getOrElse { e ->
             handleLoadError(e)
@@ -192,7 +191,7 @@ class DashboardViewModel(
         }
     }
     
-    private  fun handleLoadError(e: Throwable) {
+    private fun handleLoadError(e: Throwable) {
         val errorMessage = e.localizedMessage ?: "不明なエラーが発生しました"
         setState { copy(isLoading = false, error = errorMessage) }
     }

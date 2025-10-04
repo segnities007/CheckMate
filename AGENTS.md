@@ -575,28 +575,399 @@ sealed interface DashboardEffect : MviEffect {
 
 ### Reducer (状態更新ロジック)
 
+**Reducerとは:**
+
+Reducerは**純粋関数**であり、現在のStateとIntentを受け取り、新しいStateを返す責務を持ちます。MVIパターンにおいて、**同期的な状態変更**を一元管理するための重要なコンポーネントです。
+
+**Reducerの責務:**
+
+1. **同期的な状態遷移のみを扱う**（ローディング開始、入力値の更新など）
+2. **予測可能な状態変更**を保証する（同じState + Intentなら必ず同じ結果）
+3. **副作用を含まない**（API呼び出し、データベースアクセス、ログ出力などは不可）
+4. **テストが容易**（純粋関数なので単体テストが簡単）
+
 **ルール:**
 
-- **純粋関数**として実装
-- **副作用を含まない**（Repository 呼び出しなど不可）
-- Intent を受け取り、新しい State を返す
-- 同期的な状態変更のみ
-- **ローディング状態の設定**などに使用
+- ✅ **純粋関数として実装**（外部状態に依存しない）
+- ✅ **副作用を含まない**（Repository呼び出し、ログ出力、時刻取得など不可）
+- ✅ **Intentを受け取り、新しいStateを返す**
+- ✅ **同期的な状態変更のみ**（データ取得などの非同期処理は不可）
+- ✅ **イミュータブルなStateを返す**（元のStateを変更しない）
+- ✅ **when式で全Intentケースを網羅**
+- ❌ **Use CaseやRepositoryを注入しない**
+- ❌ **非同期処理（suspend fun）を含まない**
 
-**実装例:**
+**Reducerが扱うべき状態変更の例:**
+
+| 状態変更の種類 | 例 | Reducerで扱う |
+|---------------|-----|-------------|
+| ローディング状態の開始 | `isLoading = true` | ✅ Yes |
+| ローディング状態の終了 | `isLoading = false` | ✅ Yes |
+| エラー状態のクリア | `error = null` | ✅ Yes |
+| 入力フィールドの更新 | `searchQuery = "新しい値"` | ✅ Yes |
+| フィルター条件の変更 | `filter = newFilter` | ✅ Yes |
+| タブ選択の変更 | `selectedTab = Tab.ITEMS` | ✅ Yes |
+| データの取得結果の反映 | `items = loadedItems` | ❌ No (ViewModelで直接) |
+| バリデーション実行 | 複雑なルール適用 | ❌ No (Use Caseで実行) |
+
+---
+
+### Reducer実装パターン（必須ルール）
+
+**⚠️ 重要: 実装の統一性のため、以下のルールを厳守してください。**
+
+#### 📋 実装ルール
+
+| 画面の特徴 | 必須実装方法 | ファイル構成 |
+|-----------|------------|------------|
+| **Stateが空**（`MviState`のみ） | **インライン**（Reducer不要） | ViewModel.kt のみ |
+| **Stateが存在する**（1項目以上） | **単一State拡張関数** ⭐必須 | ViewModel.kt のみ |
+
+**例外なし:** Stateを持つ全てのViewModelは、`reduce(intent: Intent): State`形式の単一拡張関数として実装してください。
+
+#### 🚫 禁止事項
+
+- ❌ **Reducerクラス・objectの作成禁止**（別ファイル化を避ける）
+- ❌ **別ファイルへのReducer分離禁止**（ファイルの分散を避ける）
+- ❌ **Intent毎に個別の拡張関数を作成禁止**（関数の乱立を避ける）
+- ❌ **複雑な状態遷移の直接インライン禁止**（可読性低下）
+
+#### パターン1: インライン（Stateが空の場合のみ）
+
+**適用場面:** Stateが空の画面（LoginViewModel、AuthViewModelなど）
+
+**⚠️ 注意:** このパターンはStateが`object : MviState {}`のように空の場合**のみ**使用可能です。
 
 ```kotlin
-class DashboardReducer {
-    fun reduce(state: DashboardState, intent: DashboardIntent): DashboardState {
-        return when (intent) {
-            is DashboardIntent.LoadDashboardData ->
-                state.copy(isLoading = true, error = null)
-            is DashboardIntent.UpdateFilter ->
-                state.copy(filter = intent.filter)
+class LoginViewModel(...) : BaseViewModel<LoginIntent, MviState, LoginEffect>(
+    object : MviState {}
+) {
+    override suspend fun handleIntent(intent: LoginIntent) {
+        when (intent) {
+            is LoginIntent.LoginWithGoogle -> {
+                // 状態変更が不要、または1-2箇所のみ
+                val result = loginUseCase()
+                result.fold(
+                    onSuccess = { sendEffect { LoginEffect.NavigateToHome } },
+                    onFailure = { sendEffect { LoginEffect.ShowError(it.message) } }
+                )
+            }
         }
     }
 }
 ```
+
+**メリット:**
+- ✅ 最もシンプル、コードが短い
+- ✅ 状態管理が不要な画面に最適
+
+**デメリット:**
+- ⚠️ Stateを持つ画面では使用禁止
+
+---
+
+#### パターン2: 単一State拡張関数 ⭐**標準実装（必須）**
+
+**適用場面:** Stateを持つ全ての画面（必須）
+
+**⚠️ 強制ルール:** Stateが1項目以上ある画面は、必ず`reduce(intent: Intent): State`形式の単一拡張関数を使用してください。
+
+```kotlin
+class DashboardViewModel(...) : BaseViewModel(...) {
+    
+    override suspend fun handleIntent(intent: DashboardIntent) {
+        when (intent) {
+            is DashboardIntent.LoadData -> {
+                setState { reduce(DashboardIntent.LoadStart) }
+                
+                val items = getAllItemsUseCase().getOrElse { e ->
+                    setState { reduce(DashboardIntent.LoadError(e.message)) }
+                    return
+                }
+                
+                setState { reduce(DashboardIntent.LoadSuccess(items)) }
+            }
+            is DashboardIntent.UpdateSearchQuery -> {
+                setState { reduce(intent) }
+            }
+            is DashboardIntent.ClearError -> {
+                setState { reduce(intent) }
+            }
+        }
+    }
+}
+
+// ViewModel.ktの末尾にprivate拡張関数として定義
+private fun DashboardState.reduce(intent: DashboardIntent): DashboardState {
+    return when (intent) {
+        is DashboardIntent.LoadStart -> copy(isLoading = true, error = null)
+        is DashboardIntent.LoadSuccess -> copy(isLoading = false, items = intent.items, error = null)
+        is DashboardIntent.LoadError -> copy(isLoading = false, error = intent.message)
+        is DashboardIntent.UpdateSearchQuery -> copy(searchQuery = intent.query)
+        is DashboardIntent.ClearError -> copy(error = null)
+        // 他のIntentケースも全て網羅
+    }
+}
+```
+
+**メリット:**
+- ✅ **1つの関数で全てのIntent処理を統合**（関数の乱立を防ぐ）
+- ✅ **when式で網羅性チェック**（sealed interfaceと組み合わせで漏れを防ぐ）
+- ✅ **ファイルが1つで完結**（ViewModel.kt内で完結）
+- ✅ **純粋関数なのでテスト可能**（`internal`化でテストモジュールからアクセス可能）
+- ✅ **Kotlinらしい自然な記述**
+- ✅ **ViewModelが肥大化しない**
+
+**デメリット:**
+- ⚠️ なし（標準実装）
+
+**命名規則:**
+- 関数名は必ず`reduce`（固定）
+- シグネチャ: `private fun <State>.reduce(intent: <Intent>): <State>`
+
+**実装場所:**
+- ViewModel.ktファイルの末尾に`private fun`（またはテスト用に`internal fun`）として定義
+- ViewModel本体とreduce関数の間に`// Reducer Function`コメントを推奨
+
+---
+
+#### ~~パターン3: Object分離~~（❌ 使用禁止）
+
+**廃止理由:** プロジェクトの統一性を保つため、Object分離パターンは使用しません。
+
+**以前の適用場面:** 大規模・複雑な画面（State 10項目以上、複雑なフィルター・計算処理）
+
+**⚠️ 重要:** 大規模な画面でも、単一State拡張関数パターン（パターン2）を使用してください。Intent数が多い場合は、when式内でコメントによるグループ化で整理します。
+
+**大規模画面の実装例:**
+
+```kotlin
+class ComplexViewModel(...) : BaseViewModel(...) {
+    
+    override suspend fun handleIntent(intent: ComplexIntent) {
+        when (intent) {
+            is ComplexIntent.LoadData -> {
+                setState { reduce(ComplexIntent.LoadStart) }
+                // ... Use Case呼び出し
+                setState { reduce(ComplexIntent.LoadSuccess(items)) }
+            }
+            is ComplexIntent.UpdateFilter -> {
+                setState { reduce(intent) }
+            }
+            // ... 他のIntent処理
+        }
+    }
+}
+
+// =============================================================================
+// Reducer Function
+// =============================================================================
+
+private fun ComplexState.reduce(intent: ComplexIntent): ComplexState {
+    return when (intent) {
+        // ローディング関連
+        is ComplexIntent.LoadStart -> copy(isLoading = true, error = null)
+        is ComplexIntent.LoadSuccess -> copy(isLoading = false, items = intent.items, error = null)
+        is ComplexIntent.LoadError -> copy(isLoading = false, error = intent.message)
+        
+        // フィルター関連
+        is ComplexIntent.UpdateFilter -> copy(filter = intent.filter)
+        is ComplexIntent.UpdateCategory -> copy(selectedCategory = intent.category)
+        is ComplexIntent.ClearFilters -> copy(filter = "", selectedCategory = null, sortOrder = SortOrder.DEFAULT)
+}
+
+// ダイアログ関連
+private fun ComplexState.reduceShowDialog(): ComplexState {
+    return copy(showDialog = true)
+}
+
+private fun ComplexState.reduceHideDialog(): ComplexState {
+    return copy(showDialog = false, dialogError = null)
+}
+```
+
+**廃止されたObject分離パターン（参考用・使用禁止）:**
+
+```kotlin
+// DashboardReducer.kt（別ファイル）
+object DashboardReducer {
+    fun reduce(state: DashboardState, intent: DashboardIntent): DashboardState {
+        return when (intent) {
+            is DashboardIntent.LoadData -> reduceLoadStart(state)
+            is DashboardIntent.UpdateFilter -> reduceUpdateFilter(state, intent)
+            is DashboardIntent.ApplySorting -> reduceApplySorting(state, intent)
+            is DashboardIntent.ToggleSelection -> reduceToggleSelection(state, intent)
+            // ... 10+個のIntent処理
+            else -> state
+        }
+    }
+    
+    private fun reduceLoadStart(state: DashboardState): DashboardState {
+        return state.copy(isLoading = true, error = null)
+    }
+    
+    private fun reduceUpdateFilter(
+        state: DashboardState,
+        intent: DashboardIntent.UpdateFilter
+    ): DashboardState {
+        return state.copy(
+            filter = intent.filter,
+            selectedCategory = intent.category,
+            sortOrder = intent.sortOrder
+        )
+    }
+    
+    // ... 他の複雑な状態遷移ロジック
+}
+
+// DashboardViewModel.kt
+class DashboardViewModel(...) : BaseViewModel(...) {
+    
+    override suspend fun handleIntent(intent: DashboardIntent) {
+        when (intent) {
+            // 同期的状態変更
+            is DashboardIntent.UpdateFilter,
+            is DashboardIntent.ToggleSelection -> {
+                setState { DashboardReducer.reduce(this, intent) }
+            }
+            
+            // 非同期処理
+            is DashboardIntent.LoadData -> loadData()
+        }
+    }
+    
+    private suspend fun loadData() {
+        setState { DashboardReducer.reduce(this, DashboardIntent.LoadData) }
+        // ... Use Case呼び出し
+    }
+}
+```
+
+~~メリット~~（使用禁止のため省略）
+
+~~デメリット~~（使用禁止のため省略）
+
+---
+
+### Reducer実装の強制ルール（まとめ）
+
+#### ✅ 必ず守ること
+
+1. **Stateが空の画面**: インライン実装（Reducer不要）
+   - 例: `LoginViewModel`, `AuthViewModel`
+
+2. **Stateを持つ全ての画面**: `reduce(intent: Intent): State`形式の単一拡張関数を必須で実装
+   - 例: `DashboardViewModel`, `HomeViewModel`, `ItemsViewModel`, `TemplatesViewModel`
+
+3. **実装場所**: ViewModel.ktファイル内に`private fun`として定義
+
+4. **命名規則**: 関数名は必ず`reduce`（固定）
+   - シグネチャ: `private fun <State>.reduce(intent: <Intent>): <State>`
+
+5. **整理方法**: Intent数が多い場合は、when式内でコメントによるグループ化
+   ```kotlin
+   private fun MyState.reduce(intent: MyIntent): MyState {
+       return when (intent) {
+           // ローディング関連
+           is MyIntent.LoadStart -> copy(isLoading = true)
+           
+           // フィルター関連
+           is MyIntent.UpdateFilter -> copy(filter = intent.filter)
+       }
+   }
+   ```
+
+#### ❌ 絶対にしてはいけないこと
+
+1. ❌ **Reducerクラス・objectの作成**（`class XxxReducer { ... }` や `object XxxReducer { ... }`）
+2. ❌ **別ファイルへのReducer分離**（`XxxReducer.kt`を作らない）
+3. ❌ **Intent毎に個別の拡張関数を作成**（`reduceXxx()`を複数作らない）
+4. ❌ **複雑な状態遷移をインラインで直接記述**（可読性が低下）
+5. ❌ **Reducer関数内で副作用**（Use Case呼び出し、ログ出力など）
+
+#### 理由
+
+- **統一性**: チーム全体で同じパターンを使用
+- **シンプルさ**: ファイルが1つで完結、関数も1つ
+- **網羅性**: when式で全Intentケースを強制的にチェック
+- **可読性**: 1箇所で全ての状態遷移ロジックが見える
+- **保守性**: Kotlinらしい自然な記述
+- **テスト容易性**: 純粋関数として分離されているのでテスト可能
+
+---
+
+### Reducer使用ガイドライン
+
+#### Reducerを使うべき状態変更
+
+| シナリオ | State拡張関数を使う | 理由 |
+|---------|------------------|------|
+| ローディング開始 | ✅ Yes | 同期的な状態変更 |
+| ローディング終了 | ✅ Yes | 同期的な状態変更 |
+| エラー状態のクリア | ✅ Yes | 同期的な状態変更 |
+| 検索クエリ入力 | ✅ Yes | 同期的な状態変更 |
+| タブ選択 | ✅ Yes | 同期的な状態変更 |
+| フィルター変更 | ✅ Yes | 同期的な状態変更 |
+| ダイアログ表示/非表示 | ✅ Yes | 同期的な状態変更 |
+| データ取得成功時 | ❌ No | Use Case実行後の結果反映（ViewModelで直接） |
+| エラー発生時 | ❌ No | Use Case実行後のエラー処理（ViewModelで直接） |
+| バリデーション実行 | ❌ No | Use Caseで実行すべき |
+
+#### reduce関数のテスト例
+
+reduce関数は純粋関数なので、テストが非常に簡単です。
+
+```kotlin
+class DashboardViewModelTest {
+    
+    @Test
+    fun `reduce handles LoadStart intent correctly`() {
+        // Given
+        val initialState = DashboardState(
+            isLoading = false,
+            error = "Previous error"
+        )
+        
+        // When
+        val newState = initialState.reduce(DashboardIntent.LoadStart)
+        
+        // Then
+        assertTrue(newState.isLoading)
+        assertNull(newState.error)
+    }
+    
+    @Test
+    fun `reduce handles UpdateFilter intent correctly`() {
+        // Given
+        val initialState = DashboardState(filter = "old")
+        
+        // When
+        val newState = initialState.reduce(DashboardIntent.UpdateFilter("new"))
+        
+        // Then
+        assertEquals("new", newState.filter)
+    }
+}
+
+// ViewModel.ktファイルの末尾でテスト用にinternal化する場合
+internal fun DashboardState.reduce(intent: DashboardIntent): DashboardState {
+    return when (intent) {
+        is DashboardIntent.LoadStart -> copy(isLoading = true, error = null)
+        is DashboardIntent.UpdateFilter -> copy(filter = intent.filter)
+        // ... 他のIntent
+    }
+}
+```
+
+**まとめ:**
+
+- **reduce関数は同期的な状態変更のみを扱う純粋関数**
+- **1つの関数で全てのIntentを処理**
+- **when式で網羅性チェック**
+- **副作用（Use Case呼び出し等）は含まない**
+- **予測可能で、テストが容易**
+- **ViewModelの可読性と保守性を向上させる**
+- **ファイルが1つで完結するため、保守が簡単**
 
 ### ViewModel 実装パターン
 
@@ -1282,7 +1653,12 @@ private suspend fun loadDashboardData() {
 - [ ] BaseViewModel を継承しているか？
 - [ ] Intent、State、Effect が適切に定義されているか？
 - [ ] State は`data class`でイミュータブル（`val`のみ）か？
-- [ ] Reducer は純粋関数（副作用なし）か？
+- [ ] **Stateを持つ画面は `reduce(intent: Intent): State` 形式の単一拡張関数を実装しているか？** ⭐
+- [ ] **Reducerクラス・objectを作成していないか？**（禁止）
+- [ ] **別ファイルへのReducer分離をしていないか？**（禁止）
+- [ ] **Intent毎に個別の拡張関数を作成していないか？**（禁止）
+- [ ] **reduce関数は純粋関数（副作用なし）か？**
+- [ ] **reduce関数でwhen式の網羅性チェックをしているか？**
 - [ ] Composable でビジネスロジックを実装していないか？
 - [ ] `state.collectAsStateWithLifecycle()`を使用しているか？
 - [ ] `effect.collect`を`LaunchedEffect`内で実行しているか？

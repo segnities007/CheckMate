@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -27,7 +28,6 @@ class HomeViewModel(
     private val checkItemUseCase: CheckItemUseCase,
 ) : BaseViewModel<HomeIntent, HomeState, HomeEffect>(HomeState()) {
     private val itemCheckStatesByDate = mutableMapOf<LocalDate, MutableMap<Int, Boolean>>()
-    private val reducer: HomeReducer = HomeReducer()
 
     override suspend fun handleIntent(intent: HomeIntent) {
         when (intent) {
@@ -35,8 +35,8 @@ class HomeViewModel(
             is HomeIntent.SelectDate -> selectDate(intent.date)
             is HomeIntent.ChangeWeek -> setState { copy(currentWeekCenter = intent.date) }
             is HomeIntent.CheckItem -> checkItem(intent.itemId, intent.checked)
-            is HomeIntent.SetAllItems -> setState { reducer.reduce(this, intent) }
-            is HomeIntent.SetItemCheckStates -> setState { reducer.reduce(this, intent) }
+            is HomeIntent.SetAllItems -> setState { reduce(intent) }
+            is HomeIntent.SetItemCheckStates -> setState { reduce(intent) }
             HomeIntent.GetAllItem -> getAllItems()
             HomeIntent.EnsureCheckHistory -> ensureCheckHistoryForToday()
             is HomeIntent.ChangeMonth -> changeMonth(intent.year, intent.month)
@@ -53,7 +53,7 @@ class HomeViewModel(
         setState {
             copy(
                 currentYear = today.year,
-                currentMonth = today.monthNumber,
+                currentMonth = today.month.number,
                 currentWeekCenter = today,
             )
         }
@@ -78,7 +78,7 @@ class HomeViewModel(
     private suspend fun getAllItems() {
         getAllItemsUseCase().fold(
             onSuccess = { allItems ->
-                setState { reducer.reduce(this, HomeIntent.SetAllItems(allItems)) }
+                setState { reduce(HomeIntent.SetAllItems(allItems)) }
             },
             onFailure = { e ->
                 sendEffect { HomeEffect.ShowError("アイテムの読み込みに失敗しました") }
@@ -135,8 +135,7 @@ class HomeViewModel(
         stateMap.clear()
         stateMap.putAll(checkStates)
 
-        // update state via reducer directly
-        setState { reducer.reduce(this, HomeIntent.SetItemCheckStates(date, stateMap.toMap())) }
+        setState { reduce(HomeIntent.SetItemCheckStates(date, stateMap.toMap())) }
         // templatesForToday and itemsForToday are still set directly because they are derived lists
         setState {
             copy(
@@ -176,5 +175,19 @@ class HomeViewModel(
                 setState { copy(itemCheckStates = stateMap.toMap()) }
             }
         )
+    }
+}
+
+// =============================================================================
+// Reducer Function
+// =============================================================================
+
+private fun HomeState.reduce(intent: HomeIntent): HomeState {
+    return when (intent) {
+        is HomeIntent.SetAllItems -> copy(allItem = intent.allItems)
+        is HomeIntent.SetItemCheckStates -> copy(itemCheckStates = intent.itemCheckStates)
+        
+        // 他のIntentはViewModelで処理（非同期処理など）
+        else -> this
     }
 }
