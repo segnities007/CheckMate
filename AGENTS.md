@@ -1,230 +1,270 @@
-# AGENTS.md - AI Agent 設計原則ガイド (Use Case 導入版)
+# CheckMate アーキテクチャガイド
 
-このドキュメントは、AI Agent が **CheckMate Android プロジェクト** のコード生成・修正を行う際に厳守すべき設計原則とアーキテクチャガイドラインを定義します。
+> **AI Agent および開発者向けの設計原則・アーキテクチャガイドライン**
+
+このドキュメントは、**CheckMate Android プロジェクト**のコード生成・修正時に**厳守すべき**設計原則とアーキテクチャガイドラインを定義します。
+
+⚠️ **重要**: このガイドラインの違反は技術的負債を生み、長期的な保守性を損ないます。
+
+---
+
+## 📋 目次
+
+1. [プロジェクト概要](#プロジェクト概要)
+2. [アーキテクチャ原則](#アーキテクチャ原則)
+3. [SOLID原則](#solid原則)
+4. [レイヤー別実装ガイド](#レイヤー別実装ガイド)
+5. [MVIパターン実装](#mviパターン実装)
+6. [Dependency Injection](#dependency-injection)
+7. [コード品質ルール](#コード品質ルール)
+8. [禁止事項](#禁止事項)
+9. [チェックリスト](#チェックリスト)
+
+---
 
 ## プロジェクト概要
 
-**CheckMate** は、持ち物管理とチェックリスト機能を提供する Android アプリケーションです。
+**CheckMate** は、持ち物管理とチェックリスト機能を提供するAndroidアプリケーションです。
 
 ### 技術スタック
 
-- **言語**: Kotlin 2.2.20
-- **UI**: Jetpack Compose
-- **DI**: Koin
-- **非同期処理**: Coroutines + Flow
-- **データ永続化**: Room Database
-- **ネットワーク**: Ktor Client
-- **画像処理**: Coil 3
-- **日時処理**: kotlinx-datetime
+| カテゴリ | 技術 |
+|---------|------|
+| 言語 | Kotlin 2.2.20 |
+| UI | Jetpack Compose |
+| アーキテクチャ | Clean Architecture + MVI |
+| DI | Koin |
+| 非同期処理 | Coroutines + Flow |
+| データ永続化 | Room Database |
+| ネットワーク | Ktor Client |
+| 画像処理 | Coil 3 |
+| 日時処理 | kotlinx-datetime |
 
 ### モジュール構造
 
 ```text
 CheckMate/
 ├── app/                          # アプリケーションエントリーポイント
-├── presentation/                 # UI層（各画面のモジュール）
+├── presentation/                 # UI層
 │   ├── auth/                    # 認証画面
-│   ├── dashboard/               # ダッシュボード画面
+│   ├── dashboard/               # ダッシュボード
 │   ├── home/                    # ホーム画面
-│   ├── hub/                     # Hub画面
-│   ├── items/                   # アイテム管理画面
-│   ├── login/                   # ログイン画面
-│   ├── setting/                 # 設定画面
-│   ├── splash/                  # スプラッシュ画面
-│   └── templates/               # テンプレート管理画面
+│   ├── items/                   # アイテム管理
+│   ├── templates/               # テンプレート管理
+│   └── ...
 ├── domain/                      # ビジネスロジック層
-│   ├── model/                   # ドメインモデル（Entity）
-│   ├── repository/              # Repository Interface定義
-│   └── usecase/                 # Use Case（ビジネスロジック）⭐NEW
+│   ├── model/                   # Entity（ドメインモデル）
+│   ├── repository/              # Repository Interface
+│   └── usecase/                 # Use Case ⭐最重要
 ├── data/                        # データアクセス層
-│   ├── local/                   # Room Database実装
-│   ├── remote/                  # API通信実装
+│   ├── local/                   # Room Database
+│   ├── remote/                  # API通信
 │   └── repository/              # Repository実装
 ├── core/                        # 共通機能
-│   ├── common/                  # 共通ユーティリティ
+│   ├── common/                  # ユーティリティ + DIモジュール
 │   ├── navigation/              # ナビゲーション
-│   └── ui/                      # 共通UIコンポーネント（BaseViewModel含む）
+│   └── ui/                      # BaseViewModel等
 └── widget/                      # Androidウィジェット
 ```
 
-## アーキテクチャ概要
+---
 
-本プロジェクトは **Clean Architecture** と **MVI (Model-View-Intent)** パターンを採用しています。
+## アーキテクチャ原則
 
-### レイヤー構造と依存方向
+### Clean Architecture + MVI
+
+本プロジェクトは**Clean Architecture**と**MVI (Model-View-Intent)**を組み合わせたアーキテクチャを採用しています。
 
 ```text
-┌─────────────────────────────────────────────────────────┐
-│  Presentation Layer (presentation/*)                    │
-│  - Composable関数（UI）                                  │
-│  - ViewModel（MVI: Intent/State/Effect管理）             │
-│  - Screen（画面単位）                                     │
-└───────────────────┬─────────────────────────────────────┘
-                    ↓ depends on (Use Caseを使用)
-┌─────────────────────────────────────────────────────────┐
-│  Domain Layer (domain/*)                                │
-│  - model/     : Entity（ドメインモデル）                  │
-│  - usecase/   : Use Case（ビジネスロジック）⭐          │
-│  - repository/: Repository Interface                    │
-└───────────────────┬─────────────────────────────────────┘
-                    ↑ implements
-┌─────────────────────────────────────────────────────────┐
-│  Data Layer (data/*)                                    │
-│  - repository/: Repository実装                          │
-│  - local/     : Room DAO/Entity                         │
-│  - remote/    : Ktor API Client                         │
-└─────────────────────────────────────────────────────────┘
-                    ↓ uses
-┌─────────────────────────────────────────────────────────┐
-│  External (Framework/Library)                           │
-│  - Room, Ktor, Android SDK, etc.                        │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  Presentation Layer (UI層)                  │
+│  • Composable (宣言的UI)                     │
+│  • ViewModel (MVI状態管理)                   │
+│  • Intent / State / Effect                  │
+└──────────────┬──────────────────────────────┘
+               ↓ Use Caseを使用
+┌─────────────────────────────────────────────┐
+│  Domain Layer (ビジネスロジック層)           │
+│  • Entity (ドメインモデル)                   │
+│  • Use Case (ビジネスロジック) ⭐           │
+│  • Repository Interface                     │
+└──────────────┬──────────────────────────────┘
+               ↑ 実装
+┌─────────────────────────────────────────────┐
+│  Data Layer (データアクセス層)               │
+│  • Repository実装                           │
+│  • Room DAO / Entity                        │
+│  • Ktor API Client                          │
+└─────────────────────────────────────────────┘
 ```
 
-**依存の方向ルール（絶対厳守）:**
+### 依存関係の鉄則
 
-- **依存は常に内側（Domain）に向かう**
-- **Presentation → Use Case → Repository の順で依存**
-- **Domain 層は外側（Presentation/Data）を知らない**
-- **Domain 層は Android SDK やライブラリに依存しない**
+#### ✅ 必ず守る
 
-## 必須設計原則
+1. **依存は常に内側（Domain）に向かう**
+2. **Presentation → Use Case → Repository の順序を厳守**
+3. **Domain層は外側を知らない**（Presentation/Dataを参照しない）
+4. **Domain層はAndroid SDKに依存しない**（kotlinx-datetimeは例外）
+5. **1つのUse Case = 1つのビジネスアクション**（単一責任の原則）
 
-### 1. SOLID 原則の厳守
+#### ❌ 絶対禁止
 
-#### 単一責任の原則 (SRP)
+1. **ViewModelから直接Repositoryを呼び出す** → 必ずUse Case経由
+2. **内側のレイヤーが外側を参照する**
+3. **Domain層でAndroid SDKを使用する**
+4. **1つのUse Caseに複数の責任を持たせる**
+5. **Presentation層にビジネスロジックを記述する**
 
-- **各クラス/モジュールは 1 つの責任のみを持つ**
-- **特に重要: 1 つの Use Case = 1 つのビジネスアクション**
-- ❌ 悪い例: `UserManagerService` が認証、データ取得、バリデーションを全て担当
-- ✅ 良い例: `AuthenticateUserUseCase`, `GetUserUseCase`, `ValidateUserUseCase` に分離
+---
 
-#### 開放閉鎖の原則 (OCP)
+## SOLID原則
 
-- **拡張に対して開き、修正に対して閉じる**
+### 1. 単一責任の原則 (SRP)
+
+**各クラス/モジュールは1つの責任のみを持つ**
+
+**特に重要: 1つのUse Case = 1つのビジネスアクション**
+
+```kotlin
+// ❌ 悪い例: 複数の責任
+class UserManagerService {
+    fun authenticate() { }
+    fun getUserData() { }
+    fun validateUser() { }
+}
+
+// ✅ 良い例: 単一責任
+class AuthenticateUserUseCase(private val repository: UserRepository) {
+    suspend operator fun invoke(credentials: Credentials): Result<User> {
+        return repository.authenticate(credentials)
+    }
+}
+
+class GetUserDataUseCase(private val repository: UserRepository) {
+    suspend operator fun invoke(userId: Int): Result<User> {
+        return repository.getUser(userId)
+    }
+}
+```
+
+### 2. 開放閉鎖の原則 (OCP)
+
+**拡張に対して開き、修正に対して閉じる**
+
 - 新機能追加時に既存コードを変更しない
 - インターフェースと抽象クラスを活用
 
-#### リスコフの置換原則 (LSP)
+### 3. リスコフの置換原則 (LSP)
 
-- **派生クラスは基底クラスと置き換え可能**
+**派生クラスは基底クラスと置き換え可能**
+
 - サブクラスが親クラスの契約を破らない
 
-#### インターフェース分離の原則 (ISP)
+### 4. インターフェース分離の原則 (ISP)
 
-- **使用しないメソッドを含むインターフェースを強制しない**
+**使用しないメソッドを含むインターフェースを強制しない**
+
 - 大きなインターフェースを小さく分割
 
-#### 依存性逆転の原則 (DIP)
+### 5. 依存性逆転の原則 (DIP)
 
-- **具象ではなく抽象に依存する**
+**具象ではなく抽象に依存する**
+
 - 上位レイヤーは下位レイヤーの実装に依存しない
-- Repository Interface は Domain 層に配置、実装は Data 層
+- Repository InterfaceはDomain層に配置、実装はData層
 
-### 2. その他の重要原則
+### その他の重要原則
 
 #### DRY (Don't Repeat Yourself)
 
-- **コードの重複を避ける**
+- コードの重複を避ける
 - 共通ロジックは関数/クラスに抽出
-- コピー&ペーストは避ける
 
 #### KISS (Keep It Simple, Stupid)
 
-- **シンプルに保つ**
+- シンプルに保つ
 - 過度な抽象化を避ける
-- 読みやすく理解しやすいコードを書く
 
 #### YAGNI (You Aren't Gonna Need It)
 
-- **必要になるまで実装しない**
-- 将来必要になるかもしれない機能は実装しない
+- 必要になるまで実装しない
 - 現在の要件のみに集中
 
-## Clean Architecture 実装ガイドライン
+---
 
-### レイヤー間の依存関係ルール
+## レイヤー別実装ガイド
 
-**絶対に守るべきルール:**
+### Domain層（ビジネスロジック層）
 
-1. **依存の方向は外側から内側へのみ**
-2. **ViewModel → Use Case → Repository の順序を厳守**
-3. **内側のレイヤーは外側のレイヤーを知らない**
-4. **Domain 層はフレームワーク非依存**
+#### 配置場所
 
-```text
-Presentation → Use Case → Repository
-     ↓           ↑           ↑
-   Framework  Pure Logic  External
-```
-
-### Domain 層 (ビジネスロジック層)
-
-**配置場所:**
-
-- `domain/model/` : Entity クラス
-- `domain/usecase/` : Use Case クラス ⭐**最重要**
+- `domain/model/` : Entity
+- `domain/usecase/` : Use Case
 - `domain/repository/` : Repository Interface
 
-**責務:**
+#### 責務
 
 - ビジネスルールの定義
-- Entity の定義とドメインロジック
-- **Use Case によるビジネスロジックのカプセル化** ⭐
-- Repository Interface の定義
+- Entityの定義とドメインロジック
+- **Use Caseによるビジネスロジックのカプセル化**
+- Repository Interfaceの定義
 
-**ルール:**
+#### ルール
 
-- **Android SDK やライブラリに依存しない**
+- **Android SDKやライブラリに依存しない**（kotlinx-datetimeは例外）
 - 純粋なビジネスロジックのみ
-- DTO ではなく Domain Model を使用
-- **Entity は`@Serializable`と`@Immutable`でマーク**
-- **kotlinx-datetime**の使用は許可（ドメイン要件）
-- **1 つの Use Case は 1 つのビジネスアクションのみ実行**
-- **Use Case は suspend 関数または Flow を返す**
+- DTOではなくDomain Modelを使用
+- **Entityは`@Serializable`と`@Immutable`でマーク**
+- **1つのUse Case = 1つのビジネスアクション**
+- **Use Caseは`suspend fun`またはFlowを返す**
 
-**実装例:**
+#### Entity実装例
 
 ```kotlin
-// Entity (domain/model/)
+// domain/model/Item.kt
 package com.segnities007.model.item
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
+import kotlinx.datetime.Clock
 
 @Serializable
 @Immutable
-data class Item
-    @OptIn(ExperimentalTime::class)
-    constructor(
-        val id: Int = 0,
-        val name: String = "",
-        val description: String = "",
-        val category: ItemCategory = ItemCategory.OTHER_SUPPLIES,
-        val imagePath: String = "",
-        val barcodeInfo: BarcodeInfo? = null,
-        val productInfo: ProductInfo? = null,
-        val createdAt: Instant = Clock.System.now(),
-    ) {
+data class Item(
+    val id: Int = 0,
+    val name: String = "",
+    val description: String = "",
+    val category: ItemCategory = ItemCategory.OTHER_SUPPLIES,
+    val imagePath: String = "",
+    val createdAt: Instant = Clock.System.now(),
+) {
     // ドメインロジック
     fun isValid(): Boolean = name.isNotBlank()
 }
+```
 
-// Repository Interface (domain/repository/)
+#### Repository Interface実装例
+
+```kotlin
+// domain/repository/ItemRepository.kt
 package com.segnities007.repository
+
+import com.segnities007.model.item.Item
 
 interface ItemRepository {
     suspend fun getAllItems(): List<Item>
     suspend fun getItemById(id: Int): Item?
     suspend fun insertItem(item: Item)
     suspend fun deleteItem(id: Int)
-    suspend fun getUncheckedItemsForToday(): List<Item>
 }
+```
 
-// ⭐ Use Case (domain/usecase/) - 新規追加
+#### Use Case実装例 ⭐
+
+```kotlin
+// domain/usecase/item/GetAllItemsUseCase.kt
 package com.segnities007.usecase.item
 
 import com.segnities007.model.item.Item
@@ -237,20 +277,12 @@ import com.segnities007.repository.ItemRepository
 class GetAllItemsUseCase(
     private val itemRepository: ItemRepository
 ) {
-    suspend operator fun invoke(): List<Item> {
-        return itemRepository.getAllItems()
-    }
-}
-
-/**
- * 今日未チェックのアイテムを取得するUse Case
- * ビジネスロジック: 今日の日付に基づくフィルタリング
- */
-class GetUncheckedItemsForTodayUseCase(
-    private val itemRepository: ItemRepository
-) {
-    suspend operator fun invoke(): List<Item> {
-        return itemRepository.getUncheckedItemsForToday()
+    suspend operator fun invoke(): Result<List<Item>> {
+        return try {
+            Result.success(itemRepository.getAllItems())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
 
@@ -262,13 +294,12 @@ class AddItemUseCase(
     private val itemRepository: ItemRepository
 ) {
     suspend operator fun invoke(item: Item): Result<Unit> {
-        return try {
-            // バリデーション
-            if (!item.isValid()) {
-                return Result.failure(IllegalArgumentException("無効なアイテム"))
-            }
+        // バリデーション
+        if (!item.isValid()) {
+            return Result.failure(IllegalArgumentException("無効なアイテム"))
+        }
 
-            // 保存
+        return try {
             itemRepository.insertItem(item)
             Result.success(Unit)
         } catch (e: Exception) {
@@ -278,49 +309,52 @@ class AddItemUseCase(
 }
 ```
 
-**Use Case の命名規則:**
+#### Use Case命名規則
 
-- `GetXxxUseCase` : データ取得
-- `AddXxxUseCase` : データ追加
-- `UpdateXxxUseCase` : データ更新
-- `DeleteXxxUseCase` : データ削除
-- `ValidateXxxUseCase` : バリデーション
-- `CalculateXxxUseCase` : 計算処理
+| パターン | 用途 | 例 |
+|---------|------|-----|
+| `GetXxxUseCase` | データ取得 | `GetAllItemsUseCase` |
+| `AddXxxUseCase` | データ追加 | `AddItemUseCase` |
+| `UpdateXxxUseCase` | データ更新 | `UpdateItemUseCase` |
+| `DeleteXxxUseCase` | データ削除 | `DeleteItemUseCase` |
+| `ValidateXxxUseCase` | バリデーション | `ValidateItemUseCase` |
+| `CalculateXxxUseCase` | 計算処理 | `CalculateCompletionRateUseCase` |
 
-**重要な注意点:**
+#### 重要な注意点
 
-- **Use Case は 1 つのビジネスアクションのみ実行**（単一責任の原則）
-- **ViewModel は Use Case を通じてビジネスロジックを実行**
-- **Repository は Use Case 内でのみ呼び出す**（ViewModel から直接呼ばない）
-- Entity にビジネスロジックを含めることは許可（Anemic Domain Model を避ける）
-- **`operator fun invoke()`で Use Case を関数のように呼び出し可能に**
+- **Use Caseは1つのビジネスアクションのみ実行**（単一責任の原則）
+- **ViewModelはUse Caseを通じてビジネスロジックを実行**
+- **RepositoryはUse Case内でのみ呼び出す**（ViewModelから直接呼ばない）
+- **`operator fun invoke()`でUse Caseを関数のように呼び出し可能に**
 
-### Data 層 (データアクセス層)
+---
 
-**配置場所:**
+### Data層（データアクセス層）
+
+#### 配置場所
 
 - `data/local/` : Room Database（DAO、Entity）
 - `data/remote/` : Ktor API Client
-- `data/repository/` : Repository Interface 実装
+- `data/repository/` : Repository Interface実装
 
-**責務:**
+#### 責務
 
-- Repository Interface の実装
+- Repository Interfaceの実装
 - 外部データソースとの通信
-- Room Entity と Domain Model の変換
-- API DTO と Domain Model の変換
+- Room EntityとDomain Modelの変換
+- API DTOとDomain Modelの変換
 
-**ルール:**
+#### ルール
 
-- Domain 層の Interface を実装
-- Room Entity/API DTO は`data/local/entity`、`data/remote/dto`に配置
-- Domain Model への変換は拡張関数（`toDomain()`）で実装
-- Domain Model から Entity への変換は拡張関数（`toEntity()`）で実装
+- Domain層のInterfaceを実装
+- Room Entity/API DTOは`data/local/entity`、`data/remote/dto`に配置
+- Domain Modelへの変換は拡張関数（`toDomain()`）で実装
+- Domain ModelからEntityへの変換は拡張関数（`toEntity()`）で実装
 
-**実装例:**
+#### 実装例
 
 ```kotlin
-// Room Entity (data/local/entity/)
+// data/local/entity/ItemEntity.kt
 package com.segnities007.local.entity
 
 import androidx.room.Entity
@@ -357,8 +391,10 @@ fun Item.toEntity(): ItemEntity = ItemEntity(
     imagePath = imagePath,
     // ...
 )
+```
 
-// DAO (data/local/dao/)
+```kotlin
+// data/local/dao/ItemDao.kt
 @Dao
 interface ItemDao {
     @Query("SELECT * FROM items")
@@ -367,10 +403,13 @@ interface ItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ItemEntity)
 }
+```
 
-// Repository実装 (data/repository/)
+```kotlin
+// data/repository/ItemRepositoryImpl.kt
 package com.segnities007.repository
 
+import android.util.Log
 import com.segnities007.local.dao.ItemDao
 import com.segnities007.local.entity.toDomain
 import com.segnities007.local.entity.toEntity
@@ -379,157 +418,75 @@ import com.segnities007.model.item.Item
 class ItemRepositoryImpl(
     private val itemDao: ItemDao,
 ) : ItemRepository {
-    override suspend fun getAllItems(): List<Item> =
-        itemDao.getAll().map { it.toDomain() }
-
-    override suspend fun insertItem(item: Item) {
-        itemDao.insert(item.toEntity())
+    override suspend fun getAllItems(): List<Item> {
+        Log.d("ItemRepository", "getAllItems() called")
+        return try {
+            val entities = itemDao.getAll()
+            Log.d("ItemRepository", "Fetched ${entities.size} items")
+            entities.map { it.toDomain() }
+        } catch (e: Exception) {
+            Log.e("ItemRepository", "Failed to fetch items", e)
+            throw e
+        }
     }
 
-    // 他のメソッド実装...
+    override suspend fun insertItem(item: Item) {
+        Log.d("ItemRepository", "insertItem() called: ${item.name}")
+        itemDao.insert(item.toEntity())
+    }
 }
 ```
 
-### Presentation 層 (UI 層)
+---
 
-**配置場所:**
+### Presentation層（UI層）
+
+#### 配置場所
 
 - `presentation/<feature>/` : 各機能画面のモジュール
 - `presentation/<feature>/mvi/` : ViewModel、Intent、State、Effect、Reducer
-- `presentation/<feature>/components/` : 画面固有の Composable
+- `presentation/<feature>/components/` : 画面固有のComposable
 
-**責務:**
+#### 責務
 
-- Jetpack Compose による宣言的 UI
-- ユーザー入力の受付（Intent 発行）
-- MVI パターンによる状態管理（ViewModel）
+- Jetpack Composeによる宣言的UI
+- ユーザー入力の受付（Intent発行）
+- MVIパターンによる状態管理（ViewModel）
 - 画面ナビゲーション
 
-**ルール:**
+#### ルール
 
-- ビジネスロジックを含まない
-- **ViewModel は Use Case を通じてビジネスロジックを実行** ⭐
-- **Repository を直接呼び出さない**（必ず Use Case を経由）
-- **BaseViewModel を継承**して実装
-- `core/ui`の BaseViewModel を使用
-- MVI パターンに厳密に従う
+- **ビジネスロジックを含まない**
+- **ViewModelはUse Caseを通じてビジネスロジックを実行** ⭐
+- **Repositoryを直接呼び出さない**（必ずUse Case経由）
+- **BaseViewModelを継承**して実装
+- **MVIパターンに厳密に従う**
 
-**実装例:**
+---
 
-```kotlin
-// Intent (presentation/<feature>/mvi/)
-sealed interface DashboardIntent : MviIntent {
-    data object LoadDashboardData : DashboardIntent
-}
+## MVIパターン実装
 
-// State (presentation/<feature>/mvi/)
-data class DashboardState(
-    val isLoading: Boolean = true,
-    val itemCount: Int = 0,
-    val error: String? = null
-) : MviState
-
-// Effect (presentation/<feature>/mvi/)
-sealed interface DashboardEffect : MviEffect {
-    data class ShowError(val message: String) : DashboardEffect
-}
-
-// Reducer (presentation/<feature>/mvi/)
-class DashboardReducer {
-    fun reduce(state: DashboardState, intent: DashboardIntent): DashboardState {
-        return when (intent) {
-            is DashboardIntent.LoadDashboardData ->
-                state.copy(isLoading = true, error = null)
-        }
-    }
-}
-
-// ⭐ ViewModel (presentation/<feature>/mvi/) - Use Caseを使用
-class DashboardViewModel(
-    private val getAllItemsUseCase: GetAllItemsUseCase,
-    private val getTemplateCountUseCase: GetTemplateCountUseCase,
-) : BaseViewModel<DashboardIntent, DashboardState, DashboardEffect>(DashboardState()) {
-    private val reducer = DashboardReducer()
-
-    init {
-        sendIntent(DashboardIntent.LoadDashboardData)
-    }
-
-    override suspend fun handleIntent(intent: DashboardIntent) {
-        when (intent) {
-            is DashboardIntent.LoadDashboardData -> loadDashboardData()
-        }
-    }
-
-    private suspend fun loadDashboardData() {
-        setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
-        try {
-            // ⭐ Use Caseを通じてビジネスロジックを実行
-            val items = getAllItemsUseCase()
-            val templateCount = getTemplateCountUseCase()
-
-            setState {
-                copy(
-                    isLoading = false,
-                    itemCount = items.size,
-                    templateCount = templateCount
-                )
-            }
-        } catch (e: Exception) {
-            setState { copy(isLoading = false, error = e.message) }
-            sendEffect { DashboardEffect.ShowError(e.message ?: "Error") }
-        }
-    }
-}
-
-// Composable Screen
-@Composable
-fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel()) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                is DashboardEffect.ShowError -> {
-                    // Show snackbar
-                }
-            }
-        }
-    }
-
-    if (state.isLoading) {
-        LoadingIndicator()
-    } else {
-        // UI rendering based on state
-    }
-}
-```
-
-## MVI パターン実装ガイドライン
-
-### MVI アーキテクチャ構造
-
-このプロジェクトでは、`core/ui`モジュールの`BaseViewModel`を使用して MVI を実装します。
+### MVIアーキテクチャ構造
 
 ```text
 ┌─────────────────────────────────────────────┐
 │  Composable (View)                          │
-│  - state.collectAsStateWithLifecycle()     │
-│  - viewModel.sendIntent(intent)             │
-│  - effect.collect { ... }                   │
+│  • state.collectAsStateWithLifecycle()     │
+│  • viewModel.sendIntent(intent)             │
+│  • effect.collect { ... }                   │
 └──────────────┬──────────────────────────────┘
                ↓ sendIntent()
 ┌─────────────────────────────────────────────┐
 │  BaseViewModel<Intent, State, Effect>       │
-│  - handleIntent(): 各画面固有のロジック        │
-│  - setState(): State更新                     │
-│  - sendEffect(): Effect発行                  │
+│  • handleIntent(): 画面固有のロジック        │
+│  • setState(): State更新                     │
+│  • sendEffect(): Effect発行                  │
 └──────────────┬──────────────────────────────┘
                ↓ Use Case呼び出し ⭐
 ┌─────────────────────────────────────────────┐
 │  Use Case (domain/usecase/)                 │
-│  - ビジネスロジックのカプセル化               │
-│  - 単一責任（1 Use Case = 1アクション）       │
+│  • ビジネスロジックのカプセル化               │
+│  • 単一責任（1 Use Case = 1アクション）       │
 └──────────────┬──────────────────────────────┘
                ↓ Repository呼び出し
 ┌─────────────────────────────────────────────┐
@@ -537,7 +494,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel()) {
 └─────────────────────────────────────────────┘
 ```
 
-### BaseViewModel 構造
+### BaseViewModel構造
 
 **提供される機能:**
 
@@ -1339,12 +1296,20 @@ private suspend fun loadDashboardData() {
 
 ---
 
+## まとめ
+
+このガイドラインは、CheckMateプロジェクトの**持続可能な開発**と**高品質なコード**を実現するために作成されました。
+
+### 最重要事項 ⭐
+
+1. **Use Caseパターンを必ず使用する**
+2. **ViewModelから直接Repositoryを呼び出さない**
+3. **1つのUse Case = 1つのビジネスアクション**
+4. **依存は常に内側（Domain）に向かう**
+5. **MVIパターンに厳密に従う**
+
+これらの原則を守ることで、テスタブルで保守性の高いコードベースを維持できます。
+
+---
+
 **このドキュメントは必ず守ってください。設計原則の違反は技術的負債を生み、長期的な保守性を損ないます。**
-**最重要\*\***最重要\*\*
-
-- **使用場所:** Domain 層（`domain/usecase/`）
-- **目的:** ビジネスロジ
-
-- **使用場所:** Domain 層（`domain/usecase/`）
-- **目的:** ビジネスロジ
-  **特に重要:** このプロジェクトでは**Use Case パターンを必ず使用**してください。ViewModel から直接 Repository を呼び出すことは禁止です。全てのビジネスロジックは Use Case を通じて実行してください。
