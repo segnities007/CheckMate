@@ -1,7 +1,9 @@
 package com.segnities007.templates.mvi
 
 import androidx.lifecycle.viewModelScope
+import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
+import com.segnities007.templates.utils.TemplateFilter
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.ics.GenerateTemplatesFromIcsUseCase
 import com.segnities007.usecase.ics.SaveGeneratedTemplatesUseCase
@@ -109,71 +111,25 @@ class TemplatesViewModel(
         applyTemplateFilters()
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun applyFilters() {
         val currentState = state.value
-        var filteredItems = currentState.allItems
-
-        // 検索フィルタ
-        if (currentState.searchQuery.isNotBlank()) {
-            filteredItems =
-                filteredItems.filter { item ->
-                    item.name.contains(currentState.searchQuery, ignoreCase = true) ||
-                        item.description.contains(currentState.searchQuery, ignoreCase = true)
-                }
-        }
-
-        // カテゴリフィルタ
-        if (currentState.selectedCategory != null) {
-            filteredItems =
-                filteredItems.filter { item ->
-                    item.category == currentState.selectedCategory
-                }
-        }
-
-        // 並び替え
-        filteredItems =
-            when (currentState.sortOrder) {
-                SortOrder.NAME_ASC -> filteredItems.sortedBy { it.name }
-                SortOrder.NAME_DESC -> filteredItems.sortedByDescending { it.name }
-                SortOrder.CREATED_ASC -> filteredItems.sortedBy { it.createdAt }
-                SortOrder.CREATED_DESC -> filteredItems.sortedByDescending { it.createdAt }
-                SortOrder.CATEGORY_ASC -> filteredItems.sortedBy { it.category.name }
-                SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
-            }
-
+        val filteredItems = TemplateFilter.applyItemFilters(
+            allItems = currentState.allItems,
+            searchQuery = currentState.searchQuery,
+            selectedCategory = currentState.selectedCategory,
+            sortOrder = currentState.sortOrder,
+        )
         setState { reducer.reduce(this, TemplatesIntent.SetFilteredItems(filteredItems)) }
     }
 
     private fun applyTemplateFilters() {
         val currentState = state.value
-        var filteredTemplates = currentState.weeklyTemplates
-
-        // 検索フィルタ
-        if (currentState.templateSearchQuery.isNotBlank()) {
-            filteredTemplates =
-                filteredTemplates.filter { template ->
-                    template.title.contains(currentState.templateSearchQuery, ignoreCase = true)
-                }
-        }
-
-        // 曜日フィルタ
-        if (currentState.selectedDayOfWeek != null) {
-            filteredTemplates =
-                filteredTemplates.filter { template ->
-                    template.daysOfWeek.contains(currentState.selectedDayOfWeek)
-                }
-        }
-
-        // 並び替え
-        filteredTemplates =
-            when (currentState.templateSortOrder) {
-                TemplateSortOrder.NAME_ASC -> filteredTemplates.sortedBy { it.title }
-                TemplateSortOrder.NAME_DESC -> filteredTemplates.sortedByDescending { it.title }
-                TemplateSortOrder.ITEM_COUNT_ASC -> filteredTemplates.sortedBy { it.itemIds.size }
-                TemplateSortOrder.ITEM_COUNT_DESC -> filteredTemplates.sortedByDescending { it.itemIds.size }
-            }
-
+        val filteredTemplates = TemplateFilter.applyTemplateFilters(
+            allTemplates = currentState.weeklyTemplates,
+            searchQuery = currentState.templateSearchQuery,
+            selectedDayOfWeek = currentState.selectedDayOfWeek,
+            sortOrder = currentState.templateSortOrder,
+        )
         setState { reducer.reduce(this, TemplatesIntent.SetFilteredTemplates(filteredTemplates)) }
     }
 
@@ -203,7 +159,7 @@ class TemplatesViewModel(
 
     private suspend fun addWeeklyTemplate(
         title: String,
-        daysOfWeek: Set<com.segnities007.model.DayOfWeek>,
+        daysOfWeek: Set<DayOfWeek>,
     ) {
         val template = WeeklyTemplate(
             title = title,
