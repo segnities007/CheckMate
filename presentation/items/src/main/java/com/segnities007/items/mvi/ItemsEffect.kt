@@ -12,4 +12,6 @@ sealed interface ItemsEffect : MviEffect {
     data object NavigateToCameraCapture : ItemsEffect
 
     data object NavigateToBarcodeScanner : ItemsEffect
+
+    data object ReopenBottomSheetWithProductInfo : ItemsEffect
 }

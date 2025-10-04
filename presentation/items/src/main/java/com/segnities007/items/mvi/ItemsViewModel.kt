@@ -226,16 +226,13 @@ class ItemsViewModel(
                 setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
 
                 if (productInfo != null) {
-                    setState { reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(false)) }
-                    setState { reducer.reduce(this, ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
-                    setState { reducer.reduce(this, ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
-                    setState { reducer.reduce(this, ItemsIntent.SetShouldClearForm(true)) }
-
-                    kotlinx.coroutines.delay(100)
-                    setState { reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(true)) }
-
-                    kotlinx.coroutines.delay(200)
-                    setState { reducer.reduce(this, ItemsIntent.SetShouldClearForm(false)) }
+                    setState {
+                        reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(false))
+                            .let { reducer.reduce(it, ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
+                            .let { reducer.reduce(it, ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
+                            .let { reducer.reduce(it, ItemsIntent.SetShouldClearForm(true)) }
+                    }
+                    sendEffect { ItemsEffect.ReopenBottomSheetWithProductInfo }
                 } else {
                     sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
                 }
