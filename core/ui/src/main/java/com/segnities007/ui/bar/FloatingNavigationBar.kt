@@ -43,6 +43,8 @@ fun FloatingNavigationBar(
     currentHubRoute: HubRoute,
     onNavigate: (HubRoute) -> Unit,
 ) {
+    if(alpha == 0f) return
+
     Column(
         modifier = Modifier
             .graphicsLayer(alpha = alpha)

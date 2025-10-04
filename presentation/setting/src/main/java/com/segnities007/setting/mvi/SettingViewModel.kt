@@ -34,7 +34,6 @@ class SettingViewModel(
     private val saveGeneratedTemplatesUseCase: SaveGeneratedTemplatesUseCase,
     private val appContext: Context,
 ) : BaseViewModel<SettingIntent, SettingState, SettingEffect>(SettingState()) {
-    private val reducer: SettingReducer = SettingReducer()
 
     init {
         sendIntent(SettingIntent.LoadUserStatus)
@@ -114,7 +113,7 @@ class SettingViewModel(
     }
 
     private fun showDeleteAllDataConfirmation() {
-        setState { reducer.reduce(this, SettingIntent.DeleteAllData) }
+        setState { reduce(SettingIntent.DeleteAllData) }
     }
 
     private suspend fun confirmDeleteAllData() {
@@ -133,12 +132,12 @@ class SettingViewModel(
             return
         }
 
-        setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
+        setState { reduce(SettingIntent.ConfirmDeleteAllData) }
         sendEffect { SettingEffect.ShowToast("全データを削除しました") }
     }
 
     private fun cancelDeleteAllData() {
-        setState { reducer.reduce(this, SettingIntent.CancelDeleteAllData) }
+        setState { reduce(SettingIntent.CancelDeleteAllData) }
     }
 
     private suspend fun linkWithGoogle() {
@@ -174,7 +173,7 @@ class SettingViewModel(
     }
 
     private suspend fun importIcsFile(intent: SettingIntent.ImportIcsFile) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
 
         val templates = generateTemplatesFromIcsUseCase(intent.uri).getOrElse { e ->
             setState { copy(isImportingIcs = false) }
@@ -198,11 +197,11 @@ class SettingViewModel(
     }
 
     private fun showIcsImportDialog() {
-        setState { reducer.reduce(this, SettingIntent.ShowIcsImportDialog) }
+        setState { reduce(SettingIntent.ShowIcsImportDialog) }
     }
 
     private fun hideIcsImportDialog() {
-        setState { reducer.reduce(this, SettingIntent.HideIcsImportDialog) }
+        setState { reduce(SettingIntent.HideIcsImportDialog) }
     }
 
     private suspend fun saveToDownloads(
@@ -230,5 +229,28 @@ class SettingViewModel(
             contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
             resolver.update(uri, contentValues, null, null)
         }
+    }
+}
+
+// =============================================================================
+// Reducer Function
+// =============================================================================
+
+private fun SettingState.reduce(intent: SettingIntent): SettingState {
+    return when (intent) {
+        // ダイアログ表示関連
+        SettingIntent.ShowIcsImportDialog -> copy(showIcsImportDialog = true)
+        SettingIntent.HideIcsImportDialog -> copy(showIcsImportDialog = false)
+        
+        // データ削除確認
+        SettingIntent.DeleteAllData -> copy(showDeleteAllDataDialog = true)
+        SettingIntent.CancelDeleteAllData -> copy(showDeleteAllDataDialog = false)
+        SettingIntent.ConfirmDeleteAllData -> copy(showDeleteAllDataDialog = false)
+        
+        // ICSインポート
+        is SettingIntent.ImportIcsFile -> copy(isImportingIcs = true)
+        
+        // 他のIntentはViewModelで処理（非同期処理など）
+        else -> this
     }
 }
