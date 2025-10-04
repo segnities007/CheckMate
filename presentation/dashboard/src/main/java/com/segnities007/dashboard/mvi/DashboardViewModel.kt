@@ -1,13 +1,15 @@
 package com.segnities007.dashboard.mvi
 
-import androidx.lifecycle.viewModelScope
+import com.segnities007.model.WeeklyTemplate
+import com.segnities007.model.item.Item
+import com.segnities007.model.item.ItemCheckState
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.checkstate.GetCheckStatesForItemsUseCase
 import com.segnities007.usecase.item.GetAllItemsUseCase
 import com.segnities007.usecase.template.GetAllTemplatesUseCase
 import com.segnities007.usecase.template.GetTemplatesForDayUseCase
-import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -30,7 +32,6 @@ class DashboardViewModel(
     }
 
     init {
-        // schedule load via BaseViewModel.sendIntent
         sendIntent(DashboardIntent.LoadDashboardData)
     }
 
@@ -43,30 +44,22 @@ class DashboardViewModel(
     @OptIn(ExperimentalTime::class)
     private suspend fun loadDashboardData() {
         setState { reducer.reduce(this, DashboardIntent.LoadDashboardData) }
-        
-        // Use Caseを通じてデータ取得（Result型で統一的なエラーハンドリング）
-        val allItemsResult = getAllItemsUseCase()
-        val allTemplatesResult = getAllTemplatesUseCase()
-        
-        allItemsResult.fold(
-            onSuccess = { allItems ->
-                allTemplatesResult.fold(
-                    onSuccess = { allTemplates ->
-                        processLoadedData(allItems, allTemplates)
-                    },
-                    onFailure = { e ->
-                        handleLoadError(e)
-                    }
-                )
-            },
-            onFailure = { e ->
-                handleLoadError(e)
-            }
-        )
+
+        val allItems = getAllItemsUseCase().getOrElse { e ->
+            handleLoadError(e)
+            return
+        }
+
+        val allTemplates = getAllTemplatesUseCase().getOrElse { e ->
+            handleLoadError(e)
+            return
+        }
+
+        processLoadedData(allItems, allTemplates)
     }
 
     @OptIn(ExperimentalTime::class)
-    private suspend fun processLoadedData(allItems: List<com.segnities007.model.item.Item>, allTemplates: List<com.segnities007.model.WeeklyTemplate>) {
+    private suspend fun processLoadedData(allItems: List<Item>, allTemplates: List<WeeklyTemplate>) {
         try {
             val itemCount = allItems.size
             val templateCount = allTemplates.size
@@ -76,29 +69,21 @@ class DashboardViewModel(
                     .now()
                     .toLocalDateTime(TimeZone.currentSystemDefault())
                     .date
+
+            val templatesForToday = getTemplatesForDayUseCase(today.dayOfWeek.name).getOrElse { e ->
+                handleLoadError(e)
+                return
+            }
+
+            val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
+            val scheduledItemCountToday = itemIdsForToday.size
             
-            // 今日のテンプレートとアイテムを取得（Result型）
-            val templatesForTodayResult = getTemplatesForDayUseCase(today.dayOfWeek.name)
-            templatesForTodayResult.fold(
-                onSuccess = { templatesForToday ->
-                    val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
-                    val scheduledItemCountToday = itemIdsForToday.size
-                    
-                    // 今日のチェック状態を取得して完了率を計算（Result型）
-                    val checkStatesResult = getCheckStatesForItemsUseCase(itemIdsForToday)
-                    checkStatesResult.fold(
-                        onSuccess = { checkStates ->
-                            processTodayData(allItems, itemCount, templateCount, today, templatesForToday, itemIdsForToday, scheduledItemCountToday, checkStates)
-                        },
-                        onFailure = { e ->
-                            handleLoadError(e)
-                        }
-                    )
-                },
-                onFailure = { e ->
-                    handleLoadError(e)
-                }
-            )
+            val checkStates = getCheckStatesForItemsUseCase(itemIdsForToday).getOrElse { e ->
+                handleLoadError(e)
+                return
+            }
+
+            processTodayData(allItems, itemCount, templateCount, today, itemIdsForToday, scheduledItemCountToday, checkStates)
         } catch (e: Exception) {
             handleLoadError(e)
         }
@@ -106,14 +91,13 @@ class DashboardViewModel(
 
     @OptIn(ExperimentalTime::class)
     private suspend fun processTodayData(
-        allItems: List<com.segnities007.model.item.Item>,
+        allItems: List<Item>,
         itemCount: Int,
         templateCount: Int,
-        today: kotlinx.datetime.LocalDate,
-        templatesForToday: List<com.segnities007.model.WeeklyTemplate>,
+        today: LocalDate,
         itemIdsForToday: List<Int>,
         scheduledItemCountToday: Int,
-        checkStates: List<com.segnities007.model.item.ItemCheckState>
+        checkStates: List<ItemCheckState>
     ) {
         try {
             val checkedItemCountToday =
@@ -126,8 +110,7 @@ class DashboardViewModel(
                 } else {
                     0
                 }
-            
-            // 今日の未チェックアイテムを算出
+
             val itemsForToday = allItems.filter { itemIdsForToday.contains(it.id) }
             val checkStateMapByItemId = checkStates.associateBy { it.itemId }
             val uncheckedItems = itemsForToday.filter { item ->
@@ -136,70 +119,60 @@ class DashboardViewModel(
                 record?.isChecked != true
             }
 
-            // 全履歴からの完了率を計算（Result型）
             val allItemIds = allItems.map { it.id }
-            val allCheckStatesResult = getCheckStatesForItemsUseCase(allItemIds)
-            allCheckStatesResult.fold(
-                onSuccess = { allCheckStates ->
-                    val totalRecordsCount = allCheckStates.sumOf { it.history.size }
-                    val totalCheckedRecordsCount = allCheckStates.sumOf { state -> state.history.count { record -> record.isChecked } }
-                    val historicalCompletionRate =
-                        if (totalRecordsCount > 0) {
-                            ((totalCheckedRecordsCount.toDouble() / totalRecordsCount.toDouble()) * PERCENTAGE_MULTIPLIER).toInt()
-                        } else {
-                            0
-                        }
+            val allCheckStates = getCheckStatesForItemsUseCase(allItemIds).getOrElse { e ->
+                handleLoadError(e)
+                return
+            }
 
-                    // 明日の未チェックアイテムを算出（Result型）
-                    val tomorrow = today.plus(1, DateTimeUnit.DAY)
-                    val templatesForTomorrowResult = getTemplatesForDayUseCase(tomorrow.dayOfWeek.name)
-                    templatesForTomorrowResult.fold(
-                        onSuccess = { templatesForTomorrow ->
-                            val itemIdsForTomorrow = templatesForTomorrow.flatMap { it.itemIds }.distinct()
-                            val itemsForTomorrow = allItems.filter { itemIdsForTomorrow.contains(it.id) }
-                            val checkStatesForTomorrowResult = getCheckStatesForItemsUseCase(itemIdsForTomorrow)
-                            checkStatesForTomorrowResult.fold(
-                                onSuccess = { checkStatesForTomorrow ->
-                                    val checkStateMapByItemIdTomorrow = checkStatesForTomorrow.associateBy { it.itemId }
-                                    val uncheckedItemsTomorrow =
-                                        itemsForTomorrow.filter { item ->
-                                            val state = checkStateMapByItemIdTomorrow[item.id]
-                                            val record = state?.history?.find { it.date == tomorrow }
-                                            record?.isChecked != true
-                                        }
-                                    
-                                    updateFinalState(itemCount, templateCount, uncheckedItems, scheduledItemCountToday, checkedItemCountToday, completionRateToday, totalRecordsCount, totalCheckedRecordsCount, historicalCompletionRate, uncheckedItemsTomorrow)
-                                },
-                                onFailure = { e ->
-                                    handleLoadError(e)
-                                }
-                            )
-                        },
-                        onFailure = { e ->
-                            handleLoadError(e)
-                        }
-                    )
-                },
-                onFailure = { e ->
-                    handleLoadError(e)
+            val totalRecordsCount = allCheckStates.sumOf { it.history.size }
+            val totalCheckedRecordsCount = allCheckStates.sumOf { state -> state.history.count { record -> record.isChecked } }
+            val historicalCompletionRate =
+                if (totalRecordsCount > 0) {
+                    ((totalCheckedRecordsCount.toDouble() / totalRecordsCount.toDouble()) * PERCENTAGE_MULTIPLIER).toInt()
+                } else {
+                    0
                 }
-            )
+
+            val tomorrow = today.plus(1, DateTimeUnit.DAY)
+            val templatesForTomorrow = getTemplatesForDayUseCase(tomorrow.dayOfWeek.name).getOrElse { e ->
+                handleLoadError(e)
+                return
+            }
+
+            val itemIdsForTomorrow = templatesForTomorrow.flatMap { it.itemIds }.distinct()
+            val itemsForTomorrow = allItems.filter { itemIdsForTomorrow.contains(it.id) }
+            
+            val checkStatesForTomorrow = getCheckStatesForItemsUseCase(itemIdsForTomorrow).getOrElse { e ->
+                handleLoadError(e)
+                return
+            }
+
+            val checkStateMapByItemIdTomorrow = checkStatesForTomorrow.associateBy { it.itemId }
+            val uncheckedItemsTomorrow =
+                itemsForTomorrow.filter { item ->
+                    val state = checkStateMapByItemIdTomorrow[item.id]
+                    val record = state?.history?.find { it.date == tomorrow }
+                    record?.isChecked != true
+                }
+            
+            updateFinalState(itemCount, templateCount, uncheckedItems, scheduledItemCountToday, checkedItemCountToday, completionRateToday, totalRecordsCount, totalCheckedRecordsCount, historicalCompletionRate, uncheckedItemsTomorrow)
         } catch (e: Exception) {
             handleLoadError(e)
         }
     }
 
-    private suspend fun updateFinalState(
+    private fun updateFinalState(
         itemCount: Int,
         templateCount: Int,
-        uncheckedItems: List<com.segnities007.model.item.Item>,
+        uncheckedItems: List<Item>,
         scheduledItemCountToday: Int,
         checkedItemCountToday: Int,
         completionRateToday: Int,
         totalRecordsCount: Int,
         totalCheckedRecordsCount: Int,
         historicalCompletionRate: Int,
-        uncheckedItemsTomorrow: List<com.segnities007.model.item.Item>
+        uncheckedItemsTomorrow: List<Item>
     ) {
 
         setState {
@@ -219,9 +192,8 @@ class DashboardViewModel(
         }
     }
     
-    private suspend fun handleLoadError(e: Throwable) {
+    private  fun handleLoadError(e: Throwable) {
         val errorMessage = e.localizedMessage ?: "不明なエラーが発生しました"
         setState { copy(isLoading = false, error = errorMessage) }
-//      sendEffect { DashboardEffect.ShowError("データの読み込みに失敗しました: $errorMessage") }
     }
 }

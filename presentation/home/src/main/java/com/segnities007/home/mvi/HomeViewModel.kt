@@ -70,19 +70,14 @@ class HomeViewModel(
                 .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
                 .date
         ensureCheckHistoryForTodayUseCase(today).fold(
-            onSuccess = {
-                // チェック履歴の確保に成功
-            },
-            onFailure = { e ->
-                // エラーはData層でログ出力される
-            }
+            onSuccess = { },
+            onFailure = { }
         )
     }
 
     private suspend fun getAllItems() {
         getAllItemsUseCase().fold(
             onSuccess = { allItems ->
-                // set directly via reducer since we're in the coroutine started by sendIntent
                 setState { reducer.reduce(this, HomeIntent.SetAllItems(allItems)) }
             },
             onFailure = { e ->
@@ -110,48 +105,45 @@ class HomeViewModel(
             )
         }
 
-        getTemplatesForDayUseCase(date.dayOfWeek.name).fold(
-            onSuccess = { templates ->
-                val itemIdsForToday = templates.flatMap { it.itemIds }.distinct()
-                getAllItemsUseCase().fold(
-                    onSuccess = { allItems ->
-                        val itemsForToday = allItems.filter { itemIdsForToday.contains(it.id) }
+        // 早期リターンパターンでネストを削減
+        val templates = getTemplatesForDayUseCase(date.dayOfWeek.name).getOrElse { e ->
+            sendEffect { HomeEffect.ShowError("テンプレートの読み込みに失敗しました") }
+            return
+        }
 
-                        getCheckStatesForItemsUseCase(itemIdsForToday).fold(
-                            onSuccess = { checkStatesList ->
-                                val checkStates = checkStatesList.associate { state ->
-                                    val recordForDate = state.history.find { it.date == date }
-                                    state.itemId to (recordForDate?.isChecked ?: false)
-                                }
+        val itemIdsForToday = templates.flatMap { it.itemIds }.distinct()
 
-                                val stateMap = itemCheckStatesByDate.getOrPut(date) { mutableStateMapOf() }
-                                stateMap.clear()
-                                stateMap.putAll(checkStates)
+        val allItems = getAllItemsUseCase().getOrElse { e ->
+            sendEffect { HomeEffect.ShowError("アイテムの読み込みに失敗しました") }
+            return
+        }
 
-                                // update state via reducer directly
-                                setState { reducer.reduce(this, HomeIntent.SetItemCheckStates(date, stateMap.toMap())) }
-                                // templatesForToday and itemsForToday are still set directly because they are derived lists
-                                setState {
-                                    copy(
-                                        templatesForToday = templates,
-                                        itemsForToday = itemsForToday,
-                                    )
-                                }
-                            },
-                            onFailure = { e ->
-                                sendEffect { HomeEffect.ShowError("チェック状態の読み込みに失敗しました") }
-                            }
-                        )
-                    },
-                    onFailure = { e ->
-                        sendEffect { HomeEffect.ShowError("アイテムの読み込みに失敗しました") }
-                    }
-                )
-            },
-            onFailure = { e ->
-                sendEffect { HomeEffect.ShowError("テンプレートの読み込みに失敗しました") }
-            }
-        )
+        val itemsForToday = allItems.filter { itemIdsForToday.contains(it.id) }
+
+        val checkStatesList = getCheckStatesForItemsUseCase(itemIdsForToday).getOrElse { e ->
+            sendEffect { HomeEffect.ShowError("チェック状態の読み込みに失敗しました") }
+            return
+        }
+
+        // チェック状態のマップを構築
+        val checkStates = checkStatesList.associate { state ->
+            val recordForDate = state.history.find { it.date == date }
+            state.itemId to (recordForDate?.isChecked ?: false)
+        }
+
+        val stateMap = itemCheckStatesByDate.getOrPut(date) { mutableStateMapOf() }
+        stateMap.clear()
+        stateMap.putAll(checkStates)
+
+        // update state via reducer directly
+        setState { reducer.reduce(this, HomeIntent.SetItemCheckStates(date, stateMap.toMap())) }
+        // templatesForToday and itemsForToday are still set directly because they are derived lists
+        setState {
+            copy(
+                templatesForToday = templates,
+                itemsForToday = itemsForToday,
+            )
+        }
     }
 
     private fun changeMonth(
@@ -178,11 +170,8 @@ class HomeViewModel(
         setState { copy(itemCheckStates = stateMap.toMap()) }
 
         checkItemUseCase(itemId, currentDate, checked).fold(
-            onSuccess = {
-                // チェック状態の更新に成功
-            },
+            onSuccess = { },
             onFailure = { e ->
-                // エラー時はUIの状態を元に戻す
                 stateMap[itemId] = !checked
                 setState { copy(itemCheckStates = stateMap.toMap()) }
             }

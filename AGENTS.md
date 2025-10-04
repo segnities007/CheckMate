@@ -19,7 +19,7 @@
 
 ### モジュール構造
 
-```
+```text
 CheckMate/
 ├── app/                          # アプリケーションエントリーポイント
 ├── presentation/                 # UI層（各画面のモジュール）
@@ -53,7 +53,7 @@ CheckMate/
 
 ### レイヤー構造と依存方向
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  Presentation Layer (presentation/*)                    │
 │  - Composable関数（UI）                                  │
@@ -152,7 +152,7 @@ CheckMate/
 3. **内側のレイヤーは外側のレイヤーを知らない**
 4. **Domain 層はフレームワーク非依存**
 
-```
+```text
 Presentation → Use Case → Repository
      ↓           ↑           ↑
    Framework  Pure Logic  External
@@ -511,7 +511,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = koinViewModel()) {
 
 このプロジェクトでは、`core/ui`モジュールの`BaseViewModel`を使用して MVI を実装します。
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │  Composable (View)                          │
 │  - state.collectAsStateWithLifecycle()     │
@@ -783,7 +783,7 @@ fun DashboardScreen(
 
 ### Koin 設定ファイル構造
 
-```
+```text
 app/src/main/java/
 └── di/
     ├── AppModule.kt        # アプリケーション全体の依存関係
@@ -931,7 +931,73 @@ fun DashboardScreen(
 - **`suspend fun`は非同期処理にのみ使用**
 - **拡張関数を活用**（変換ロジック、ユーティリティ）
 
-**良い例:**
+#### 早期リターンパターンの活用
+
+**深いネストを避けるため、早期リターン（ガード節）を積極的に使用してください。**
+
+特に複数の`Result.fold()`や条件分岐がネストする場合、`getOrElse`と`return`を使用してフラットな構造にします。
+
+**❌ 悪い例（3 階層のネスト）:**
+
+```kotlin
+private suspend fun selectDate(date: LocalDate) {
+    getTemplatesForDayUseCase(date).fold(
+        onSuccess = { templates ->
+            getAllItemsUseCase().fold(
+                onSuccess = { allItems ->
+                    getCheckStatesUseCase(itemIds).fold(
+                        onSuccess = { checkStates ->
+                            // 処理
+                        },
+                        onFailure = { e ->
+                            sendEffect { ShowError("チェック状態の取得に失敗") }
+                        }
+                    )
+                },
+                onFailure = { e ->
+                    sendEffect { ShowError("アイテムの取得に失敗") }
+                }
+            )
+        },
+        onFailure = { e ->
+            sendEffect { ShowError("テンプレートの取得に失敗") }
+        }
+    )
+}
+```
+
+**✅ 良い例（早期リターンでフラット化）:**
+
+```kotlin
+private suspend fun selectDate(date: LocalDate) {
+    // 早期リターンパターン
+    val templates = getTemplatesForDayUseCase(date).getOrElse { e ->
+        sendEffect { ShowError("テンプレートの取得に失敗") }
+        return
+    }
+
+    val allItems = getAllItemsUseCase().getOrElse { e ->
+        sendEffect { ShowError("アイテムの取得に失敗") }
+        return
+    }
+
+    val checkStates = getCheckStatesUseCase(itemIds).getOrElse { e ->
+        sendEffect { ShowError("チェック状態の取得に失敗") }
+        return
+    }
+
+    // 成功時の処理（フラットな構造）
+    setState { copy(templates = templates, items = allItems) }
+}
+```
+
+**メリット:**
+
+- 可読性の向上（ネストが減り、処理の流れが明確）
+- 保守性の向上（各処理が独立して理解しやすい）
+- バグの減少（エラーハンドリングの漏れを防ぐ）
+
+**その他の良い例:**
 
 ```kotlin
 // 単一責任、明確な命名
@@ -943,6 +1009,17 @@ class GetAllItemsUseCase(private val repository: ItemRepository) {
 
 // 拡張関数で変換ロジック
 fun ItemEntity.toDomain(): Item = Item(id, name, description)
+
+// ガード節で条件チェック
+fun validateItem(item: Item): Result<Unit> {
+    if (item.name.isBlank()) {
+        return Result.failure(IllegalArgumentException("名前は必須です"))
+    }
+    if (item.category == null) {
+        return Result.failure(IllegalArgumentException("カテゴリは必須です"))
+    }
+    return Result.success(Unit)
+}
 ```
 
 **悪い例:**
@@ -951,6 +1028,23 @@ fun ItemEntity.toDomain(): Item = Item(id, name, description)
 // 複数の責任、副作用あり
 fun doEverything(a: Int, b: String, c: Boolean, d: List<Item>, e: Repo) {
     // ローディング、データ取得、UI更新を全て実行
+}
+
+// 深いネスト
+fun validateItem(item: Item): Result<Unit> {
+    if (item.name.isNotBlank()) {
+        if (item.category != null) {
+            if (item.description.length <= 500) {
+                return Result.success(Unit)
+            } else {
+                return Result.failure(IllegalArgumentException("説明が長すぎます"))
+            }
+        } else {
+            return Result.failure(IllegalArgumentException("カテゴリは必須です"))
+        }
+    } else {
+        return Result.failure(IllegalArgumentException("名前は必須です"))
+    }
 }
 ```
 
@@ -1004,7 +1098,9 @@ when (intent) {
 
 ### ログ出力ルール（Log.d, Log.e など）
 
-**基本方針: ログは Data 層でのみ出力する**
+#### 基本方針
+
+**ログは Data 層でのみ出力する**
 
 ログ出力は問題の根本原因を特定するために、データアクセスレベルで行うべきです。
 
@@ -1040,22 +1136,24 @@ class ItemRepositoryImpl(
 #### ❌ ログ出力が禁止される場所
 
 - **Presentation 層（`presentation/`）:**
+
   - ViewModel
   - Composable（Screen、Component）
   - MVI（Intent、State、Effect、Reducer）
 
 - **Domain 層（`domain/`）:**
+
   - Use Case
   - Entity（ドメインモデル）
   - Repository Interface
 
 - **Core 層（`core/`）:**
-  - 共通UIコンポーネント
+  - 共通 UI コンポーネント
   - BaseViewModel
 
 **理由:**
 
-1. **関心の分離:** UI層やビジネスロジック層はログ出力の責任を持たない
+1. **関心の分離:** UI 層やビジネスロジック層はログ出力の責任を持たない
 2. **デバッグ効率:** データアクセスレベルでのログのみで、問題の根本原因を特定できる
 3. **パフォーマンス:** 不要なログ出力を削減
 4. **Clean Architecture:** 各層の責務を明確に保つ

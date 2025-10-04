@@ -156,24 +156,29 @@ class ItemsViewModel(
             withContext(Dispatchers.IO) {
                 val finalImagePath =
                     if (intent.item.imagePath.isNotBlank()) {
-                        // URLの場合はそのまま使用、ローカルファイルパスの場合は保存
                         if (intent.item.imagePath.startsWith("http://") || intent.item.imagePath.startsWith("https://")) {
                             intent.item.imagePath
                         } else {
                             val result = saveImageUseCase(intent.item.imagePath, "${Uuid.random()}.jpg")
-                            result.getOrElse { "" }
+                            result.getOrElse { e ->
+                                sendEffect { ItemsEffect.ShowToast("画像の保存に失敗しました") }
+                                return@withContext null
+                            }
                         }
                     } else {
                         ""
                     }
                 intent.item.copy(imagePath = finalImagePath)
             }
+
+        if (newItem == null) {
+            return
+        }
         
         val result = addItemUseCase(newItem)
         result.fold(
             onSuccess = {
                 sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }
-                // refresh
                 getAllItems()
             },
             onFailure = { error ->
@@ -183,74 +188,52 @@ class ItemsViewModel(
     }
 
     private suspend fun deleteItem(intent: ItemsIntent.DeleteItems) {
-        getItemByIdUseCase(intent.id).fold(
-            onSuccess = { itemToDelete ->
-                if (itemToDelete == null) {
-                    sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
-                    return
-                }
-                
-                // 画像を削除（Result型で処理）
-                if (itemToDelete.imagePath.isNotBlank()) {
-                    deleteImageUseCase(itemToDelete.imagePath).fold(
-                        onSuccess = {
-                            // 画像削除成功
-                        },
-                        onFailure = { e ->
-                            // 画像削除失敗してもアイテム削除は続行
-                        }
-                    )
-                }
+        val itemToDelete = getItemByIdUseCase(intent.id).getOrElse { error ->
+            sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの取得に失敗しました") }
+            return
+        }
 
-                // アイテムを削除
-                val result = deleteItemUseCase(intent.id)
-                result.fold(
-                    onSuccess = {
-                        sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
-                        // refresh
-                        getAllItems()
-                    },
-                    onFailure = { error ->
-                        sendEffect { ItemsEffect.ShowToast(error.message ?: "削除に失敗しました") }
-                    }
-                )
-            },
-            onFailure = { error ->
-                sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの取得に失敗しました") }
-            }
-        )
+        if (itemToDelete == null) {
+            sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
+            return
+        }
+
+        if (itemToDelete.imagePath.isNotBlank()) {
+            deleteImageUseCase(itemToDelete.imagePath).getOrElse { }
+        }
+
+        deleteItemUseCase(intent.id).getOrElse { error ->
+            sendEffect { ItemsEffect.ShowToast(error.message ?: "削除に失敗しました") }
+            return
+        }
+
+        sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
+        getAllItems()
     }
 
     private fun handleBarcodeDetected(intent: ItemsIntent.BarcodeDetected) {
-        // update scanned barcode info via reducer
         sendIntent(ItemsIntent.SetScannedBarcodeInfo(intent.barcodeInfo))
-        // バーコード検出後、自動的に商品情報を取得
         sendIntent(ItemsIntent.GetProductInfo(intent.barcodeInfo))
     }
 
     private suspend fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
-        // set loading via reducer
         setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(true)) }
         
         val result = getProductInfoByBarcodeUseCase(intent.barcodeInfo)
         result.fold(
             onSuccess = { productInfo ->
-                // set product info and loading flag via reducer
                 setState { reducer.reduce(this, ItemsIntent.SetProductInfo(productInfo)) }
                 setState { reducer.reduce(this, ItemsIntent.SetProductInfoLoading(false)) }
 
                 if (productInfo != null) {
-                    // 商品情報が取得できた場合、ボトムシートの状態を reset via reducer
                     setState { reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(false)) }
                     setState { reducer.reduce(this, ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
                     setState { reducer.reduce(this, ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
                     setState { reducer.reduce(this, ItemsIntent.SetShouldClearForm(true)) }
 
-                    // 少し遅延を入れてからボトムシートを表示（状態リセットのため）
                     kotlinx.coroutines.delay(100)
                     setState { reducer.reduce(this, ItemsIntent.UpdateIsShowBottomSheet(true)) }
 
-                    // フォームクリアフラグをリセット（productInfoは保持）
                     kotlinx.coroutines.delay(200)
                     setState { reducer.reduce(this, ItemsIntent.SetShouldClearForm(false)) }
                 } else {

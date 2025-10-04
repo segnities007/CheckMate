@@ -266,26 +266,21 @@ class TemplatesViewModel(
     private fun importIcs(uri: android.net.Uri) =
         viewModelScope.launch {
             setState { copy(isImportingIcs = true) }
-            
-            val result = generateTemplatesFromIcsUseCase(uri)
-            result.fold(
-                onSuccess = { templates ->
-                    saveGeneratedTemplatesUseCase(templates).fold(
-                        onSuccess = {
-                            getAllWeeklyTemplates()
-                            setState { copy(isImportingIcs = false) }
-                            sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
-                        },
-                        onFailure = { e ->
-                            setState { copy(isImportingIcs = false) }
-                            sendEffect { TemplatesEffect.ShowToast("テンプレート保存失敗: ${e.message}") }
-                        }
-                    )
-                },
-                onFailure = { e ->
-                    setState { copy(isImportingIcs = false) }
-                    sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }
-                }
-            )
+
+            val templates = generateTemplatesFromIcsUseCase(uri).getOrElse { e ->
+                setState { copy(isImportingIcs = false) }
+                sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }
+                return@launch
+            }
+
+            saveGeneratedTemplatesUseCase(templates).getOrElse { e ->
+                setState { copy(isImportingIcs = false) }
+                sendEffect { TemplatesEffect.ShowToast("テンプレート保存失敗: ${e.message}") }
+                return@launch
+            }
+
+            getAllWeeklyTemplates()
+            setState { copy(isImportingIcs = false) }
+            sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
         }
 }

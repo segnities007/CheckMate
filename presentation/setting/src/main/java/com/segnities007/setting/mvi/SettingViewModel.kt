@@ -118,30 +118,23 @@ class SettingViewModel(
     }
 
     private suspend fun confirmDeleteAllData() {
-        // Use Caseを使用して全データを削除（Result型で統一的なエラーハンドリング）
-        clearAllCheckStatesUseCase().fold(
-            onSuccess = {
-                clearAllTemplatesUseCase().fold(
-                    onSuccess = {
-                        clearAllItemsUseCase().fold(
-                            onSuccess = {
-                                setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
-                                sendEffect { SettingEffect.ShowToast("全データを削除しました") }
-                            },
-                            onFailure = { e ->
-                                sendEffect { SettingEffect.ShowToast("アイテム削除失敗: ${e.message}") }
-                            }
-                        )
-                    },
-                    onFailure = { e ->
-                        sendEffect { SettingEffect.ShowToast("テンプレート削除失敗: ${e.message}") }
-                    }
-                )
-            },
-            onFailure = { e ->
-                sendEffect { SettingEffect.ShowToast("チェック状態削除失敗: ${e.message}") }
-            }
-        )
+        clearAllCheckStatesUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast("チェック状態削除失敗: ${e.message}") }
+            return
+        }
+
+        clearAllTemplatesUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast("テンプレート削除失敗: ${e.message}") }
+            return
+        }
+
+        clearAllItemsUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast("アイテム削除失敗: ${e.message}") }
+            return
+        }
+
+        setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
+        sendEffect { SettingEffect.ShowToast("全データを削除しました") }
     }
 
     private fun cancelDeleteAllData() {
@@ -149,72 +142,59 @@ class SettingViewModel(
     }
 
     private suspend fun linkWithGoogle() {
-        val result = loginWithGoogleUseCase()
-        result.fold(
-            onSuccess = {
-                getUserStatusUseCase().fold(
-                    onSuccess = { updatedUserStatus ->
-                        setState { copy(userStatus = updatedUserStatus) }
-                        sendEffect { SettingEffect.ShowToast("Googleアカウントと連携しました") }
-                    },
-                    onFailure = { e ->
-                        sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
-                    }
-                )
-            },
-            onFailure = {
-                sendEffect { SettingEffect.ShowToast("Google連携に失敗しました") }
-            }
+        performGoogleAuthentication(
+            successMessage = "Googleアカウントと連携しました",
+            failureMessage = "Google連携に失敗しました"
         )
     }
 
     private suspend fun changeGoogleAccount() {
-        val result = loginWithGoogleUseCase()
-        result.fold(
-            onSuccess = {
-                getUserStatusUseCase().fold(
-                    onSuccess = { updatedUserStatus ->
-                        setState { copy(userStatus = updatedUserStatus) }
-                        sendEffect { SettingEffect.ShowToast("Googleアカウントを変更しました") }
-                    },
-                    onFailure = { e ->
-                        sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
-                    }
-                )
-            },
-            onFailure = {
-                sendEffect { SettingEffect.ShowToast("アカウント変更に失敗しました") }
-            }
+        performGoogleAuthentication(
+            successMessage = "Googleアカウントを変更しました",
+            failureMessage = "アカウント変更に失敗しました"
         )
+    }
+
+    private suspend fun performGoogleAuthentication(
+        successMessage: String,
+        failureMessage: String
+    ) {
+        loginWithGoogleUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast(failureMessage) }
+            return
+        }
+
+        val updatedUserStatus = getUserStatusUseCase().getOrElse { e ->
+            sendEffect { SettingEffect.ShowToast(failureMessage) }
+            return
+        }
+
+        setState { copy(userStatus = updatedUserStatus) }
+        sendEffect { SettingEffect.ShowToast(successMessage) }
     }
 
     private suspend fun importIcsFile(intent: SettingIntent.ImportIcsFile) {
         setState { reducer.reduce(this, intent) }
-        
-        val result = generateTemplatesFromIcsUseCase(intent.uri)
-        result.fold(
-            onSuccess = { templates ->
-                saveGeneratedTemplatesUseCase(templates).fold(
-                    onSuccess = {
-                        setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
-                        sendEffect {
-                            SettingEffect.ShowIcsImportResult(
-                                successCount = templates.size,
-                                totalCount = templates.size,
-                            )
-                        }
-                    },
-                    onFailure = { e ->
-                        setState { copy(isImportingIcs = false) }
-                        sendEffect { SettingEffect.ShowToast("テンプレート保存に失敗しました: ${e.message}") }
-                    }
-                )
-            },
-            onFailure = { e ->
-                setState { copy(isImportingIcs = false) }
-                sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
-            }
-        )
+
+        val templates = generateTemplatesFromIcsUseCase(intent.uri).getOrElse { e ->
+            setState { copy(isImportingIcs = false) }
+            sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }
+            return
+        }
+
+        saveGeneratedTemplatesUseCase(templates).getOrElse { e ->
+            setState { copy(isImportingIcs = false) }
+            sendEffect { SettingEffect.ShowToast("テンプレート保存に失敗しました: ${e.message}") }
+            return
+        }
+
+        setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
+        sendEffect {
+            SettingEffect.ShowIcsImportResult(
+                successCount = templates.size,
+                totalCount = templates.size,
+            )
+        }
     }
 
     private fun showIcsImportDialog() {
