@@ -121,18 +121,33 @@ class SettingViewModel(
     }
 
     private suspend fun confirmDeleteAllData() {
-        try {
-            // Use Caseを使用して全データを削除
-            clearAllCheckStatesUseCase()
-            clearAllTemplatesUseCase()
-            clearAllItemsUseCase()
-            
-            setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
-            sendEffect { SettingEffect.ShowToast("全データを削除しました") }
-        } catch (e: Exception) {
-            sendEffect { SettingEffect.ShowToast("データ削除失敗: ${e.message}") }
-            Log.e("SettingViewModel", "データ削除失敗", e)
-        }
+        // Use Caseを使用して全データを削除（Result型で統一的なエラーハンドリング）
+        clearAllCheckStatesUseCase().fold(
+            onSuccess = {
+                clearAllTemplatesUseCase().fold(
+                    onSuccess = {
+                        clearAllItemsUseCase().fold(
+                            onSuccess = {
+                                setState { reducer.reduce(this, SettingIntent.ConfirmDeleteAllData) }
+                                sendEffect { SettingEffect.ShowToast("全データを削除しました") }
+                            },
+                            onFailure = { e ->
+                                sendEffect { SettingEffect.ShowToast("アイテム削除失敗: ${e.message}") }
+                                Log.e("SettingViewModel", "アイテム削除失敗", e)
+                            }
+                        )
+                    },
+                    onFailure = { e ->
+                        sendEffect { SettingEffect.ShowToast("テンプレート削除失敗: ${e.message}") }
+                        Log.e("SettingViewModel", "テンプレート削除失敗", e)
+                    }
+                )
+            },
+            onFailure = { e ->
+                sendEffect { SettingEffect.ShowToast("チェック状態削除失敗: ${e.message}") }
+                Log.e("SettingViewModel", "チェック状態削除失敗", e)
+            }
+        )
     }
 
     private fun cancelDeleteAllData() {
@@ -185,14 +200,22 @@ class SettingViewModel(
         val result = generateTemplatesFromIcsUseCase(intent.uri)
         result.fold(
             onSuccess = { templates ->
-                saveGeneratedTemplatesUseCase(templates)
-                setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
-                sendEffect {
-                    SettingEffect.ShowIcsImportResult(
-                        successCount = templates.size,
-                        totalCount = templates.size,
-                    )
-                }
+                saveGeneratedTemplatesUseCase(templates).fold(
+                    onSuccess = {
+                        setState { copy(isImportingIcs = false, showIcsImportDialog = false) }
+                        sendEffect {
+                            SettingEffect.ShowIcsImportResult(
+                                successCount = templates.size,
+                                totalCount = templates.size,
+                            )
+                        }
+                    },
+                    onFailure = { e ->
+                        setState { copy(isImportingIcs = false) }
+                        sendEffect { SettingEffect.ShowToast("テンプレート保存に失敗しました: ${e.message}") }
+                        Log.e("SettingViewModel", "テンプレート保存失敗", e)
+                    }
+                )
             },
             onFailure = { e ->
                 setState { copy(isImportingIcs = false) }

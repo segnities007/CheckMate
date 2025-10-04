@@ -69,7 +69,14 @@ class HomeViewModel(
                 .now()
                 .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
                 .date
-        ensureCheckHistoryForTodayUseCase(today)
+        ensureCheckHistoryForTodayUseCase(today).fold(
+            onSuccess = {
+                // チェック履歴の確保に成功
+            },
+            onFailure = { e ->
+                // エラーハンドリング: ログ出力
+            }
+        )
     }
 
     private suspend fun getAllItems() {
@@ -170,6 +177,15 @@ class HomeViewModel(
         stateMap[itemId] = checked
         setState { copy(itemCheckStates = stateMap.toMap()) }
 
-        checkItemUseCase(itemId, currentDate, checked)
+        checkItemUseCase(itemId, currentDate, checked).fold(
+            onSuccess = {
+                // チェック状態の更新に成功
+            },
+            onFailure = { e ->
+                // エラー時はUIの状態を元に戻す
+                stateMap[itemId] = !checked
+                setState { copy(itemCheckStates = stateMap.toMap()) }
+            }
+        )
     }
 }

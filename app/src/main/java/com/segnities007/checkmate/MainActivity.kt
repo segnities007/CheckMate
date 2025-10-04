@@ -8,8 +8,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,6 +30,8 @@ import com.segnities007.navigation.Route
 import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
+
+    private var showNotificationRationaleDialog by mutableStateOf(false)
 
     /**
      * 通知権限リクエスト用のActivityResultLauncher
@@ -51,6 +59,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             CheckMateTheme {
                 MainNavigation()
+                
+                // 通知権限の説明ダイアログ
+                if (showNotificationRationaleDialog) {
+                    NotificationPermissionRationaleDialog(
+                        onConfirm = {
+                            showNotificationRationaleDialog = false
+                            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        },
+                        onDismiss = {
+                            showNotificationRationaleDialog = false
+                        }
+                    )
+                }
             }
         }
     }
@@ -70,9 +91,8 @@ class MainActivity : ComponentActivity() {
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
                     // ユーザーが以前に権限を拒否した場合
-                    // 理由を説明するダイアログを表示することを推奨
-                    // ここでは直接リクエストを実行
-                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    // 理由を説明するダイアログを表示
+                    showNotificationRationaleDialog = true
                 }
                 else -> {
                     // 初回リクエスト
@@ -81,6 +101,37 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+/**
+ * 通知権限の必要性を説明するダイアログ
+ */
+@Composable
+private fun NotificationPermissionRationaleDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("通知の許可が必要です") },
+        text = {
+            Text(
+                "CheckMateは、未チェックのアイテムがある場合に " +
+                    "毎日リマインダー通知を送信します。\n\n" +
+                    "通知を受け取ることで、大切なアイテムのチェック忘れを防ぐことができます。"
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("許可する")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("後で")
+            }
+        }
+    )
 }
 
 @Composable

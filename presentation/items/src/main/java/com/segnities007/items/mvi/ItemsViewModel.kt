@@ -192,9 +192,16 @@ class ItemsViewModel(
                     return
                 }
                 
-                // 画像を削除
+                // 画像を削除（Result型で処理）
                 if (itemToDelete.imagePath.isNotBlank()) {
-                    deleteImageUseCase(itemToDelete.imagePath)
+                    deleteImageUseCase(itemToDelete.imagePath).fold(
+                        onSuccess = {
+                            // 画像削除成功
+                        },
+                        onFailure = { e ->
+                            // 画像削除失敗してもアイテム削除は続行
+                        }
+                    )
                 }
 
                 // アイテムを削除

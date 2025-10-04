@@ -210,14 +210,28 @@ class TemplatesViewModel(
             daysOfWeek = daysOfWeek,
             itemIds = emptyList(), // 追加時は空で作成し、後から編集で詰める
         )
-        addTemplateUseCase(template)
-        getAllWeeklyTemplates()
+        addTemplateUseCase(template).fold(
+            onSuccess = {
+                getAllWeeklyTemplates()
+                sendEffect { TemplatesEffect.ShowToast("「${template.title}」を追加しました") }
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("テンプレートの追加に失敗しました: ${e.message}") }
+            }
+        )
     }
 
     private suspend fun editWeeklyTemplate(template: WeeklyTemplate) {
-        updateTemplateUseCase(template)
-        getAllWeeklyTemplates()
-        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+        updateTemplateUseCase(template).fold(
+            onSuccess = {
+                getAllWeeklyTemplates()
+                sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+                sendEffect { TemplatesEffect.ShowToast("「${template.title}」を更新しました") }
+            },
+            onFailure = { e ->
+                sendEffect { TemplatesEffect.ShowToast("テンプレートの更新に失敗しました: ${e.message}") }
+            }
+        )
     }
 
     private fun showDeleteConfirmation(template: WeeklyTemplate) {
@@ -227,10 +241,16 @@ class TemplatesViewModel(
     private suspend fun confirmDeleteTemplate() {
         val templateToDelete = state.value.templateToDelete
         if (templateToDelete != null) {
-            deleteTemplateUseCase(templateToDelete)
-            setState { reducer.reduce(this, TemplatesIntent.ConfirmDeleteTemplate) }
-            getAllWeeklyTemplates()
-            sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
+            deleteTemplateUseCase(templateToDelete).fold(
+                onSuccess = {
+                    setState { reducer.reduce(this, TemplatesIntent.ConfirmDeleteTemplate) }
+                    getAllWeeklyTemplates()
+                    sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
+                },
+                onFailure = { e ->
+                    sendEffect { TemplatesEffect.ShowToast("削除失敗: ${e.message}") }
+                }
+            )
         }
     }
 
@@ -250,10 +270,17 @@ class TemplatesViewModel(
             val result = generateTemplatesFromIcsUseCase(uri)
             result.fold(
                 onSuccess = { templates ->
-                    saveGeneratedTemplatesUseCase(templates)
-                    getAllWeeklyTemplates()
-                    setState { copy(isImportingIcs = false) }
-                    sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
+                    saveGeneratedTemplatesUseCase(templates).fold(
+                        onSuccess = {
+                            getAllWeeklyTemplates()
+                            setState { copy(isImportingIcs = false) }
+                            sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
+                        },
+                        onFailure = { e ->
+                            setState { copy(isImportingIcs = false) }
+                            sendEffect { TemplatesEffect.ShowToast("テンプレート保存失敗: ${e.message}") }
+                        }
+                    )
                 },
                 onFailure = { e ->
                     setState { copy(isImportingIcs = false) }
