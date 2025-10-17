@@ -2,21 +2,21 @@ package com.segnities007.ui.card.statistics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.segnities007.ui.indicator.CircularProgressWithPercentage
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.segnities007.ui.card.BaseCard
+import com.segnities007.ui.indicator.CircularWavyProgressWithPercentage
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatCardWithPercentage(
     title: String,
@@ -24,14 +24,7 @@ fun StatCardWithPercentage(
     progress: Float,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors =
-            CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-    ) {
+    BaseCard(modifier = modifier) {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -51,7 +44,7 @@ fun StatCardWithPercentage(
                 color = MaterialTheme.colorScheme.primary,
             )
 
-            CircularProgressWithPercentage(
+            CircularWavyProgressWithPercentage(
                 progress = progress,
                 modifier = Modifier.size(80.dp),
             )

@@ -2,18 +2,16 @@ package com.segnities007.templates.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.segnities007.model.DayOfWeek
 import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.utils.getDayOfWeekDisplayName
-import com.segnities007.ui.bar.FilterConfig
-import com.segnities007.ui.bar.FilterOption
-import com.segnities007.ui.bar.SearchFilterSortBar
-import com.segnities007.ui.bar.SortConfig
-import com.segnities007.ui.bar.SortOption
+import com.segnities007.ui.card.search.SearchCard
+import com.segnities007.ui.card.search.model.FilterConfig
+import com.segnities007.ui.card.search.model.FilterOption
+import com.segnities007.ui.card.search.model.SortConfig
+import com.segnities007.ui.card.search.model.SortOption
 
 @Composable
 fun TemplateSearchFilterSortBar(
@@ -32,7 +30,7 @@ fun TemplateSearchFilterSortBar(
         ) + DayOfWeek.entries.map { dayOfWeek ->
             FilterOption(dayOfWeek, getDayOfWeekDisplayName(dayOfWeek))
         },
-        getDisplayName = { selectedDayOfWeek?.let { getDayOfWeekDisplayName(it) } ?: "全曜日" },
+        getDisplayName = { option -> option?.let { getDayOfWeekDisplayName(it) } ?: "全曜日" },
         onValueChange = onDayOfWeekChange,
         iconDescription = "曜日",
     )
@@ -43,7 +41,7 @@ fun TemplateSearchFilterSortBar(
             SortOption(TemplateSortOrder.NAME_ASC, "名前順"),
             SortOption(TemplateSortOrder.ITEM_COUNT_ASC, "アイテム数順"),
         ),
-        getDisplayName = { 
+        getDisplayName = {
             when (it) {
                 TemplateSortOrder.NAME_ASC -> "名前順"
                 TemplateSortOrder.NAME_DESC -> "名前順"
@@ -56,7 +54,7 @@ fun TemplateSearchFilterSortBar(
         iconDescription = "ソート",
     )
 
-    SearchFilterSortBar(
+    SearchCard(
         searchQuery = searchQuery,
         searchPlaceholder = "テンプレートを検索...",
         onSearchQueryChange = onSearchQueryChange,

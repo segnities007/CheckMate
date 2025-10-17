@@ -127,11 +127,11 @@ private fun HomeScreenPreview() {
             state = HomeState(),
             scrollState = rememberScrollState(),
             brash = verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    MaterialTheme.colorScheme.primary.copy(0.6f),
-                )
-            ),
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.primary.copy(0.6f),
+                    )
+                ),
             sendIntent = {},
         )
 }

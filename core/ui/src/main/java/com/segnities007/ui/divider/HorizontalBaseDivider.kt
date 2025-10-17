@@ -1,6 +1,8 @@
 package com.segnities007.ui.divider
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -19,11 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HorizontalStatDivider(
-    label: String,
-    itemCount: Int,
-    checkedCount: Int,
+fun HorizontalBaseDivider(
     modifier: Modifier = Modifier,
+    startContent: @Composable () -> Unit = {},
+    centerContent: @Composable () -> Unit = {},
+    endContent: @Composable () -> Unit = {},
 ) {
     Row(
         modifier =
@@ -42,32 +44,43 @@ fun HorizontalStatDivider(
                     Modifier
                         .size(12.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.inversePrimary),
+                        .background(MaterialTheme.colorScheme.inversePrimary)
+                        .border(BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary), CircleShape),
             )
-
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            startContent()
         }
-
-        Text(
-            text = "$checkedCount/$itemCount",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium,
-        )
+        centerContent()
+        endContent()
     }
 }
 
 @Composable
 @Preview
-private fun HorizontalStatDividerPreview() {
-    HorizontalStatDivider(
-        label = "今日の持ち物",
-        itemCount = 7,
-        checkedCount = 3,
+private fun HorizontalBaseDividerPreview() {
+    HorizontalBaseDivider(
+        startContent = {
+            Text(
+                text = "持ち物リスト",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        centerContent = {
+            Text(
+                text = "今日の持ち物",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        endContent = {
+            Text(
+                text = "3/5",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium,
+            )
+        },
     )
 }

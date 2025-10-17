@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.model.UserStatus
 import com.segnities007.navigation.HubRoute
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
@@ -35,6 +36,7 @@ import com.segnities007.setting.component.DeleteAllDataDialog
 import com.segnities007.setting.component.ImportingDialog
 import com.segnities007.setting.mvi.SettingEffect
 import com.segnities007.setting.mvi.SettingIntent
+import com.segnities007.setting.mvi.SettingState
 import com.segnities007.setting.mvi.SettingViewModel
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UserStatusCard
@@ -104,7 +106,7 @@ fun SettingScreen(
                 .verticalScroll(scrollState),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        SettingUi(settingViewModel::sendIntent)
+        SettingUi(state = state, sendIntent = settingViewModel::sendIntent)
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 
@@ -123,7 +125,10 @@ fun SettingScreen(
 }
 
 @Composable
-private fun SettingUi(sendIntent: (SettingIntent) -> Unit) {
+private fun SettingUi(
+    state: SettingState,
+    sendIntent: (SettingIntent) -> Unit,
+) {
     val jsonLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.OpenDocument(),
@@ -131,19 +136,9 @@ private fun SettingUi(sendIntent: (SettingIntent) -> Unit) {
             uri?.let { sendIntent(SettingIntent.ImportData(it)) }
         }
 
-    val icsLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.OpenDocument(),
-        ) { uri: Uri? ->
-            uri?.let { sendIntent(SettingIntent.ImportIcsFile(it)) }
-        }
-
-    val settingViewModel: SettingViewModel = koinInject()
-    val state by settingViewModel.state.collectAsState()
-
     Column(
         modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UserStatusCard(state.userStatus)
@@ -181,6 +176,9 @@ private fun SettingUi(sendIntent: (SettingIntent) -> Unit) {
 @Composable
 private fun SettingScreenPreview() {
     SettingUi(
+        state = SettingState(
+            userStatus = UserStatus(),
+        ),
         sendIntent = {},
     )
 }
