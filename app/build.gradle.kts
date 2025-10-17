@@ -96,4 +96,10 @@ dependencies {
 
     // navigation
     implementation(libs.androidx.navigation.compose)
+
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // kotlinx-datetime
+    implementation(libs.kotlinx.datetime)
 }

@@ -40,6 +40,7 @@ dependencies {
     implementation(project(":presentation:login"))
     implementation(project(":core:ui"))
     implementation(project(":domain:repository"))
+    implementation(project(":domain:usecase"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

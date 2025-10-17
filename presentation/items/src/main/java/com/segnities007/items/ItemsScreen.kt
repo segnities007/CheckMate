@@ -54,6 +54,10 @@ fun ItemsScreen(
                 ItemsEffect.NavigateToBarcodeScanner -> {
                     navController.navigate(ItemsRoute.BarcodeScanner)
                 }
+                ItemsEffect.ReopenBottomSheetWithProductInfo -> {
+                    itemsViewModel.sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
+                    itemsViewModel.sendIntent(ItemsIntent.SetShouldClearForm(false))
+                }
             }
         }
     }

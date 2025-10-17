@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
+    implementation(project(":domain:usecase"))
     implementation(project(":data:remote"))
     implementation(project(":data:repository"))
     implementation(project(":data:local"))

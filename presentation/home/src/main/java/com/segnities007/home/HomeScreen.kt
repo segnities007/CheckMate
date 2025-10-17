@@ -1,6 +1,5 @@
 package com.segnities007.home
 
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
@@ -62,7 +61,17 @@ fun HomeScreen(
                 onNavigate = onNavigate,
             )
         }
-        Log.d("HomeScreen", state.toString())
+    }
+
+    // Effect処理
+    LaunchedEffect(Unit) {
+        homeViewModel.effect.collect { effect ->
+            when (effect) {
+                is com.segnities007.home.mvi.HomeEffect.ShowError -> {
+                    // TODO: Snackbarやダイアログで表示
+                }
+            }
+        }
     }
 
     HomeUi(

@@ -1,16 +1,15 @@
 package com.segnities007.hub.mvi
 
-import com.segnities007.repository.UserRepository
 import com.segnities007.ui.mvi.BaseViewModel
+import com.segnities007.usecase.user.GetUserStatusUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 
 class HubViewModel(
-    private val userRepository: UserRepository,
+    private val getUserStatusUseCase: GetUserStatusUseCase,
 ) : BaseViewModel<HubIntent, HubState, HubEffect>(HubState()),
     KoinComponent {
-    private val reducer: HubReducer = HubReducer()
 
     override suspend fun handleIntent(intent: HubIntent) {
         when (intent) {
@@ -29,24 +28,30 @@ class HubViewModel(
     }
 
     private suspend fun loadUserStatus() {
-        val userStatus = withContext(Dispatchers.IO) { userRepository.getUserStatus() }
-        setState { copy(userStatus = userStatus) }
+        getUserStatusUseCase().fold(
+            onSuccess = { userStatus ->
+                setState { copy(userStatus = userStatus) }
+            },
+            onFailure = { e ->
+                sendEffect { HubEffect.ShowToast("ユーザー情報の読み込みに失敗しました") }
+            }
+        )
     }
 
     private fun setBottomBar(intent: HubIntent.SetBottomBar) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
     }
 
     private fun setTopBar(intent: HubIntent.SetTopBar) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
     }
 
     private fun setFab(intent: HubIntent.SetFab) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
     }
 
     private fun navigate(intent: HubIntent.Navigate) {
-        setState { reducer.reduce(this, intent) }
+        setState { reduce(intent) }
         sendEffect { HubEffect.Navigate(intent.hubRoute) }
     }
 
@@ -56,5 +61,21 @@ class HubViewModel(
 
     private fun logout() {
         sendEffect { HubEffect.Logout }
+    }
+}
+
+// =============================================================================
+// Reducer Function
+// =============================================================================
+
+private fun HubState.reduce(intent: HubIntent): HubState {
+    return when (intent) {
+        is HubIntent.SetBottomBar -> copy(bottomBar = intent.bottomBar)
+        is HubIntent.SetTopBar -> copy(topBar = intent.topBar)
+        is HubIntent.SetFab -> copy(fab = intent.fab)
+        is HubIntent.Navigate -> copy(currentHubRoute = intent.hubRoute)
+        
+        // 他のIntentはViewModelで処理（非同期処理など）
+        else -> this
     }
 }
