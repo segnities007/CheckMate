@@ -4,11 +4,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.segnities007.items.mvi.SortOrder
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.ui.card.FilterConfig
-import com.segnities007.ui.card.FilterOption
-import com.segnities007.ui.card.SearchCardWithFilter
-import com.segnities007.ui.card.SortConfig
-import com.segnities007.ui.card.SortOption
+import com.segnities007.ui.card.search.FilterConfig
+import com.segnities007.ui.card.search.FilterOption
+import com.segnities007.ui.card.search.SearchCard
+import com.segnities007.ui.card.search.SortConfig
+import com.segnities007.ui.card.search.SortOption
 
 @Composable
 fun SearchFilterBar(
@@ -44,7 +44,7 @@ fun SearchFilterBar(
         iconDescription = "ソート",
     )
 
-    SearchCardWithFilter(
+    SearchCard(
         searchQuery = searchQuery,
         searchPlaceholder = "アイテムを検索...",
         onSearchQueryChange = onSearchQueryChange,

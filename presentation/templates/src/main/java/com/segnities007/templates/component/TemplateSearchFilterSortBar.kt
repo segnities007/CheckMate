@@ -7,11 +7,11 @@ import androidx.compose.ui.Modifier
 import com.segnities007.model.DayOfWeek
 import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.utils.getDayOfWeekDisplayName
-import com.segnities007.ui.card.FilterConfig
-import com.segnities007.ui.card.FilterOption
-import com.segnities007.ui.card.SearchCardWithFilter
-import com.segnities007.ui.card.SortConfig
-import com.segnities007.ui.card.SortOption
+import com.segnities007.ui.card.search.FilterConfig
+import com.segnities007.ui.card.search.FilterOption
+import com.segnities007.ui.card.search.SearchCard
+import com.segnities007.ui.card.search.SortConfig
+import com.segnities007.ui.card.search.SortOption
 
 @Composable
 fun TemplateSearchFilterSortBar(
@@ -54,7 +54,7 @@ fun TemplateSearchFilterSortBar(
         iconDescription = "ソート",
     )
 
-    SearchCardWithFilter(
+    SearchCard(
         searchQuery = searchQuery,
         searchPlaceholder = "テンプレートを検索...",
         onSearchQueryChange = onSearchQueryChange,
