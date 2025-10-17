@@ -7,11 +7,11 @@ import androidx.compose.ui.Modifier
 import com.segnities007.model.DayOfWeek
 import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.utils.getDayOfWeekDisplayName
-import com.segnities007.ui.card.search.FilterConfig
-import com.segnities007.ui.card.search.FilterOption
 import com.segnities007.ui.card.search.SearchCard
-import com.segnities007.ui.card.search.SortConfig
-import com.segnities007.ui.card.search.SortOption
+import com.segnities007.ui.card.search.model.FilterConfig
+import com.segnities007.ui.card.search.model.FilterOption
+import com.segnities007.ui.card.search.model.SortConfig
+import com.segnities007.ui.card.search.model.SortOption
 
 @Composable
 fun TemplateSearchFilterSortBar(
@@ -30,7 +30,7 @@ fun TemplateSearchFilterSortBar(
         ) + DayOfWeek.entries.map { dayOfWeek ->
             FilterOption(dayOfWeek, getDayOfWeekDisplayName(dayOfWeek))
         },
-    getDisplayName = { option -> option?.let { getDayOfWeekDisplayName(it) } ?: "全曜日" },
+        getDisplayName = { option -> option?.let { getDayOfWeekDisplayName(it) } ?: "全曜日" },
         onValueChange = onDayOfWeekChange,
         iconDescription = "曜日",
     )
@@ -41,7 +41,7 @@ fun TemplateSearchFilterSortBar(
             SortOption(TemplateSortOrder.NAME_ASC, "名前順"),
             SortOption(TemplateSortOrder.ITEM_COUNT_ASC, "アイテム数順"),
         ),
-        getDisplayName = { 
+        getDisplayName = {
             when (it) {
                 TemplateSortOrder.NAME_ASC -> "名前順"
                 TemplateSortOrder.NAME_DESC -> "名前順"

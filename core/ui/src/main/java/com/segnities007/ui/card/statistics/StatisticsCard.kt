@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import com.segnities007.ui.card.BaseCard
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,6 +27,7 @@ import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.ui.indicator.CircularProgressWithPercentage
 import androidx.compose.ui.tooling.preview.Preview
+import com.segnities007.ui.indicator.CircularWavyProgressWithPercentage
 import kotlin.time.ExperimentalTime
 
 @Composable
@@ -72,8 +76,7 @@ fun StatisticsCard(
                     )
                 }
 
-                // small circular with percentage
-                CircularProgressWithPercentage(progress = progress)
+                CircularWavyProgressWithPercentage(progress = progress)
             }
 
             if (totalCount == 0) {
@@ -128,6 +131,7 @@ private fun StatisticsCardPreview() {
     StatisticsCard(itemsForToday = items, itemCheckStates = checks)
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CategoryProgressRow(
     category: ItemCategory,
@@ -149,12 +153,10 @@ private fun CategoryProgressRow(
             overflow = TextOverflow.Ellipsis,
         )
 
-        LinearProgressIndicator(
+        LinearWavyProgressIndicator(
             progress = { progress },
+            wavelength = 12.dp,
             modifier = Modifier.weight(1.2f).height(6.dp).clip(RoundedCornerShape(4.dp)),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            strokeCap = StrokeCap.Round,
         )
 
         Text(

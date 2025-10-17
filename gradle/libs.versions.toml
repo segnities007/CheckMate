@@ -17,32 +17,34 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.9.0"
-ktorBom = "3.3.0"
-ktorClientCio = "3.3.0"
-ktorClientContentNegotiation = "3.3.0"
-ktorClientCore = "3.3.0"
-ktorClientLogging = "3.3.0"
-ktorSerializationKotlinxJson = "3.3.0"
+ktorBom = "3.3.1"
+ktorClientCio = "3.3.1"
+ktorClientContentNegotiation = "3.3.1"
+ktorClientCore = "3.3.1"
+ktorClientLogging = "3.3.1"
+ktorSerializationKotlinxJson = "3.3.1"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
-composeBom = "2025.09.01"
+composeBom = "2025.10.00"
+material3AdaptiveNavigationSuite = "1.5.0-alpha06"
 workRuntime = "2.10.5"
 appcompat = "1.7.1"
 googleAiClient = "0.9.0"
 material = "1.13.0"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.5"
-roomRuntime = "2.8.1"
+roomRuntime = "2.8.2"
 material3 = "1.4.0"
-runtime = "1.9.2"
+runtime = "1.9.3"
 mlKitBarcode = "17.3.0"
-foundationLayout = "1.9.2"
+foundationLayout = "1.9.3"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCore" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
+androidx-compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
