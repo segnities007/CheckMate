@@ -135,7 +135,7 @@ fun <FilterType, SortType> SearchFilterSortBar(
                                     containerColor = MaterialTheme.colorScheme.surface.copy(backgroundAlpha),
                                     contentColor = MaterialTheme.colorScheme.onSurface,
                                 ),
-                                border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+                                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
                                     brush = androidx.compose.ui.graphics.Brush.verticalGradient(
                                         colors = listOf(
                                             MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
@@ -188,7 +188,7 @@ fun <FilterType, SortType> SearchFilterSortBar(
                                     containerColor = MaterialTheme.colorScheme.surface.copy(backgroundAlpha),
                                     contentColor = MaterialTheme.colorScheme.onSurface,
                                 ),
-                                border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+                                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
                                     brush = androidx.compose.ui.graphics.Brush.verticalGradient(
                                         colors = listOf(
                                             MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),

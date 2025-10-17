@@ -8,19 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,11 +26,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
-import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.ui.tag.CountTag
 
 @Composable
@@ -48,62 +41,59 @@ fun TemplateCard(
     endContent: @Composable () -> Unit = {},
 ) {
     val backgroundAlpha = 0.7f
-
     val rowBrush = Brush.horizontalGradient(
         0.0f to Color.Transparent,
         1.0f to MaterialTheme.colorScheme.surface.copy(backgroundAlpha),
     )
 
-    Box(
-        modifier = modifier
+    BaseCard(
+        modifier = modifier,
+        brush = rowBrush,
+        tagContent = { mod ->
+            CountTag(
+                modifier = mod,
+                count = template.itemIds.size,
+            )
+        }
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface.copy(0.3f),
-            ),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).background(brush = rowBrush),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            TemplateIcon(template)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                TemplateIcon(template)
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
+                Text(
+                    text = template.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                if (template.daysOfWeek.isNotEmpty()) {
+                    val daysText = template.daysOfWeek.toList()
+                        .sortedBy { it.ordinal }
+                        .joinToString("、") { getDayOfWeekDisplayName(it) }
                     Text(
-                        text = template.title,
+                        text = daysText,
+                        fontSize = 12.sp,
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.secondary
                     )
-                    
-                    if (template.daysOfWeek.isNotEmpty()) {
-                        val daysText = template.daysOfWeek.toList()
-                            .sortedBy { it.ordinal }
-                            .joinToString("、") { getDayOfWeekDisplayName(it) }
-                        Text(
-                            text = daysText,
-                            fontSize = 12.sp,
-                            style = MaterialTheme.typography.bodyLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
                 }
-                endContent()
-                Spacer(Modifier.width(2.dp))
             }
+            endContent()
+            Spacer(Modifier.width(2.dp))
         }
-        CountTag(
-            modifier = Modifier.align(Alignment.TopStart).offset(x = (-6).dp, y = (-12).dp),
-            count = template.itemIds.size,
-        )
     }
 }
 
