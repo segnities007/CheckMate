@@ -23,7 +23,7 @@ import com.segnities007.ui.tag.CategoryTag
 fun BaseCard(
     modifier: Modifier = Modifier,
     brush: Brush = Brush.verticalGradient(0.0f to Color.Transparent, 1.0f to Color.Transparent),
-    alpha: Float = 0.7f,
+    alpha: Float = 0.6f,
     onCardClick: () -> Unit = {},
     tagContent: @Composable (modifier: Modifier) -> Unit = {},
     startContent: @Composable () -> Unit = {},

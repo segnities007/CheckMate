@@ -39,13 +39,13 @@ fun DataButtons(
     ) {
         DataButtonCard(
             title = "エクスポート",
-            icon = Icons.Default.Download,
+            icon = Icons.Default.Upload,
             onClick = onExportData,
         )
 
         DataButtonCard(
             title = "インポート",
-            icon = Icons.Default.Upload,
+            icon = Icons.Default.Download,
             onClick = onImportData,
         )
 

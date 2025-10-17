@@ -40,10 +40,9 @@ fun TemplateCard(
     onClick: () -> Unit = {},
     endContent: @Composable () -> Unit = {},
 ) {
-    val backgroundAlpha = 0.7f
     val rowBrush = Brush.horizontalGradient(
         0.0f to Color.Transparent,
-        1.0f to MaterialTheme.colorScheme.surface.copy(backgroundAlpha),
+        1.0f to Color.Transparent,
     )
 
     BaseCard(

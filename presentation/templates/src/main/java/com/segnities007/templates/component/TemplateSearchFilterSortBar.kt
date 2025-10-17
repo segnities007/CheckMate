@@ -2,18 +2,16 @@ package com.segnities007.templates.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.segnities007.model.DayOfWeek
 import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.utils.getDayOfWeekDisplayName
-import com.segnities007.ui.bar.FilterConfig
-import com.segnities007.ui.bar.FilterOption
-import com.segnities007.ui.bar.SearchFilterSortBar
-import com.segnities007.ui.bar.SortConfig
-import com.segnities007.ui.bar.SortOption
+import com.segnities007.ui.card.FilterConfig
+import com.segnities007.ui.card.FilterOption
+import com.segnities007.ui.card.SearchCardWithFilter
+import com.segnities007.ui.card.SortConfig
+import com.segnities007.ui.card.SortOption
 
 @Composable
 fun TemplateSearchFilterSortBar(
@@ -32,7 +30,7 @@ fun TemplateSearchFilterSortBar(
         ) + DayOfWeek.entries.map { dayOfWeek ->
             FilterOption(dayOfWeek, getDayOfWeekDisplayName(dayOfWeek))
         },
-        getDisplayName = { selectedDayOfWeek?.let { getDayOfWeekDisplayName(it) } ?: "全曜日" },
+    getDisplayName = { option -> option?.let { getDayOfWeekDisplayName(it) } ?: "全曜日" },
         onValueChange = onDayOfWeekChange,
         iconDescription = "曜日",
     )
@@ -56,7 +54,7 @@ fun TemplateSearchFilterSortBar(
         iconDescription = "ソート",
     )
 
-    SearchFilterSortBar(
+    SearchCardWithFilter(
         searchQuery = searchQuery,
         searchPlaceholder = "テンプレートを検索...",
         onSearchQueryChange = onSearchQueryChange,

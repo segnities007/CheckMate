@@ -1,16 +1,14 @@
 package com.segnities007.items.component
 
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.segnities007.items.mvi.SortOrder
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.ui.bar.FilterConfig
-import com.segnities007.ui.bar.FilterOption
-import com.segnities007.ui.bar.SearchFilterSortBar
-import com.segnities007.ui.bar.SortConfig
-import com.segnities007.ui.bar.SortOption
+import com.segnities007.ui.card.FilterConfig
+import com.segnities007.ui.card.FilterOption
+import com.segnities007.ui.card.SearchCardWithFilter
+import com.segnities007.ui.card.SortConfig
+import com.segnities007.ui.card.SortOption
 
 @Composable
 fun SearchFilterBar(
@@ -29,7 +27,7 @@ fun SearchFilterBar(
         ) + ItemCategory.entries.map { category ->
             FilterOption(category, getCategoryDisplayName(category))
         },
-        getDisplayName = { selectedCategory?.let { getCategoryDisplayName(it) } ?: "カテゴリ" },
+    getDisplayName = { option -> option?.let { getCategoryDisplayName(it) } ?: "カテゴリ" },
         onValueChange = onCategoryChange,
         iconDescription = "カテゴリ",
     )
@@ -46,7 +44,7 @@ fun SearchFilterBar(
         iconDescription = "ソート",
     )
 
-    SearchFilterSortBar(
+    SearchCardWithFilter(
         searchQuery = searchQuery,
         searchPlaceholder = "アイテムを検索...",
         onSearchQueryChange = onSearchQueryChange,
