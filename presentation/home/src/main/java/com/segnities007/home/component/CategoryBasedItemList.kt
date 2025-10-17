@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.ui.button.CheckBoxButton
-import com.segnities007.ui.card.EmptyStateCard
+import com.segnities007.ui.card.empty.EmptyStateCard
 import com.segnities007.ui.card.ItemCard
 import com.segnities007.ui.divider.HorizontalStatDivider
 import kotlin.time.ExperimentalTime

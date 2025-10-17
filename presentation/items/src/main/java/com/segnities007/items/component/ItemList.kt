@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.items.mvi.ItemsState
 import com.segnities007.model.item.Item
 import com.segnities007.ui.card.ItemCard
-import com.segnities007.ui.card.ItemsEmptyStateCard
+import com.segnities007.ui.card.empty.ItemsEmptyStateCard
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalFoundationApi::class)
