@@ -41,6 +41,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.segnities007.ui.card.search.model.FilterConfig
+import com.segnities007.ui.card.search.model.SortConfig
 
 
 @OptIn(ExperimentalMaterial3Api::class)
