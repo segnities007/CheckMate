@@ -55,14 +55,12 @@ import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 import kotlin.time.ExperimentalTime
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+
 @OptIn(ExperimentalTime::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsListPage(
-    innerPadding: PaddingValues,
     backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
     sendIntent: (ItemsIntent) -> Unit,
     onNavigateToBarcodeScanner: () -> Unit,
@@ -91,17 +89,15 @@ fun ItemsListPage(
         label = "navigationBarAlpha",
     )
 
-    // 上部バーやFABを親から設定
-    LaunchedEffect(Unit) {
-        setNavigationBar {
+    CheckMateScaffold(
+        bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
                 currentHubRoute = HubRoute.Items,
                 onNavigate = onNavigate,
             )
-        }
-        setTopBar {}
-        setFab {
+        },
+        floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier.graphicsLayer(alpha = alpha),
                 containerColor = FloatingActionButtonDefaults.containerColor,
@@ -119,16 +115,16 @@ fun ItemsListPage(
                 )
             }
         }
+    ) { innerPadding ->
+        // UI部分を切り出し
+        ItemListUi(
+            innerPadding = innerPadding,
+            scrollState = scrollState,
+            brush = backgroundBrush,
+            state = state,
+            sendIntent = sendIntent,
+        )
     }
-
-    // UI部分を切り出し
-    ItemListUi(
-        innerPadding = innerPadding,
-        scrollState = scrollState,
-        brush = backgroundBrush,
-        state = state,
-        sendIntent = sendIntent,
-    )
 
     // BottomSheet
     if (state.isShowBottomSheet) {

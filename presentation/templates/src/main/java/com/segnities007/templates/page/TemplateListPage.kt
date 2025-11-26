@@ -44,13 +44,11 @@ import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+
 @Composable
 fun TemplateListPage(
-    innerPadding: PaddingValues,
     backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
     sendIntent: (TemplatesIntent) -> Unit,
     templates: List<WeeklyTemplate>,
@@ -72,52 +70,51 @@ fun TemplateListPage(
         label = "navigationBarAlpha",
     )
 
-    LaunchedEffect(Unit) {
-        setNavigationBar {
+    CheckMateScaffold(
+        bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
                 currentHubRoute = HubRoute.Templates,
                 onNavigate = onNavigate,
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                modifier = Modifier.graphicsLayer(alpha = alpha),
+                onClick = { sendIntent(TemplatesIntent.ShowBottomSheet) },
+                elevation = FloatingActionButtonDefaults.elevation(2.dp),
+                containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
+                contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Assignment,
+                    contentDescription = "Add Template",
+                )
+            }
         }
-        setFab {
-                FloatingActionButton(
-                    modifier = Modifier.graphicsLayer(alpha = alpha),
-                    onClick = { sendIntent(TemplatesIntent.ShowBottomSheet) },
-                    elevation = FloatingActionButtonDefaults.elevation(2.dp),
-                    containerColor = FloatingActionButtonDefaults.containerColor.copy(alpha = alpha),
-                    contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor).copy(alpha = alpha),
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Assignment,
-                        contentDescription = "Add Template",
-                    )
-                }
+    ) { innerPadding ->
+        Column(
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .background(backgroundBrush)
+                    .verticalScroll(listState)
+                    .padding(horizontal = 16.dp),
+        ) {
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+            TemplateListUi(
+                sendIntent = sendIntent,
+                templates = templates,
+                templateSearchQuery = templateSearchQuery,
+                templateSortOrder = templateSortOrder,
+                selectedDayOfWeek = selectedDayOfWeek,
+                onTemplateClick = onTemplateClick,
+                onSearchQueryChange = onSearchQueryChange,
+                onSortOrderChange = onSortOrderChange,
+                onDayOfWeekChange = onDayOfWeekChange,
+            )
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         }
-        setTopBar {}
-    }
-
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(backgroundBrush)
-                .verticalScroll(listState)
-                .padding(horizontal = 16.dp),
-    ) {
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        TemplateListUi(
-            sendIntent = sendIntent,
-            templates = templates,
-            templateSearchQuery = templateSearchQuery,
-            templateSortOrder = templateSortOrder,
-            selectedDayOfWeek = selectedDayOfWeek,
-            onTemplateClick = onTemplateClick,
-            onSearchQueryChange = onSearchQueryChange,
-            onSortOrderChange = onSortOrderChange,
-            onDayOfWeekChange = onDayOfWeekChange,
-        )
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
     }
 }
 

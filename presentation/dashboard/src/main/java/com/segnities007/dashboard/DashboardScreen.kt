@@ -36,14 +36,12 @@ import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    innerPadding: PaddingValues,
     backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val dashboardViewModel: DashboardViewModel = koinInject()
@@ -57,24 +55,22 @@ fun DashboardScreen(
         label = "navigationBarAlpha",
     )
 
-    LaunchedEffect(Unit) {
-        setFab {}
-        setTopBar {}
-        setNavigationBar {
+    CheckMateScaffold(
+        bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
                 currentHubRoute = HubRoute.Dashboard,
                 onNavigate = onNavigate,
             )
         }
+    ) { innerPadding ->
+        DashboardUi(
+            state = state,
+            scrollState = scrollState,
+            innerPadding = innerPadding,
+            backgroundBrush = backgroundBrush,
+        )
     }
-
-    DashboardUi(
-        state = state,
-        scrollState = scrollState,
-        innerPadding = innerPadding,
-        backgroundBrush = backgroundBrush,
-    )
 }
 
 @Composable

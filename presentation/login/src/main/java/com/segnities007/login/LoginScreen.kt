@@ -18,6 +18,8 @@ import com.segnities007.login.mvi.LoginViewModel
 import com.segnities007.navigation.Route
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+
 @Composable
 fun LoginScreen(topNavigate: (Route) -> Unit) {
     val loginViewModel: LoginViewModel = koinInject()
@@ -35,7 +37,9 @@ fun LoginScreen(topNavigate: (Route) -> Unit) {
         }
     }
 
-    LoginUi(sendIntent = loginViewModel::sendIntent)
+    CheckMateScaffold {
+        LoginUi(sendIntent = loginViewModel::sendIntent)
+    }
 }
 
 @Composable

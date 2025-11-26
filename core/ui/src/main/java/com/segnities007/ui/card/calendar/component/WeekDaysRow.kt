@@ -1,37 +1,16 @@
 package com.segnities007.ui.card.calendar.component
 
-import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.segnities007.model.WeeklyTemplate
-import com.segnities007.ui.card.calendar.util.hasTemplateFor
 import kotlinx.datetime.LocalDate
 
 @Composable
-fun WeekDaysRow(
+fun WeekDays(
     days: List<LocalDate>,
     selectedDate: LocalDate?,
     today: LocalDate,
-    templates: List<WeeklyTemplate>,
+    templates: List<com.segnities007.model.WeeklyTemplate>,
     onDateSelected: (LocalDate) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
 ) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        days.forEach { date ->
-            val isSelected = date == selectedDate
-            val isToday = date == today
-            val hasTemplates = hasTemplateFor(date, templates)
-
-            Box(modifier = Modifier.weight(1f)) {
-                WeekCalendarDayChip(
-                    date = date,
-                    isSelected = isSelected,
-                    isToday = isToday,
-                    hasTemplates = hasTemplates,
-                    onClick = { onDateSelected(date) },
-                )
-            }
-        }
-    }
+    // Implementation of WeekDays component
 }

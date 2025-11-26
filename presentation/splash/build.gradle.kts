@@ -35,6 +35,7 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
+    implementation(project(":core:ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -55,4 +56,8 @@ dependencies {
     // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
+
+    // navigation
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 }

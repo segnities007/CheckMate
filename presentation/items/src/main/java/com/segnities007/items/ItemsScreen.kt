@@ -25,11 +25,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreen(
-    innerPadding: PaddingValues,
     backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val itemsViewModel: ItemsViewModel = koinInject()
@@ -68,13 +64,9 @@ fun ItemsScreen(
     ) {
         composable<ItemsRoute.ItemsList> {
             ItemsListPage(
-                innerPadding = innerPadding,
                 backgroundBrush = backgroundBrush,
-                setNavigationBar = setNavigationBar,
-                setFab = setFab,
                 onNavigate = onNavigate,
                 sendIntent = itemsViewModel::sendIntent,
-                setTopBar = setTopBar,
                 onNavigateToBarcodeScanner = {
                     itemsViewModel.sendIntent(ItemsIntent.NavigateToBarcodeScanner)
                 },
@@ -95,9 +87,6 @@ fun ItemsScreen(
                 onNavigateToItemsList = {
                     itemsViewModel.sendIntent(ItemsIntent.NavigateToItemsList)
                 },
-                setFab = setFab,
-                setTopBar = setTopBar,
-                setNavigationBar = setNavigationBar,
             )
         }
         composable<ItemsRoute.BarcodeScanner> {
@@ -110,9 +99,6 @@ fun ItemsScreen(
                     itemsViewModel.sendIntent(ItemsIntent.NavigateToItemsList)
                 },
                 sendIntent = itemsViewModel::sendIntent,
-                setFab = setFab,
-                setTopBar = setTopBar,
-                setNavigationBar = setNavigationBar,
             )
         }
     }

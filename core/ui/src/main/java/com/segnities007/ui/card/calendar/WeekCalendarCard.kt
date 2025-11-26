@@ -24,11 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.ui.card.BaseCard
-import com.segnities007.ui.card.calendar.component.WeekRangeHeader
-import com.segnities007.ui.card.calendar.component.WeekdayLabelsRow
-import com.segnities007.ui.card.calendar.component.WeekDaysRow
-import com.segnities007.ui.card.calendar.util.weekDaysStartingSunday
+import com.segnities007.ui.card.calendar.component.CalendarWeekHeader
+import com.segnities007.ui.card.calendar.component.WeekdayLabels
+import com.segnities007.ui.card.calendar.component.WeekDays
+import com.segnities007.ui.card.calendar.util.weekDaysStartingOn
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
@@ -49,6 +50,7 @@ fun WeekCalendarCard(
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .date,
     onCenterDateChanged: (LocalDate) -> Unit = {},
+    weekStart: DayOfWeek = DayOfWeek.SUNDAY,
 ) {
     val today = Clock.System
         .now()
@@ -61,14 +63,14 @@ fun WeekCalendarCard(
         selectedDate?.let { if (it != internalCenter) internalCenter = it }
     }
 
-    val days: List<LocalDate> = weekDaysStartingSunday(internalCenter)
+    val days: List<LocalDate> = weekDaysStartingOn(internalCenter, weekStart)
 
     BaseCard(modifier = modifier) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            WeekRangeHeader(
+            CalendarWeekHeader(
                 first = days.first(),
                 onPreviousWeek = {
                     val newCenter = internalCenter.minus(7, DateTimeUnit.DAY)
@@ -82,9 +84,9 @@ fun WeekCalendarCard(
                 },
             )
 
-            WeekdayLabelsRow(days = days)
+            WeekdayLabels(days = days)
 
-            WeekDaysRow(
+            WeekDays(
                 days = days,
                 selectedDate = selectedDate,
                 today = today,

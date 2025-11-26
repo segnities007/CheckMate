@@ -67,4 +67,6 @@ dependencies {
 
     // datetime
     implementation(libs.kotlinx.datetime)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 }

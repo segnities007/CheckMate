@@ -2,7 +2,11 @@ package com.segnities007.ui.card.calendar.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,7 +22,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 @Composable
-fun CalendarWeekDayChip(
+fun WeekDayChip(
     date: LocalDate,
     isSelected: Boolean,
     isToday: Boolean,
@@ -48,7 +52,7 @@ fun CalendarWeekDayChip(
             .clickable { onClick() },
         contentAlignment = Alignment.Center,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center) {
             Text(
                 text = "${date.day}",
                 color = textColor,
@@ -66,22 +70,4 @@ fun CalendarWeekDayChip(
             }
         }
     }
-}
-
-@Composable
-@Deprecated("Use CalendarWeekDayChip in WeekDayChip.kt", ReplaceWith("CalendarWeekDayChip(date, isSelected, isToday, hasTemplates, onClick)"))
-fun WeekCalendarDayChip(
-    date: LocalDate,
-    isSelected: Boolean,
-    isToday: Boolean,
-    hasTemplates: Boolean,
-    onClick: () -> Unit,
-) {
-    CalendarWeekDayChip(
-        date = date,
-        isSelected = isSelected,
-        isToday = isToday,
-        hasTemplates = hasTemplates,
-        onClick = onClick,
-    )
 }

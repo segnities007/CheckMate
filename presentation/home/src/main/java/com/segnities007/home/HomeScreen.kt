@@ -31,13 +31,11 @@ import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+
 @Composable
 fun HomeScreen(
-    innerPadding: PaddingValues,
     backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val homeViewModel: HomeViewModel = koinInject()
@@ -51,18 +49,6 @@ fun HomeScreen(
         label = "navigationBarAlpha",
     )
 
-    LaunchedEffect(Unit) {
-        setTopBar {}
-        setFab {}
-        setNavigationBar {
-            FloatingNavigationBar(
-                alpha = alpha,
-                currentHubRoute = HubRoute.Home,
-                onNavigate = onNavigate,
-            )
-        }
-    }
-
     // Effect処理
     LaunchedEffect(Unit) {
         homeViewModel.effect.collect { effect ->
@@ -74,13 +60,23 @@ fun HomeScreen(
         }
     }
 
-    HomeUi(
-        innerPadding = innerPadding,
-        state = state,
-        scrollState = scrollState,
-        brash = backgroundBrush,
-        sendIntent = homeViewModel::sendIntent,
-    )
+    CheckMateScaffold(
+        bottomBar = {
+            FloatingNavigationBar(
+                alpha = alpha,
+                currentHubRoute = HubRoute.Home,
+                onNavigate = onNavigate,
+            )
+        }
+    ) { innerPadding ->
+        HomeUi(
+            innerPadding = innerPadding,
+            state = state,
+            scrollState = scrollState,
+            brash = backgroundBrush,
+            sendIntent = homeViewModel::sendIntent,
+        )
+    }
 }
 
 @Composable

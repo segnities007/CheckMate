@@ -16,7 +16,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 @Composable
-fun WeekdayLabelsRow(days: List<LocalDate>, modifier: Modifier = Modifier) {
+fun WeekdayLabels(days: List<LocalDate>, modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         days.forEach { date ->
             val label = japaneseWeekday(date.dayOfWeek)

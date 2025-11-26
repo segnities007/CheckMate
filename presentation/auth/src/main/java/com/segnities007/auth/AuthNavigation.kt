@@ -1,6 +1,5 @@
 package com.segnities007.auth
 
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,27 +37,17 @@ fun AuthNavigation(topNavigate: (Route) -> Unit) {
         }
     }
 
-    AuthUi {
-        NavHost(
-            navController = authNavController,
-            startDestination = AuthRoute.Splash,
-        ) {
-            composable<AuthRoute.Splash> {
-                SplashScreen()
-            }
-            composable<AuthRoute.Login> {
-                LoginScreen(
-                    topNavigate = topNavigate,
-                )
-            }
+    NavHost(
+        navController = authNavController,
+        startDestination = AuthRoute.Splash,
+    ) {
+        composable<AuthRoute.Splash> {
+            SplashScreen()
         }
-    }
-}
-
-@Composable
-private fun AuthUi(content: @Composable () -> Unit) {
-    Scaffold {
-        it
-        content()
+        composable<AuthRoute.Login> {
+            LoginScreen(
+                topNavigate = topNavigate,
+            )
+        }
     }
 }

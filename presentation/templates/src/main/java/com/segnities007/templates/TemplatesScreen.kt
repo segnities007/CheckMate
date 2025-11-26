@@ -36,11 +36,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplatesScreen(
-    innerPadding: PaddingValues,
     backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val templatesViewModel: TemplatesViewModel = koinInject()
@@ -83,11 +79,7 @@ fun TemplatesScreen(
     ) {
         composable<TemplatesRoute.WeeklyTemplateList> {
             TemplateListPage(
-                innerPadding = innerPadding,
                 backgroundBrush = backgroundBrush,
-                setFab = setFab,
-                setTopBar = setTopBar,
-                setNavigationBar = setNavigationBar,
                 onNavigate = onNavigate,
                 sendIntent = templatesViewModel::sendIntent,
                 templates = state.filteredTemplates,
@@ -104,10 +96,6 @@ fun TemplatesScreen(
             TemplateItemSelectPage(
                 backgroundBrush = backgroundBrush,
                 sendIntent = templatesViewModel::sendIntent,
-                innerPadding = innerPadding,
-                setNavigationBar = setNavigationBar,
-                setTopBar = setTopBar,
-                setFab = setFab,
                 template = state.selectedTemplate ?: WeeklyTemplate(),
                 allItems = state.filteredItems.ifEmpty { state.allItems },
             )

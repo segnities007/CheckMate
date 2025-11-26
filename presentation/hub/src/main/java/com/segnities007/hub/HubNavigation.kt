@@ -1,8 +1,6 @@
 package com.segnities007.hub
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,75 +52,39 @@ fun HubNavigation(onTopNavigate: (Route) -> Unit) {
         }
     }
 
-    HubUi(state = state) { innerPadding ->
-        NavHost(
-            navController = hubNavController,
-            startDestination = HubRoute.Home,
-        ) {
-            composable<HubRoute.Home> {
-                HomeScreen(
-                    innerPadding = innerPadding,
-                    backgroundBrush = backgroundBrush,
-                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
-                    setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
-                    setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
-                    onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
-                )
-            }
-            composable<HubRoute.Items> {
-                ItemsScreen(
-                    innerPadding = innerPadding,
-                    backgroundBrush = backgroundBrush,
-                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
-                    setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
-                    setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
-                    onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
-                )
-            }
-            composable<HubRoute.Dashboard> {
-                DashboardScreen(
-                    innerPadding = innerPadding,
-                    backgroundBrush = backgroundBrush,
-                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
-                    setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
-                    setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
-                    onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
-                )
-            }
-            composable<HubRoute.Templates> {
-                TemplatesScreen(
-                    innerPadding = innerPadding,
-                    backgroundBrush = backgroundBrush,
-                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
-                    setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
-                    setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
-                    onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
-                )
-            }
-            composable<HubRoute.Setting> {
-                SettingScreen(
-                    innerPadding = innerPadding,
-                    backgroundBrush = backgroundBrush,
-                    setFab = { hubViewModel.sendIntent(HubIntent.SetFab(it)) },
-                    setTopBar = { hubViewModel.sendIntent(HubIntent.SetTopBar(it)) },
-                    setNavigationBar = { hubViewModel.sendIntent(HubIntent.SetBottomBar(it)) },
-                    onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
-                )
-            }
+    NavHost(
+        navController = hubNavController,
+        startDestination = HubRoute.Home,
+    ) {
+        composable<HubRoute.Home> {
+            HomeScreen(
+                backgroundBrush = backgroundBrush,
+                onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
+            )
         }
-    }
-}
-
-@Composable
-private fun HubUi(
-    state: HubState,
-    content: @Composable (innerPadding: PaddingValues) -> Unit,
-) {
-    Scaffold(
-        bottomBar = state.bottomBar,
-        topBar = state.topBar,
-        floatingActionButton = state.fab,
-    ) { innerPadding ->
-        content(innerPadding)
+        composable<HubRoute.Items> {
+            ItemsScreen(
+                backgroundBrush = backgroundBrush,
+                onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
+            )
+        }
+        composable<HubRoute.Dashboard> {
+            DashboardScreen(
+                backgroundBrush = backgroundBrush,
+                onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
+            )
+        }
+        composable<HubRoute.Templates> {
+            TemplatesScreen(
+                backgroundBrush = backgroundBrush,
+                onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
+            )
+        }
+        composable<HubRoute.Setting> {
+            SettingScreen(
+                backgroundBrush = backgroundBrush,
+                onNavigate = { hubViewModel.sendIntent(HubIntent.Navigate(it)) },
+            )
+        }
     }
 }

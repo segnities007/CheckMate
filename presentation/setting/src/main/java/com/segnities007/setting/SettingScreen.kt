@@ -44,13 +44,11 @@ import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+
 @Composable
 fun SettingScreen(
-    innerPadding: PaddingValues,
     backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
     onNavigate: (HubRoute) -> Unit,
 ) {
     val localContext = LocalContext.current
@@ -66,16 +64,6 @@ fun SettingScreen(
     )
 
     LaunchedEffect(Unit) {
-        setNavigationBar {
-            FloatingNavigationBar(
-                alpha = alpha,
-                currentHubRoute = HubRoute.Setting,
-                onNavigate = onNavigate,
-            )
-        }
-        setFab {}
-        setTopBar {}
-
         settingViewModel.effect.collect { effect ->
             when (effect) {
                 is SettingEffect.ShowToast -> {
@@ -98,16 +86,26 @@ fun SettingScreen(
         }
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(backgroundBrush)
-                .verticalScroll(scrollState),
-    ) {
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        SettingUi(state = state, sendIntent = settingViewModel::sendIntent)
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+    CheckMateScaffold(
+        bottomBar = {
+            FloatingNavigationBar(
+                alpha = alpha,
+                currentHubRoute = HubRoute.Setting,
+                onNavigate = onNavigate,
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(backgroundBrush)
+                    .verticalScroll(scrollState),
+        ) {
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+            SettingUi(state = state, sendIntent = settingViewModel::sendIntent)
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        }
     }
 
     // 全データ削除確認ダイアログ

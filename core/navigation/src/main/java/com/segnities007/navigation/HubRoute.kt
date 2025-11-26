@@ -3,7 +3,7 @@ package com.segnities007.navigation
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface HubRoute : Route {
+sealed interface  HubRoute : Route {
     @Serializable data object Home : HubRoute
 
     @Serializable data object Items : HubRoute
