@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.UserStatus
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
 import com.segnities007.setting.component.DeleteAllDataDialog
@@ -46,10 +46,11 @@ import org.koin.compose.koinInject
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
 
+import com.segnities007.ui.theme.checkMateBackgroundBrush
+
 @Composable
 fun SettingScreen(
-    backgroundBrush: Brush,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val localContext = LocalContext.current
     val settingViewModel: SettingViewModel = koinInject()
@@ -90,7 +91,7 @@ fun SettingScreen(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = HubRoute.Setting,
+                currentHubRoute = NavKey.Setting,
                 onNavigate = onNavigate,
             )
         }
@@ -99,7 +100,7 @@ fun SettingScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(backgroundBrush)
+                    .background(MaterialTheme.checkMateBackgroundBrush)
                     .verticalScroll(scrollState),
         ) {
             Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))

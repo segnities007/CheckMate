@@ -1,7 +1,7 @@
 package com.segnities007.auth.mvi
 
 import androidx.lifecycle.viewModelScope
-import com.segnities007.navigation.AuthRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.navigation.Route
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.ui.mvi.MviState
@@ -38,12 +38,12 @@ class AuthViewModel(
                 if (isCreated) {
                     topNavigate(AuthIntent.TopNavigate(Route.Hub))
                 } else {
-                    navigate(AuthIntent.Navigate(AuthRoute.Login))
+                    navigate(AuthIntent.Navigate(NavKey.Login))
                 }
             },
             onFailure = { e ->
                 // エラー時はログイン画面に遷移
-                navigate(AuthIntent.Navigate(AuthRoute.Login))
+                navigate(AuthIntent.Navigate(NavKey.Login))
             }
         )
     }

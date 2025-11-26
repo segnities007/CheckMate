@@ -48,12 +48,12 @@ import com.segnities007.ui.card.ItemCard
 import kotlin.time.ExperimentalTime
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.ui.theme.checkMateBackgroundBrush
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateItemSelectPage(
     template: WeeklyTemplate,
-    backgroundBrush: Brush,
     allItems: List<Item>,
     sendIntent: (TemplatesIntent) -> Unit,
 ) {
@@ -96,7 +96,7 @@ fun TemplateItemSelectPage(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(backgroundBrush)
+                    .background(MaterialTheme.checkMateBackgroundBrush)
                     .verticalScroll(scrollState)
                     .padding(horizontal = 16.dp),
         ) {
@@ -252,12 +252,5 @@ fun WeeklyTemplateSelectorPreview() {
         template = dummyTemplate,
         allItems = dummyItems,
         sendIntent = {},
-        backgroundBrush = verticalGradient(
-            colors =
-                listOf(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    MaterialTheme.colorScheme.primary.copy(0.2f),
-                ),
-        ),
     )
 }

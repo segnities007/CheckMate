@@ -16,8 +16,6 @@ internal class MainViewModel :
     }
 
     private fun navigate(intent: MainIntent.Navigate) {
-        viewModelScope.launch {
-            sendEffect { MainEffect.Navigate(intent.route) }
-        }
+        setState { copy(currentRoute = intent.route) }
     }
 }

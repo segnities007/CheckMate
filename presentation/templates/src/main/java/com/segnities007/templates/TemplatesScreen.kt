@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,34 +15,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.navigation.TemplatesRoute
 import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
 import com.segnities007.templates.mvi.TemplatesEffect
 import com.segnities007.templates.mvi.TemplatesIntent
 import com.segnities007.templates.mvi.TemplatesViewModel
-import com.segnities007.templates.page.TemplateListPage
 import com.segnities007.templates.page.TemplateItemSelectPage
+import com.segnities007.templates.page.TemplateListPage
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplatesScreen(
-    backgroundBrush: Brush,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val templatesViewModel: TemplatesViewModel = koinInject()
     val state by templatesViewModel.state.collectAsState()
     val localContext = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val navController = rememberNavController()
 
     val icsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: android.net.Uri? ->
@@ -54,9 +50,9 @@ fun TemplatesScreen(
         templatesViewModel.effect.collect { effect ->
             when (effect) {
                 is TemplatesEffect.NavigateToWeeklyTemplateSelector ->
-                    navController.navigate(TemplatesRoute.WeeklyTemplateSelector)
+                    { /* Handled by state */ }
                 TemplatesEffect.NavigateToWeeklyTemplateList ->
-                    navController.navigate(TemplatesRoute.WeeklyTemplateList)
+                    { /* Handled by state */ }
                 is TemplatesEffect.ShowToast ->
                     Toast.makeText(localContext, effect.message, Toast.LENGTH_SHORT).show()
                 TemplatesEffect.LaunchIcsPicker ->
@@ -69,38 +65,40 @@ fun TemplatesScreen(
         }
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = TemplatesRoute.WeeklyTemplateList,
+    val entryProvider = remember {
+        entryProvider {
+            entry(TemplatesRoute.WeeklyTemplateList) {
+                TemplateListPage(
+                    onNavigate = onNavigate,
+                    sendIntent = templatesViewModel::sendIntent,
+                    templates = state.filteredTemplates,
+                    templateSearchQuery = state.templateSearchQuery,
+                    templateSortOrder = state.templateSortOrder,
+                    selectedDayOfWeek = state.selectedDayOfWeek,
+                    onTemplateClick = { templatesViewModel.sendIntent(TemplatesIntent.SelectTemplate(it)) },
+                    onSearchQueryChange = { query -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSearchQuery(query)) },
+                    onSortOrderChange = { sortOrder -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSortOrder(sortOrder)) },
+                    onDayOfWeekChange = { dayOfWeek -> templatesViewModel.sendIntent(TemplatesIntent.UpdateSelectedDayOfWeek(dayOfWeek)) },
+                )
+            }
+            entry(TemplatesRoute.WeeklyTemplateSelector) {
+                TemplateItemSelectPage(
+                    sendIntent = templatesViewModel::sendIntent,
+                    template = state.selectedTemplate ?: WeeklyTemplate(),
+                    allItems = state.filteredItems.ifEmpty { state.allItems },
+                )
+            }
+        }
+    }
+
+    NavDisplay(
+        backStack = listOf(state.currentRoute),
+        entryProvider = entryProvider,
         modifier =
             Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        composable<TemplatesRoute.WeeklyTemplateList> {
-            TemplateListPage(
-                backgroundBrush = backgroundBrush,
-                onNavigate = onNavigate,
-                sendIntent = templatesViewModel::sendIntent,
-                templates = state.filteredTemplates,
-                templateSearchQuery = state.templateSearchQuery,
-                templateSortOrder = state.templateSortOrder,
-                selectedDayOfWeek = state.selectedDayOfWeek,
-                onTemplateClick = { templatesViewModel.sendIntent(TemplatesIntent.SelectTemplate(it)) },
-                onSearchQueryChange = { query -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSearchQuery(query)) },
-                onSortOrderChange = { sortOrder -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSortOrder(sortOrder)) },
-                onDayOfWeekChange = { dayOfWeek -> templatesViewModel.sendIntent(TemplatesIntent.UpdateSelectedDayOfWeek(dayOfWeek)) },
-            )
-        }
-        composable<TemplatesRoute.WeeklyTemplateSelector> {
-            TemplateItemSelectPage(
-                backgroundBrush = backgroundBrush,
-                sendIntent = templatesViewModel::sendIntent,
-                template = state.selectedTemplate ?: WeeklyTemplate(),
-                allItems = state.filteredItems.ifEmpty { state.allItems },
-            )
-        }
-    }
+    )
 
     if (state.isShowingBottomSheet) {
         CreateWeeklyTemplateBottomSheet(

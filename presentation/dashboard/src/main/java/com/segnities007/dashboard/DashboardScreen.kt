@@ -30,7 +30,7 @@ import com.segnities007.ui.card.statistics.StatCardWithPercentage
 import com.segnities007.ui.card.UncheckedItemsCard
 import com.segnities007.dashboard.mvi.DashboardState
 import com.segnities007.dashboard.mvi.DashboardViewModel
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
@@ -38,11 +38,12 @@ import org.koin.compose.koinInject
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
 
+import com.segnities007.ui.theme.checkMateBackgroundBrush
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    backgroundBrush: Brush,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val dashboardViewModel: DashboardViewModel = koinInject()
     val state by dashboardViewModel.state.collectAsState()
@@ -59,7 +60,7 @@ fun DashboardScreen(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = HubRoute.Dashboard,
+                currentHubRoute = NavKey.Dashboard,
                 onNavigate = onNavigate,
             )
         }
@@ -68,7 +69,6 @@ fun DashboardScreen(
             state = state,
             scrollState = scrollState,
             innerPadding = innerPadding,
-            backgroundBrush = backgroundBrush,
         )
     }
 }
@@ -76,7 +76,6 @@ fun DashboardScreen(
 @Composable
 private fun DashboardUi(
     innerPadding: PaddingValues,
-    backgroundBrush: Brush,
     state: DashboardState,
     scrollState: ScrollState,
 ) {
@@ -85,7 +84,7 @@ private fun DashboardUi(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(backgroundBrush)
+            .background(MaterialTheme.checkMateBackgroundBrush)
             .padding(horizontal = 16.dp),
     ) {
         Spacer(Modifier.height(innerPadding.calculateTopPadding()))
@@ -160,12 +159,6 @@ fun DashboardUiPreview() {
             uncheckedItemsToday = listOf()
         ),
         scrollState = rememberScrollState(),
-        backgroundBrush = verticalGradient(
-            colors = listOf(
-                MaterialTheme.colorScheme.primary,
-                MaterialTheme.colorScheme.secondary,
-            ),
-        ),
     )
 }
 

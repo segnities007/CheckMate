@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.card.TemplateCard
 import com.segnities007.templates.component.TemplateSearchFilterSortBar
 import com.segnities007.ui.card.empty.TemplatesEmptyStateCard
@@ -45,11 +45,11 @@ import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.ui.theme.checkMateBackgroundBrush
 
 @Composable
 fun TemplateListPage(
-    backgroundBrush: Brush,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
     sendIntent: (TemplatesIntent) -> Unit,
     templates: List<WeeklyTemplate>,
     templateSearchQuery: String,
@@ -74,7 +74,7 @@ fun TemplateListPage(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = HubRoute.Templates,
+                currentHubRoute = NavKey.Templates,
                 onNavigate = onNavigate,
             )
         },
@@ -97,7 +97,7 @@ fun TemplateListPage(
             modifier =
                 modifier
                     .fillMaxSize()
-                    .background(backgroundBrush)
+                    .background(MaterialTheme.checkMateBackgroundBrush)
                     .verticalScroll(listState)
                     .padding(horizontal = 16.dp),
         ) {

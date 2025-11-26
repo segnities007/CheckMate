@@ -4,6 +4,7 @@ import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+import com.segnities007.navigation.TemplatesRoute
 import com.segnities007.ui.mvi.MviState
 
 data class TemplatesState(
@@ -25,6 +26,7 @@ data class TemplatesState(
     val templateToDelete: WeeklyTemplate? = null,
     // ICS インポート状態
     val isImportingIcs: Boolean = false,
+    val currentRoute: TemplatesRoute = TemplatesRoute.WeeklyTemplateList,
 ) : MviState
 
 enum class SortOrder {

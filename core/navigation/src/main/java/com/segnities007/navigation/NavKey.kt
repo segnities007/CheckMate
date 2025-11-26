@@ -32,4 +32,10 @@ interface NavKey {
 
     @Serializable
     data object WeeklyTemplateSelector : NavKey
+
+    @Serializable
+    data object Splash : NavKey
+
+    @Serializable
+    data object Login : NavKey
 }

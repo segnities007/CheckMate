@@ -26,22 +26,23 @@ import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.home.mvi.HomeState
 import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.home.page.EnhancedHomeContent
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.ui.theme.checkMateBackgroundBrush
 
 @Composable
 fun HomeScreen(
-    backgroundBrush: Brush,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val homeViewModel: HomeViewModel = koinInject()
     val state by homeViewModel.state.collectAsState()
     val scrollState = rememberScrollState()
     val isVisible by rememberScrollVisibility(scrollState = scrollState)
+    val backgroundBrush = MaterialTheme.checkMateBackgroundBrush
 
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
@@ -64,7 +65,7 @@ fun HomeScreen(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = HubRoute.Home,
+                currentHubRoute = NavKey.Home,
                 onNavigate = onNavigate,
             )
         }

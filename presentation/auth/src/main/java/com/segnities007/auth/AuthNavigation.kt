@@ -1,53 +1,57 @@
 package com.segnities007.auth
 
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import com.segnities007.auth.mvi.AuthEffect
 import com.segnities007.auth.mvi.AuthViewModel
-import com.segnities007.login.LoginScreen
-import com.segnities007.navigation.AuthRoute
+import com.segnities007.login.loginEntry
+import com.segnities007.navigation.NavKey
 import com.segnities007.navigation.Route
-import com.segnities007.splash.SplashScreen
+import com.segnities007.splash.splashEntry
 import org.koin.compose.koinInject
 
 @Composable
 fun AuthNavigation(topNavigate: (Route) -> Unit) {
-    val authNavController = rememberNavController()
     val authViewModel: AuthViewModel = koinInject()
+    var currentRoute by remember { mutableStateOf<NavKey>(NavKey.Splash) }
+
+    val entryProvider = remember {
+        entryProvider {
+            splashEntry()
+            loginEntry(topNavigate = topNavigate)
+        }
+    }
+
+    NavDisplay(
+        backStack = listOf(currentRoute),
+        entryProvider = entryProvider,
+        modifier = Modifier.background(MaterialTheme.colorScheme.background)
+    )
 
     LaunchedEffect(Unit) {
         authViewModel.effect.collect { effect ->
             when (effect) {
-                is com.segnities007.auth.mvi.AuthEffect.Navigate -> {
-                    authNavController.navigate(effect.authRoute)
+                is AuthEffect.Navigate -> {
+                    currentRoute = effect.authRoute
                 }
 
-                is com.segnities007.auth.mvi.AuthEffect.TopNavigate -> {
+                is AuthEffect.TopNavigate -> {
                     topNavigate(effect.route)
                 }
 
-                is com.segnities007.auth.mvi.AuthEffect.ShowToast -> {
+                is AuthEffect.ShowToast -> {
                     // TODO
                 }
             }
-        }
-    }
-
-    NavHost(
-        navController = authNavController,
-        startDestination = AuthRoute.Splash,
-    ) {
-        composable<AuthRoute.Splash> {
-            SplashScreen()
-        }
-        composable<AuthRoute.Login> {
-            LoginScreen(
-                topNavigate = topNavigate,
-            )
         }
     }
 }

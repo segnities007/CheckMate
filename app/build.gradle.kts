@@ -95,7 +95,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // navigation
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)

@@ -3,6 +3,7 @@ package com.segnities007.templates.mvi
 import androidx.lifecycle.viewModelScope
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
+import com.segnities007.navigation.TemplatesRoute
 import com.segnities007.templates.utils.TemplateFilter
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.ics.GenerateTemplatesFromIcsUseCase
@@ -58,9 +59,9 @@ class TemplatesViewModel(
             TemplatesIntent.HideBottomSheet -> setState { reduce(TemplatesIntent.HideBottomSheet) }
 
             TemplatesIntent.NavigateToWeeklyTemplateList ->
-                sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+                setState { reduce(intent) }
             TemplatesIntent.NavigateToWeeklyTemplateSelector ->
-                sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
+                setState { reduce(intent) }
 
             is TemplatesIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is TemplatesIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
@@ -180,7 +181,7 @@ class TemplatesViewModel(
         updateTemplateUseCase(template).fold(
             onSuccess = {
                 getAllWeeklyTemplates()
-                sendEffect { TemplatesEffect.NavigateToWeeklyTemplateList }
+                setState { reduce(TemplatesIntent.NavigateToWeeklyTemplateList) }
                 sendEffect { TemplatesEffect.ShowToast("「${template.title}」を更新しました") }
             },
             onFailure = { e ->
@@ -215,7 +216,7 @@ class TemplatesViewModel(
 
     private fun selectTemplate(template: WeeklyTemplate) {
         setState { reduce(TemplatesIntent.SelectTemplate(template)) }
-        sendEffect { TemplatesEffect.NavigateToWeeklyTemplateSelector }
+        setState { reduce(TemplatesIntent.NavigateToWeeklyTemplateSelector) }
     }
 
     private fun importIcs(uri: android.net.Uri) =
@@ -271,6 +272,10 @@ private fun TemplatesState.reduce(intent: TemplatesIntent): TemplatesState {
         is TemplatesIntent.DeleteWeeklyTemplate -> copy(templateToDelete = intent.weeklyTemplate)
         TemplatesIntent.ConfirmDeleteTemplate -> copy(templateToDelete = null)
         TemplatesIntent.CancelDeleteTemplate -> copy(templateToDelete = null)
+        
+        // ナビゲーション
+        TemplatesIntent.NavigateToWeeklyTemplateList -> copy(currentRoute = TemplatesRoute.WeeklyTemplateList)
+        TemplatesIntent.NavigateToWeeklyTemplateSelector -> copy(currentRoute = TemplatesRoute.WeeklyTemplateSelector)
         
         // 他のIntentはViewModelで処理（非同期処理など）
         else -> this

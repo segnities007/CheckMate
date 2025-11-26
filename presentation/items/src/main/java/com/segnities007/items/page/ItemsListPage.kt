@@ -49,19 +49,19 @@ import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsState
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 import kotlin.time.ExperimentalTime
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.ui.theme.checkMateBackgroundBrush
 
 @OptIn(ExperimentalTime::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsListPage(
-    backgroundBrush: Brush,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
     sendIntent: (ItemsIntent) -> Unit,
     onNavigateToBarcodeScanner: () -> Unit,
     state: ItemsState,
@@ -93,7 +93,7 @@ fun ItemsListPage(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = HubRoute.Items,
+                currentHubRoute = NavKey.Items,
                 onNavigate = onNavigate,
             )
         },
@@ -120,7 +120,6 @@ fun ItemsListPage(
         ItemListUi(
             innerPadding = innerPadding,
             scrollState = scrollState,
-            brush = backgroundBrush,
             state = state,
             sendIntent = sendIntent,
         )
@@ -180,14 +179,13 @@ fun ItemsListPage(
 private fun ItemListUi(
     innerPadding: PaddingValues,
     scrollState: androidx.compose.foundation.ScrollState,
-    brush: Brush,
     state: ItemsState,
     sendIntent: (ItemsIntent) -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush)
+            .background(MaterialTheme.checkMateBackgroundBrush)
             .verticalScroll(scrollState),
     ) {
         // Top Padding
@@ -237,12 +235,6 @@ fun ItemListUiPreview() {
     ItemListUi(
         innerPadding = PaddingValues(0.dp),
         scrollState = rememberScrollState(),
-        brush = verticalGradient(
-            colors = listOf(
-                MaterialTheme.colorScheme.primaryContainer,
-                MaterialTheme.colorScheme.primary.copy(0.2f),
-            ),
-        ),
         state = ItemsState(
             filteredItems = listOf(
                 Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),

@@ -1,4 +1,5 @@
 package com.segnities007.items.mvi
+import com.segnities007.navigation.ItemsRoute
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.image.DeleteImageUseCase
 import com.segnities007.usecase.image.SaveImageUseCase
@@ -38,9 +39,9 @@ class ItemsViewModel(
             is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> updateCapturedImageUriForBottomSheet(intent)
             is ItemsIntent.UpdateCapturedTempPathForViewModel -> updateCapturedTempPathForViewModel(intent)
             is ItemsIntent.UpdateIsShowBottomSheet -> updateIsShowBottomSheet(intent)
-            ItemsIntent.NavigateToItemsList -> sendEffect { ItemsEffect.NavigateToItemsList }
-            ItemsIntent.NavigateToCameraCapture -> sendEffect { ItemsEffect.NavigateToCameraCapture }
-            ItemsIntent.NavigateToBarcodeScanner -> sendEffect { ItemsEffect.NavigateToBarcodeScanner }
+            ItemsIntent.NavigateToItemsList -> setState { reduce(intent) }
+            ItemsIntent.NavigateToCameraCapture -> setState { reduce(intent) }
+            ItemsIntent.NavigateToBarcodeScanner -> setState { reduce(intent) }
             is ItemsIntent.BarcodeDetected -> handleBarcodeDetected(intent)
             is ItemsIntent.GetProductInfo -> getProductInfo(intent)
             ItemsIntent.ClearProductInfo -> clearProductInfo()
@@ -274,6 +275,11 @@ private fun ItemsState.reduce(intent: ItemsIntent): ItemsState {
         is ItemsIntent.SetProductInfoLoading -> copy(isLoadingProductInfo = intent.isLoading)
         is ItemsIntent.SetProductInfo -> copy(productInfo = intent.productInfo)
         is ItemsIntent.SetShouldClearForm -> copy(shouldClearForm = intent.shouldClear)
+
+        // ナビゲーション
+        ItemsIntent.NavigateToItemsList -> copy(currentRoute = ItemsRoute.ItemsList)
+        ItemsIntent.NavigateToCameraCapture -> copy(currentRoute = ItemsRoute.CameraCapture)
+        ItemsIntent.NavigateToBarcodeScanner -> copy(currentRoute = ItemsRoute.BarcodeScanner)
         
         // 他のIntentはViewModelで処理（非同期処理など）
         else -> this
