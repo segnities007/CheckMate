@@ -50,6 +50,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -70,4 +73,8 @@ dependencies {
 
     // icon
     implementation(libs.androidx.material.icons.extended)
+
+    //navigation
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 }

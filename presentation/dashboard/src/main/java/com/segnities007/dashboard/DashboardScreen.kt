@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -28,26 +31,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.ui.card.statistics.StatCard
 import com.segnities007.ui.card.statistics.StatCardWithPercentage
 import com.segnities007.ui.card.UncheckedItemsCard
+import com.segnities007.dashboard.mvi.DashboardIntent
 import com.segnities007.dashboard.mvi.DashboardState
 import com.segnities007.dashboard.mvi.DashboardViewModel
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.ui.mvi.UiState
+
+
+
+import com.segnities007.ui.theme.checkMateBackgroundBrush
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    innerPadding: PaddingValues,
-    backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val dashboardViewModel: DashboardViewModel = koinInject()
-    val state by dashboardViewModel.state.collectAsState()
+    val uiState by dashboardViewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.data
     val scrollState = rememberScrollState()
     val isVisible by rememberScrollVisibility(scrollState = scrollState)
 
@@ -57,39 +64,53 @@ fun DashboardScreen(
         label = "navigationBarAlpha",
     )
 
-    LaunchedEffect(Unit) {
-        setFab {}
-        setTopBar {}
-        setNavigationBar {
+    CheckMateScaffold(
+        bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = HubRoute.Dashboard,
+                currentHubRoute = NavKey.Dashboard,
                 onNavigate = onNavigate,
             )
         }
-    }
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            DashboardContent(
+                state = state,
+                scrollState = scrollState,
+                innerPadding = innerPadding,
+                onIntent = dashboardViewModel::sendIntent,
+            )
 
-    DashboardUi(
-        state = state,
-        scrollState = scrollState,
-        innerPadding = innerPadding,
-        backgroundBrush = backgroundBrush,
-    )
+            if (uiState is UiState.Loading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            if (uiState is UiState.Failure) {
+                val message = (uiState as UiState.Failure).message
+                // Error handling, e.g. show toast or banner
+            }
+        }
+    }
 }
 
 @Composable
-private fun DashboardUi(
+private fun DashboardContent(
     innerPadding: PaddingValues,
-    backgroundBrush: Brush,
     state: DashboardState,
     scrollState: ScrollState,
+    onIntent: (DashboardIntent) -> Unit,
 ) {
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .background(backgroundBrush)
+            .background(MaterialTheme.checkMateBackgroundBrush)
             .padding(horizontal = 16.dp),
     ) {
         Spacer(Modifier.height(innerPadding.calculateTopPadding()))
@@ -151,8 +172,8 @@ private fun DashboardUi(
 
 @Preview
 @Composable
-fun DashboardUiPreview() {
-    DashboardUi(
+fun DashboardContentPreview() {
+    DashboardContent(
         innerPadding = PaddingValues(0.dp),
         state = DashboardState(
             itemCount = 10,
@@ -164,12 +185,7 @@ fun DashboardUiPreview() {
             uncheckedItemsToday = listOf()
         ),
         scrollState = rememberScrollState(),
-        backgroundBrush = verticalGradient(
-            colors = listOf(
-                MaterialTheme.colorScheme.primary,
-                MaterialTheme.colorScheme.secondary,
-            ),
-        ),
+        onIntent = {},
     )
 }
 

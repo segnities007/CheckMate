@@ -13,6 +13,8 @@ import kotlinx.datetime.LocalDate
  * ビジネスロジック: 今日スケジュールされているアイテムに対して、
  * チェック履歴が存在しない場合は未チェック状態で作成する
  */
+import kotlinx.coroutines.flow.first
+
 class EnsureCheckHistoryForTodayUseCase(
     private val itemRepository: ItemRepository,
     private val templateRepository: WeeklyTemplateRepository,
@@ -25,7 +27,7 @@ class EnsureCheckHistoryForTodayUseCase(
             val itemIdsForToday = templatesForToday.flatMap { it.itemIds }.distinct()
             
             // 全アイテムを取得してフィルタリング
-            val allItems = itemRepository.getAllItems()
+            val allItems = itemRepository.getAllItems().first()
             val itemsScheduledForToday = allItems.filter { itemIdsForToday.contains(it.id) }
 
             // 各アイテムのチェック履歴を確認・作成

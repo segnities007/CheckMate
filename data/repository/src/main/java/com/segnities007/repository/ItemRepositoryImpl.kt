@@ -14,12 +14,19 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.ExperimentalTime
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+import kotlinx.coroutines.flow.first
+
 class ItemRepositoryImpl(
     private val itemDao: ItemDao,
     private val itemCheckStateDao: ItemCheckStateDao, // ItemCheckStateDaoをコンストラクタに追加
     private val productApiService: ProductApiService,
 ) : ItemRepository {
-    override suspend fun getAllItems(): List<Item> = itemDao.getAll().map { it.toDomain() }
+    override fun getAllItems(): Flow<List<Item>> = itemDao.getAll().map { entities ->
+        entities.map { it.toDomain() }
+    }
 
     override suspend fun getItemById(id: Int): Item? = itemDao.getById(id)?.toDomain()
 
@@ -36,7 +43,7 @@ class ItemRepositoryImpl(
         val today =
             kotlin.time.Clock.System
                 .todayIn(TimeZone.currentSystemDefault())
-        val allItems = itemDao.getAll().map { it.toDomain() }
+        val allItems = itemDao.getAll().first().map { it.toDomain() }
         val uncheckedItems = mutableListOf<Item>()
 
         for (item in allItems) {

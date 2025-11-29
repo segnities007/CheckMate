@@ -8,25 +8,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import com.segnities007.auth.AuthNavigation
-import com.segnities007.checkmate.mvi.MainEffect
 import com.segnities007.checkmate.mvi.MainIntent
 import com.segnities007.checkmate.mvi.MainViewModel
-import com.segnities007.ui.theme.CheckMateTheme
 import com.segnities007.hub.HubNavigation
-import com.segnities007.navigation.Route
+import com.segnities007.navigation.NavKey
+import com.segnities007.ui.theme.CheckMateTheme
 import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
@@ -58,19 +63,24 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CheckMateTheme {
-                MainNavigation()
-                
-                // 通知権限の説明ダイアログ
-                if (showNotificationRationaleDialog) {
-                    NotificationPermissionRationaleDialog(
-                        onConfirm = {
-                            showNotificationRationaleDialog = false
-                            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        },
-                        onDismiss = {
-                            showNotificationRationaleDialog = false
-                        }
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MainNavigation()
+
+                    // 通知権限の説明ダイアログ
+                    if (showNotificationRationaleDialog) {
+                        NotificationPermissionRationaleDialog(
+                            onConfirm = {
+                                showNotificationRationaleDialog = false
+                                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            },
+                            onDismiss = {
+                                showNotificationRationaleDialog = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -136,30 +146,28 @@ private fun NotificationPermissionRationaleDialog(
 
 @Composable
 private fun MainNavigation() {
-    val mainNavController = rememberNavController()
     val mainViewModel: MainViewModel = koinInject()
+    val uiState by mainViewModel.uiState.collectAsState()
+    val state = uiState.data
 
-    val onNavigate: (Route) -> Unit = { route ->
-        mainViewModel.sendIntent(MainIntent.Navigate(route))
-    }
-
-    LaunchedEffect(Unit) {
-        mainViewModel.effect.collect {
-            when (it) {
-                is MainEffect.Navigate -> mainNavController.navigate(it.route)
+    val entryProvider = remember {
+        entryProvider {
+            entry(NavKey.Auth) {
+                AuthNavigation(
+                    topNavigate = { route -> mainViewModel.sendIntent(MainIntent.Navigate(route)) }
+                )
+            }
+            entry(NavKey.Hub) {
+                HubNavigation(
+                    onTopNavigate = { route -> mainViewModel.sendIntent(MainIntent.Navigate(route)) }
+                )
             }
         }
     }
 
-    NavHost(
-        navController = mainNavController,
-        startDestination = Route.Auth,
-    ) {
-        composable<Route.Auth> {
-            AuthNavigation(onNavigate)
-        }
-        composable<Route.Hub> {
-            HubNavigation(onNavigate)
-        }
-    }
+    NavDisplay(
+        backStack = listOf(state.currentRoute),
+        entryProvider = entryProvider,
+        modifier = Modifier.background(MaterialTheme.colorScheme.background)
+    )
 }

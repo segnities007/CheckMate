@@ -19,7 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.model.UserStatus
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
 import com.segnities007.setting.component.DeleteAllDataDialog
@@ -44,18 +44,21 @@ import com.segnities007.ui.divider.HorizontalDividerWithLabel
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.ui.theme.checkMateBackgroundBrush
+
+
+
+
+
 @Composable
 fun SettingScreen(
-    innerPadding: PaddingValues,
-    backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val localContext = LocalContext.current
     val settingViewModel: SettingViewModel = koinInject()
-    val state by settingViewModel.state.collectAsState()
+    val uiState by settingViewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.data
     val scrollState = rememberScrollState()
     val isVisible by rememberScrollVisibility(scrollState)
 
@@ -66,16 +69,6 @@ fun SettingScreen(
     )
 
     LaunchedEffect(Unit) {
-        setNavigationBar {
-            FloatingNavigationBar(
-                alpha = alpha,
-                currentHubRoute = HubRoute.Setting,
-                onNavigate = onNavigate,
-            )
-        }
-        setFab {}
-        setTopBar {}
-
         settingViewModel.effect.collect { effect ->
             when (effect) {
                 is SettingEffect.ShowToast -> {
@@ -98,16 +91,26 @@ fun SettingScreen(
         }
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(backgroundBrush)
-                .verticalScroll(scrollState),
-    ) {
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        SettingUi(state = state, sendIntent = settingViewModel::sendIntent)
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+    CheckMateScaffold(
+        bottomBar = {
+            FloatingNavigationBar(
+                alpha = alpha,
+                currentHubRoute = NavKey.Setting,
+                onNavigate = onNavigate,
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.checkMateBackgroundBrush)
+                    .verticalScroll(scrollState),
+        ) {
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+            SettingContent(state = state, sendIntent = settingViewModel::sendIntent)
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        }
     }
 
     // 全データ削除確認ダイアログ
@@ -125,7 +128,7 @@ fun SettingScreen(
 }
 
 @Composable
-private fun SettingUi(
+private fun SettingContent(
     state: SettingState,
     sendIntent: (SettingIntent) -> Unit,
 ) {
@@ -175,7 +178,7 @@ private fun SettingUi(
 @Preview(showBackground = true)
 @Composable
 private fun SettingScreenPreview() {
-    SettingUi(
+    SettingContent(
         state = SettingState(
             userStatus = UserStatus(),
         ),

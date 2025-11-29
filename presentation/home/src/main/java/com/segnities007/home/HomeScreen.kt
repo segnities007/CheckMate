@@ -15,35 +15,37 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.home.mvi.HomeEffect
 import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.home.mvi.HomeState
 import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.home.page.EnhancedHomeContent
-import com.segnities007.navigation.HubRoute
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.navigation.NavKey
+import com.segnities007.ui.theme.checkMateBackgroundBrush
+
 @Composable
 fun HomeScreen(
-    innerPadding: PaddingValues,
-    backgroundBrush: Brush,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
-    onNavigate: (HubRoute) -> Unit,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val homeViewModel: HomeViewModel = koinInject()
-    val state by homeViewModel.state.collectAsState()
+    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.data
     val scrollState = rememberScrollState()
     val isVisible by rememberScrollVisibility(scrollState = scrollState)
+    val backgroundBrush = MaterialTheme.checkMateBackgroundBrush
 
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
@@ -51,40 +53,38 @@ fun HomeScreen(
         label = "navigationBarAlpha",
     )
 
-    LaunchedEffect(Unit) {
-        setTopBar {}
-        setFab {}
-        setNavigationBar {
-            FloatingNavigationBar(
-                alpha = alpha,
-                currentHubRoute = HubRoute.Home,
-                onNavigate = onNavigate,
-            )
-        }
-    }
-
     // Effect処理
     LaunchedEffect(Unit) {
         homeViewModel.effect.collect { effect ->
             when (effect) {
-                is com.segnities007.home.mvi.HomeEffect.ShowError -> {
+                is HomeEffect.ShowError -> {
                     // TODO: Snackbarやダイアログで表示
                 }
             }
         }
     }
 
-    HomeUi(
-        innerPadding = innerPadding,
-        state = state,
-        scrollState = scrollState,
-        brash = backgroundBrush,
-        sendIntent = homeViewModel::sendIntent,
-    )
+    CheckMateScaffold(
+        bottomBar = {
+            FloatingNavigationBar(
+                alpha = alpha,
+                currentHubRoute = NavKey.Home,
+                onNavigate = onNavigate,
+            )
+        }
+    ) { innerPadding ->
+        HomeContent(
+            innerPadding = innerPadding,
+            state = state,
+            scrollState = scrollState,
+            brash = backgroundBrush,
+            sendIntent = homeViewModel::sendIntent,
+        )
+    }
 }
 
 @Composable
-private fun HomeUi(
+private fun HomeContent(
     innerPadding: PaddingValues,
     state: HomeState,
     scrollState: ScrollState,
@@ -115,23 +115,23 @@ private fun HomeUi(
             },
             sendIntent = sendIntent,
         )
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
     }
 }
 
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-        HomeUi(
-            innerPadding = PaddingValues(0.dp),
-            state = HomeState(),
-            scrollState = rememberScrollState(),
-            brash = verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.primary.copy(0.6f),
-                    )
-                ),
-            sendIntent = {},
-        )
+    HomeContent(
+        innerPadding = PaddingValues(0.dp),
+        state = HomeState(),
+        scrollState = rememberScrollState(),
+        brash = verticalGradient(
+            colors = listOf(
+                Color(0xFFFAF9F6),
+                Color(0xFFF0F0F0),
+            ),
+        ),
+        sendIntent = {},
+    )
 }

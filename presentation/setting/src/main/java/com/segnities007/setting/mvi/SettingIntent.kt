@@ -1,7 +1,7 @@
 package com.segnities007.setting.mvi
 
 import android.net.Uri
-import com.segnities007.navigation.Route
+
 import com.segnities007.ui.mvi.MviIntent
 
 sealed interface SettingIntent : MviIntent {

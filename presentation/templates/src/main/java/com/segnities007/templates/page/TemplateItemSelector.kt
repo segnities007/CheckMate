@@ -47,17 +47,15 @@ import com.segnities007.ui.bar.FloatingConfirmBar
 import com.segnities007.ui.card.ItemCard
 import kotlin.time.ExperimentalTime
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+import com.segnities007.ui.theme.checkMateBackgroundBrush
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateItemSelectPage(
     template: WeeklyTemplate,
-    backgroundBrush: Brush,
     allItems: List<Item>,
-    innerPadding: PaddingValues,
     sendIntent: (TemplatesIntent) -> Unit,
-    setFab: (@Composable () -> Unit) -> Unit,
-    setTopBar: (@Composable () -> Unit) -> Unit,
-    setNavigationBar: (@Composable () -> Unit) -> Unit,
 ) {
     val selectedStates =
         remember {
@@ -75,10 +73,8 @@ fun TemplateItemSelectPage(
         }
     }
 
-    LaunchedEffect(Unit) {
-        setFab {}
-        setTopBar {}
-        setNavigationBar {
+    CheckMateScaffold(
+        bottomBar = {
             FloatingConfirmBar(
                 onConfirm = {
                     sendIntent(
@@ -95,23 +91,23 @@ fun TemplateItemSelectPage(
                 alpha = alpha,
             )
         }
-    }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(backgroundBrush)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp),
-    ) {
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-        TemplateItemSelectorUi(
-            template = template,
-            allItems = allItems,
-            selectedStates = selectedStates,
-        )
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+    ) { innerPadding ->
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.checkMateBackgroundBrush)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp),
+        ) {
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+            TemplateItemSelectorUi(
+                template = template,
+                allItems = allItems,
+                selectedStates = selectedStates,
+            )
+            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        }
     }
 }
 
@@ -255,17 +251,6 @@ fun WeeklyTemplateSelectorPreview() {
     TemplateItemSelectPage(
         template = dummyTemplate,
         allItems = dummyItems,
-        innerPadding = PaddingValues(0.dp),
         sendIntent = {},
-        setFab = {},
-        setTopBar = {},
-        setNavigationBar = {},
-        backgroundBrush = verticalGradient(
-            colors =
-                listOf(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    MaterialTheme.colorScheme.primary.copy(0.2f),
-                ),
-        ),
     )
 }

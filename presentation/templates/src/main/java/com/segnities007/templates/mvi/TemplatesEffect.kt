@@ -7,10 +7,6 @@ sealed interface TemplatesEffect : MviEffect {
         val message: String,
     ) : TemplatesEffect
 
-    data object NavigateToWeeklyTemplateSelector : TemplatesEffect
-
-    data object NavigateToWeeklyTemplateList : TemplatesEffect
-
     // ICS インポート用
     data object LaunchIcsPicker : TemplatesEffect
 
@@ -18,3 +14,4 @@ sealed interface TemplatesEffect : MviEffect {
         val successCount: Int,
     ) : TemplatesEffect
 }
+

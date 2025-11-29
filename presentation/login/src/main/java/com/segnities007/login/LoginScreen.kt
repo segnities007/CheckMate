@@ -15,18 +15,20 @@ import com.segnities007.login.component.LoginTitles
 import com.segnities007.login.mvi.LoginEffect
 import com.segnities007.login.mvi.LoginIntent
 import com.segnities007.login.mvi.LoginViewModel
-import com.segnities007.navigation.Route
+import com.segnities007.navigation.NavKey
 import org.koin.compose.koinInject
 
+import com.segnities007.ui.scaffold.CheckMateScaffold
+
 @Composable
-fun LoginScreen(topNavigate: (Route) -> Unit) {
+fun LoginScreen(topNavigate: (NavKey) -> Unit) {
     val loginViewModel: LoginViewModel = koinInject()
 
     LaunchedEffect(Unit) {
         loginViewModel.effect.collect { effect ->
             when (effect) {
                 LoginEffect.NavigateToHub -> {
-                    topNavigate(Route.Hub)
+                    topNavigate(NavKey.Hub)
                 }
                 is LoginEffect.ShowToast -> {
                     // TODO
@@ -35,11 +37,13 @@ fun LoginScreen(topNavigate: (Route) -> Unit) {
         }
     }
 
-    LoginUi(sendIntent = loginViewModel::sendIntent)
+    CheckMateScaffold {
+        LoginContent(sendIntent = loginViewModel::sendIntent)
+    }
 }
 
 @Composable
-private fun LoginUi(sendIntent: (LoginIntent) -> Unit) {
+private fun LoginContent(sendIntent: (LoginIntent) -> Unit) {
     Column(
         modifier =
             Modifier
@@ -57,8 +61,8 @@ private fun LoginUi(sendIntent: (LoginIntent) -> Unit) {
 
 @Composable
 @Preview
-private fun LoginUiPreview() {
-    LoginUi(
+private fun LoginContentPreview() {
+    LoginContent(
         sendIntent = {},
     )
 }

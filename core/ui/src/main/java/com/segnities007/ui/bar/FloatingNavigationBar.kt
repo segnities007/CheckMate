@@ -35,16 +35,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.navigation.HubRoute
+import com.segnities007.navigation.NavKey
 
 @Composable
 fun FloatingNavigationBar(
     alpha: Float = 1f,
-    currentHubRoute: HubRoute,
-    onNavigate: (HubRoute) -> Unit,
+    currentHubRoute: NavKey,
+    onNavigate: (NavKey) -> Unit,
 ) {
-    if(alpha == 0f) return
-
     Column(
         modifier = Modifier
             .graphicsLayer(alpha = alpha)
@@ -62,16 +60,16 @@ fun FloatingNavigationBar(
 
 @Composable
 private fun FloatingActionBarUi(
-    currentHubRoute: HubRoute,
-    onNavigate: (HubRoute) -> Unit,
+    currentHubRoute: NavKey,
+    onNavigate: (NavKey) -> Unit,
 ) {
     val info =
         mapOf(
-            HubRoute.Home to listOf(Icons.Filled.Home, Icons.Outlined.Home),
-            HubRoute.Items to listOf(Icons.Filled.Category, Icons.Outlined.Category),
-            HubRoute.Dashboard to listOf(Icons.Filled.SpaceDashboard, Icons.Outlined.SpaceDashboard),
-            HubRoute.Templates to listOf(Icons.Filled.ContentPaste, Icons.Outlined.ContentPaste),
-            HubRoute.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
+            NavKey.Home to listOf(Icons.Filled.Home, Icons.Outlined.Home),
+            NavKey.Items to listOf(Icons.Filled.Category, Icons.Outlined.Category),
+            NavKey.Dashboard to listOf(Icons.Filled.SpaceDashboard, Icons.Outlined.SpaceDashboard),
+            NavKey.Templates to listOf(Icons.Filled.ContentPaste, Icons.Outlined.ContentPaste),
+            NavKey.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
         )
 
     val brush =
@@ -134,7 +132,7 @@ private fun FloatingNavigationBarPreview() {
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
     ) {
         FloatingNavigationBar(
-            currentHubRoute = HubRoute.Home,
+            currentHubRoute = NavKey.Home,
             onNavigate = {},
         )
     }

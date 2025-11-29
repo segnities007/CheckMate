@@ -11,7 +11,7 @@ import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.ui.card.WeekCalendarCard
+import com.segnities007.ui.card.calendar.WeekCalendarCard
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
 
