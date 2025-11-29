@@ -7,10 +7,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.segnities007.local.entity.ItemEntity
 
+import kotlinx.coroutines.flow.Flow
+
 @Dao
 interface ItemDao {
     @Query("SELECT * FROM items")
-    suspend fun getAll(): List<ItemEntity>
+    fun getAll(): Flow<List<ItemEntity>>
 
     @Query("SELECT * FROM items WHERE id = :id LIMIT 1")
     suspend fun getById(id: Int): ItemEntity?

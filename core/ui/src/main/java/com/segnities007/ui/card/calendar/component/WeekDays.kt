@@ -9,7 +9,7 @@ import com.segnities007.ui.card.calendar.util.hasTemplateFor
 import kotlinx.datetime.LocalDate
 
 @Composable
-fun CalendarWeekDays(
+fun WeekDays(
     days: List<LocalDate>,
     selectedDate: LocalDate?,
     today: LocalDate,

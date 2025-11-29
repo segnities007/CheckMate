@@ -47,6 +47,7 @@ import com.segnities007.ui.util.rememberScrollVisibility
 import com.segnities007.ui.scaffold.CheckMateScaffold
 import com.segnities007.ui.theme.checkMateBackgroundBrush
 
+
 @Composable
 fun TemplateListPage(
     onNavigate: (NavKey) -> Unit,
@@ -113,7 +114,7 @@ fun TemplateListPage(
                 onSortOrderChange = onSortOrderChange,
                 onDayOfWeekChange = onDayOfWeekChange,
             )
-            Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+            Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
         }
     }
 }

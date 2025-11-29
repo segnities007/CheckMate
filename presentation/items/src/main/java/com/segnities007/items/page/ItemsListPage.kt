@@ -56,6 +56,7 @@ import com.segnities007.ui.util.rememberScrollVisibility
 import kotlin.time.ExperimentalTime
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
+
 import com.segnities007.ui.theme.checkMateBackgroundBrush
 
 @OptIn(ExperimentalTime::class, ExperimentalMaterial3Api::class)
@@ -224,7 +225,7 @@ private fun ItemListUi(
         }
 
         // Bottom Padding
-        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
+        Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
     }
 }
 

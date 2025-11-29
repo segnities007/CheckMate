@@ -1,18 +1,19 @@
 # CheckMate Screen 実装ガイドライン
 
-このドキュメントは、CheckMateプロジェクトにおける画面（Screen / Composable）の実装ルールを定義します。
-MVIアーキテクチャに基づき、UIとロジックを適切に分離するための指針です。
+このドキュメントは、CheckMate プロジェクトにおける画面（Screen / Composable）の実装ルールを定義します。
+MVI アーキテクチャに基づき、UI とロジックを適切に分離するための指針です。
 
 ---
 
-## 1. Screen構成の基本パターン
+## 1. Screen 構成の基本パターン
 
-各画面は、**StatefulなScreen** と **StatelessなContent** の2層構造で実装することを推奨します。
+各画面は、**Stateful な Screen** と **Stateless な Content** の 2 層構造で実装することを推奨します。
 
 ### ✅ 推奨構造
 
-1. **XxxScreen (Stateful)**: ViewModelと結合し、Stateの監視、Effectの処理、Intentの送信を行う。
-2. **XxxContent (Stateless)**: UI描画のみに専念し、データとコールバックを引数で受け取る。Preview可能にする。
+1. **XxxScreen (Stateful)**: ViewModel と結合し、State の監視、Effect の処理、Intent の送信を行う。
+2. **XxxContent (Stateless)**: UI 描画のみに専念し、データとコールバックを引数で受け取る。Preview
+   可能にする。
 
 ```kotlin
 // presentation/dashboard/DashboardScreen.kt
@@ -20,9 +21,9 @@ MVIアーキテクチャに基づき、UIとロジックを適切に分離する
 // 1. Stateful Screen (Entry Point)
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = koinViewModel(),
     onNavigate: (NavKey) -> Unit
 ) {
+    val viewModel: DashboardViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     // Effect処理
@@ -68,28 +69,28 @@ fun DashboardContent(
 
 ---
 
-## 2. MVI連携ルール
+## 2. MVI 連携ルール
 
-### Stateの監視
+### State の監視
 
-* `collectAsStateWithLifecycle()` を使用して、ライフサイクルを考慮したState監視を行ってください。
-* Stateは不変（Immutable）なデータクラスとして定義されている前提です。
+- `collectAsStateWithLifecycle()` を使用して、ライフサイクルを考慮した State 監視を行ってください。
+- State は不変（Immutable）なデータクラスとして定義されている前提です。
 
-### Effectの処理
+### Effect の処理
 
-* `LaunchedEffect(Unit)` 内で `viewModel.effect.collect` を行います。
-* ナビゲーションやトースト表示などの「一度きりのイベント」はここで処理します。
+- `LaunchedEffect(Unit)` 内で `viewModel.effect.collect` を行います。
+- ナビゲーションやトースト表示などの「一度きりのイベント」はここで処理します。
 
-### Intentの送信
+### Intent の送信
 
-* ユーザーアクション（クリック、入力など）は全て `Intent` に変換して ViewModel へ送信します。
-* UI側でロジックを持たず、`onIntent(DashboardIntent.Xxx)` のように委譲します。
+- ユーザーアクション（クリック、入力など）は全て `Intent` に変換して ViewModel へ送信します。
+- UI 側でロジックを持たず、`onIntent(DashboardIntent.Xxx)` のように委譲します。
 
 ---
 
-## 3. Previewの実装
+## 3. Preview の実装
 
-Statelessな `Content` Composable に対して Preview を作成します。
+Stateless な `Content` Composable に対して Preview を作成します。
 `PreviewParameterProvider` を使用して、様々な状態（ローディング中、エラー、データあり）をテストすることを推奨します。
 
 ```kotlin
@@ -112,7 +113,7 @@ private fun DashboardContentPreview() {
 
 ## 4. 禁止事項
 
-### ❌ ViewModelをContentに渡さない
+### ❌ ViewModel を Content に渡さない
 
 `Content` Composable に ViewModel を渡すと、プレビューが困難になり、再利用性が下がります。
 必ず State と コールバック関数（または Intent 送信関数）を渡してください。
@@ -134,18 +135,10 @@ fun DashboardContent(
 }
 ```
 
-### ❌ UIでビジネスロジックを書かない
+### ❌ UI でビジネスロジックを書かない
 
 データのフィルタリングや計算は ViewModel (or Use Case) で行い、UI は加工済みの State を表示するだけにしてください。
 
-### ❌ 巨大なComposableを作らない
+### ❌ 巨大な Composable を作らない
 
 画面が複雑になる場合は、部品ごとにファイルを分割するか、小さな Composable 関数に切り出してください。
-
----
-
-## まとめ
-
-* **Stateful (Screen)** と **Stateless (Content)** を分離する。
-* **MVI** (State, Intent, Effect) のフローを厳守する。
-* **Preview** を活用してUI開発効率を上げる。

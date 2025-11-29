@@ -8,6 +8,7 @@ import com.segnities007.model.DayOfWeek
 import com.segnities007.repository.ItemCheckStateRepository
 import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.WeeklyTemplateRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -56,7 +57,7 @@ class DailyReminderWorker(
             }
 
             // すべてのアイテムを取得
-            val allItems = itemRepository.getAllItems()
+            val allItems = itemRepository.getAllItems().first()
 
             // 今日のアイテムのみをフィルタリング
             val todaysItems = allItems.filter { it.id in todaysItemIds }

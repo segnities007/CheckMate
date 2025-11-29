@@ -4,8 +4,10 @@ import com.segnities007.model.item.BarcodeInfo
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ProductInfo
 
+import kotlinx.coroutines.flow.Flow
+
 interface ItemRepository {
-    suspend fun getAllItems(): List<Item>
+    fun getAllItems(): Flow<List<Item>>
 
     suspend fun getItemById(id: Int): Item?
 

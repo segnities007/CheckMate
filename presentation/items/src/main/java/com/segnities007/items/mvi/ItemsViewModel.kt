@@ -1,5 +1,7 @@
 package com.segnities007.items.mvi
-import com.segnities007.navigation.ItemsRoute
+import androidx.lifecycle.viewModelScope
+import com.segnities007.model.item.Item
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.image.DeleteImageUseCase
 import com.segnities007.usecase.image.SaveImageUseCase
@@ -9,12 +11,13 @@ import com.segnities007.usecase.item.GetAllItemsUseCase
 import com.segnities007.usecase.item.GetItemByIdUseCase
 import com.segnities007.usecase.item.GetProductInfoByBarcodeUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalTime::class)
 class ItemsViewModel(
     private val getAllItemsUseCase: GetAllItemsUseCase,
     private val getItemByIdUseCase: GetItemByIdUseCase,
@@ -23,70 +26,80 @@ class ItemsViewModel(
     private val getProductInfoByBarcodeUseCase: GetProductInfoByBarcodeUseCase,
     private val saveImageUseCase: SaveImageUseCase,
     private val deleteImageUseCase: DeleteImageUseCase,
-) : BaseViewModel<ItemsIntent, ItemsState, ItemsEffect>(ItemsState()),
-    KoinComponent {
+) : BaseViewModel<ItemsIntent, ItemsState, ItemsEffect>(ItemsState()) {
 
     init {
-        sendIntent(ItemsIntent.GetAllItems)
+        // Start collecting items Flow immediately
+        viewModelScope.launch {
+            getAllItemsUseCase().collect { items ->
+                setState {
+                    val newState = copy(items = items)
+                    
+                    var filtered = items
+                    if (searchQuery.isNotBlank()) {
+                        filtered = filtered.filter { it.name.contains(searchQuery, ignoreCase = true) || it.description.contains(searchQuery, ignoreCase = true) }
+                    }
+                    if (selectedCategory != null) {
+                        filtered = filtered.filter { it.category == selectedCategory }
+                    }
+                    filtered = when (sortOrder) {
+                        SortOrder.NAME_ASC -> filtered.sortedBy { it.name }
+                        SortOrder.NAME_DESC -> filtered.sortedByDescending { it.name }
+                        SortOrder.CREATED_ASC -> filtered.sortedBy { it.createdAt }
+                        SortOrder.CREATED_DESC -> filtered.sortedByDescending { it.createdAt }
+                        SortOrder.CATEGORY_ASC -> filtered.sortedBy { it.category.name }
+                        SortOrder.CATEGORY_DESC -> filtered.sortedByDescending { it.category.name }
+                    }
+                    newState.copy(filteredItems = filtered)
+                }
+            }
+        }
     }
 
     override suspend fun handleIntent(intent: ItemsIntent) {
         when (intent) {
-            is ItemsIntent.GetAllItems -> getAllItems()
+            is ItemsIntent.GetAllItems -> {} // No-op, Flow is already collecting
             is ItemsIntent.GetItemsById -> getItemById(intent)
             is ItemsIntent.InsertItems -> insertItem(intent)
             is ItemsIntent.DeleteItems -> deleteItem(intent)
-            is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> updateCapturedImageUriForBottomSheet(intent)
-            is ItemsIntent.UpdateCapturedTempPathForViewModel -> updateCapturedTempPathForViewModel(intent)
-            is ItemsIntent.UpdateIsShowBottomSheet -> updateIsShowBottomSheet(intent)
-            ItemsIntent.NavigateToItemsList -> setState { reduce(intent) }
-            ItemsIntent.NavigateToCameraCapture -> setState { reduce(intent) }
-            ItemsIntent.NavigateToBarcodeScanner -> setState { reduce(intent) }
+            is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> setState { copy(capturedImageUriForBottomSheet = intent.capturedImageUriForBottomSheet) }
+            is ItemsIntent.UpdateCapturedTempPathForViewModel -> setState { copy(capturedTempPathForViewModel = intent.capturedTempPathForViewModel) }
+            is ItemsIntent.UpdateIsShowBottomSheet -> setState { copy(isShowBottomSheet = intent.isShowBottomSheet) }
+            ItemsIntent.NavigateToItemsList -> setState { copy(currentRoute = NavKey.ItemsList) }
+            ItemsIntent.NavigateToCameraCapture -> setState { copy(currentRoute = NavKey.CameraCapture) }
+            ItemsIntent.NavigateToBarcodeScanner -> setState { copy(currentRoute = NavKey.BarcodeScanner) }
             is ItemsIntent.BarcodeDetected -> handleBarcodeDetected(intent)
             is ItemsIntent.GetProductInfo -> getProductInfo(intent)
             ItemsIntent.ClearProductInfo -> clearProductInfo()
-            is ItemsIntent.SetFilteredItems -> setState { reduce(intent) }
-            is ItemsIntent.SetItems -> setState { reduce(intent) }
-            is ItemsIntent.SetScannedBarcodeInfo -> setState { reduce(intent) }
-            is ItemsIntent.SetProductInfoLoading -> setState { reduce(intent) }
-            is ItemsIntent.SetProductInfo -> setState { reduce(intent) }
-            is ItemsIntent.SetShouldClearForm -> setState { reduce(intent) }
+            is ItemsIntent.SetFilteredItems -> setState { copy(filteredItems = intent.filteredItems) }
+            is ItemsIntent.SetItems -> setState { copy(items = intent.items) }
+            is ItemsIntent.SetScannedBarcodeInfo -> setState { copy(scannedBarcodeInfo = intent.barcodeInfo) }
+            is ItemsIntent.SetProductInfoLoading -> setState { copy(isLoadingProductInfo = intent.isLoading) }
+            is ItemsIntent.SetProductInfo -> setState { copy(productInfo = intent.productInfo) }
+            is ItemsIntent.SetShouldClearForm -> setState { copy(shouldClearForm = intent.shouldClear) }
             is ItemsIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is ItemsIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
             is ItemsIntent.UpdateSortOrder -> updateSortOrder(intent)
         }
     }
 
-    private fun updateIsShowBottomSheet(intent: ItemsIntent.UpdateIsShowBottomSheet) {
-        setState { reduce(intent) }
-    }
-
-    private fun updateCapturedImageUriForBottomSheet(intent: ItemsIntent.UpdateCapturedImageUriForBottomSheet) {
-        setState { reduce(intent) }
-    }
-
-    private fun updateCapturedTempPathForViewModel(intent: ItemsIntent.UpdateCapturedTempPathForViewModel) {
-        setState { reduce(intent) }
-    }
-
     private fun updateSearchQuery(intent: ItemsIntent.UpdateSearchQuery) {
-        setState { reduce(intent) }
+        setState { copy(searchQuery = intent.query) }
         applyFilters()
     }
 
     private fun updateSelectedCategory(intent: ItemsIntent.UpdateSelectedCategory) {
-        setState { reduce(intent) }
+        setState { copy(selectedCategory = intent.category) }
         applyFilters()
     }
 
     private fun updateSortOrder(intent: ItemsIntent.UpdateSortOrder) {
-        setState { reduce(intent) }
+        setState { copy(sortOrder = intent.sortOrder) }
         applyFilters()
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun applyFilters() {
-        val currentState = state.value
+        val currentState = currentState
         var filteredItems = currentState.items
 
         // 検索フィルタ
@@ -117,96 +130,86 @@ class ItemsViewModel(
                 SortOrder.CATEGORY_DESC -> filteredItems.sortedByDescending { it.category.name }
             }
 
-        setState { reduce(ItemsIntent.SetFilteredItems(filteredItems)) }
+        setState { copy(filteredItems = filteredItems) }
     }
 
-    private suspend fun getAllItems() {
-        getAllItemsUseCase().fold(
-            onSuccess = { items ->
-                setState { reduce(ItemsIntent.SetItems(items)) }
-                applyFilters()
-            },
-            onFailure = { e ->
-                sendEffect { ItemsEffect.ShowToast("アイテムの読み込みに失敗しました") }
-            }
-        )
-    }
-
-    private suspend fun getItemById(intent: ItemsIntent.GetItemsById) {
-        getItemByIdUseCase(intent.id).fold(
-            onSuccess = { item ->
-                if (item != null) {
-                    setState { reduce(ItemsIntent.SetItems(listOf(item))) }
-                    applyFilters()
-                } else {
-                    sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
-                }
-            },
-            onFailure = { e ->
-                sendEffect { ItemsEffect.ShowToast("アイテムの取得に失敗しました") }
-            }
-        )
-    }
-
-    @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
-    private suspend fun insertItem(intent: ItemsIntent.InsertItems) {
-        val newItem =
-            withContext(Dispatchers.IO) {
-                val finalImagePath =
-                    if (intent.item.imagePath.isNotBlank()) {
-                        if (intent.item.imagePath.startsWith("http://") || intent.item.imagePath.startsWith("https://")) {
-                            intent.item.imagePath
-                        } else {
-                            val result = saveImageUseCase(intent.item.imagePath, "${Uuid.random()}.jpg")
-                            result.getOrElse { e ->
-                                sendEffect { ItemsEffect.ShowToast("画像の保存に失敗しました") }
-                                return@withContext null
-                            }
-                        }
+    private fun getItemById(intent: ItemsIntent.GetItemsById) {
+        // Manual handling to support Toast on failure/null
+        viewModelScope.launch {
+            getItemByIdUseCase(intent.id).fold(
+                onSuccess = { item ->
+                    if (item != null) {
+                        val newItems = listOf(item)
+                        setState { copy(items = newItems) }
+                        applyFilters()
                     } else {
-                        ""
+                        sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
                     }
-                intent.item.copy(imagePath = finalImagePath)
-            }
-
-        if (newItem == null) {
-            return
+                },
+                onFailure = {
+                    sendEffect { ItemsEffect.ShowToast("アイテムの取得に失敗しました") }
+                }
+            )
         }
-        
-        val result = addItemUseCase(newItem)
-        result.fold(
-            onSuccess = {
-                sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }
-                getAllItems()
-            },
-            onFailure = { error ->
-                sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの追加に失敗しました") }
-            }
-        )
     }
 
-    private suspend fun deleteItem(intent: ItemsIntent.DeleteItems) {
-        val itemToDelete = getItemByIdUseCase(intent.id).getOrElse { error ->
-            sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの取得に失敗しました") }
-            return
-        }
+    @OptIn(ExperimentalUuidApi::class)
+    private fun insertItem(intent: ItemsIntent.InsertItems) {
+        viewModelScope.launch {
+            val newItem = withContext(Dispatchers.IO) {
+                val finalImagePath = if (intent.item.imagePath.isNotBlank()) {
+                    if (intent.item.imagePath.startsWith("http")) {
+                        intent.item.imagePath
+                    } else {
+                        saveImageUseCase(intent.item.imagePath, "${Uuid.random()}.jpg").getOrElse {
+                            sendEffect { ItemsEffect.ShowToast("画像の保存に失敗しました") }
+                            return@withContext null
+                        }
+                    }
+                } else {
+                    ""
+                }
+                intent.item.copy(imagePath = finalImagePath)
+            } ?: return@launch
 
-        if (itemToDelete == null) {
-            sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
-            return
+            addItemUseCase(newItem).fold(
+                onSuccess = {
+                    sendEffect { ItemsEffect.ShowToast("「${newItem.name}」を追加しました") }
+                    // Flow will auto-update, no need to manually refresh
+                },
+                onFailure = { error ->
+                    sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの追加に失敗しました") }
+                }
+            )
         }
+    }
 
-        if (itemToDelete.imagePath.isNotBlank()) {
-            deleteImageUseCase(itemToDelete.imagePath).getOrElse { }
+    private fun deleteItem(intent: ItemsIntent.DeleteItems) {
+        viewModelScope.launch {
+            val itemToDelete = getItemByIdUseCase(intent.id).getOrElse {
+                sendEffect { ItemsEffect.ShowToast("アイテムの取得に失敗しました") }
+                return@launch
+            }
+
+            if (itemToDelete == null) {
+                sendEffect { ItemsEffect.ShowToast("アイテムが見つかりません") }
+                return@launch
+            }
+
+            if (itemToDelete.imagePath.isNotBlank()) {
+                deleteImageUseCase(itemToDelete.imagePath)
+            }
+
+            deleteItemUseCase(intent.id).fold(
+                onSuccess = {
+                    sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
+                    // Flow will auto-update, no need to manually refresh
+                },
+                onFailure = { error ->
+                    sendEffect { ItemsEffect.ShowToast(error.message ?: "削除に失敗しました") }
+                }
+            )
         }
-
-        deleteItemUseCase(intent.id).getOrElse { error ->
-            sendEffect { ItemsEffect.ShowToast(error.message ?: "削除に失敗しました") }
-            return
-        }
-
-        sendEffect { ItemsEffect.ShowToast("「${itemToDelete.name}」を削除しました") }
-        getAllItems()
     }
 
     private fun handleBarcodeDetected(intent: ItemsIntent.BarcodeDetected) {
@@ -214,30 +217,34 @@ class ItemsViewModel(
         sendIntent(ItemsIntent.GetProductInfo(intent.barcodeInfo))
     }
 
-    private suspend fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
-        setState { reduce(ItemsIntent.SetProductInfoLoading(true)) }
+    private fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
+        setState { copy(isLoadingProductInfo = true) }
         
-        val result = getProductInfoByBarcodeUseCase(intent.barcodeInfo)
-        result.fold(
-            onSuccess = { productInfo ->
-                setState { reduce(ItemsIntent.SetProductInfo(productInfo)) }
-                setState { reduce(ItemsIntent.SetProductInfoLoading(false)) }
+        viewModelScope.launch {
+            getProductInfoByBarcodeUseCase(intent.barcodeInfo).fold(
+                onSuccess = { productInfo ->
+                    setState { copy(productInfo = productInfo, isLoadingProductInfo = false) }
 
-                if (productInfo != null) {
-                    setState { reduce(ItemsIntent.UpdateIsShowBottomSheet(false)) }
-                    setState { reduce(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null)) }
-                    setState { reduce(ItemsIntent.UpdateCapturedTempPathForViewModel("")) }
-                    setState { reduce(ItemsIntent.SetShouldClearForm(true)) }
-                    sendEffect { ItemsEffect.ReopenBottomSheetWithProductInfo }
-                } else {
-                    sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
+                    if (productInfo != null) {
+                        setState { 
+                            copy(
+                                isShowBottomSheet = false,
+                                capturedImageUriForBottomSheet = null,
+                                capturedTempPathForViewModel = "",
+                                shouldClearForm = true
+                            ) 
+                        }
+                        sendEffect { ItemsEffect.ReopenBottomSheetWithProductInfo }
+                    } else {
+                        sendEffect { ItemsEffect.ShowToast("商品情報が見つかりませんでした") }
+                    }
+                },
+                onFailure = { error ->
+                    setState { copy(isLoadingProductInfo = false) }
+                    sendEffect { ItemsEffect.ShowToast("商品情報の取得に失敗しました: ${error.message}") }
                 }
-            },
-            onFailure = { error ->
-                setState { reduce(ItemsIntent.SetProductInfoLoading(false)) }
-                sendEffect { ItemsEffect.ShowToast("商品情報の取得に失敗しました: ${error.message}") }
-            }
-        )
+            )
+        }
     }
 
     private fun clearProductInfo() {
@@ -247,41 +254,5 @@ class ItemsViewModel(
                 scannedBarcodeInfo = null,
             )
         }
-    }
-}
-
-// =============================================================================
-// Reducer Function
-// =============================================================================
-
-private fun ItemsState.reduce(intent: ItemsIntent): ItemsState {
-    return when (intent) {
-        // ボトムシート関連
-        is ItemsIntent.UpdateIsShowBottomSheet -> copy(isShowBottomSheet = intent.isShowBottomSheet)
-        is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> copy(capturedImageUriForBottomSheet = intent.capturedImageUriForBottomSheet)
-        is ItemsIntent.UpdateCapturedTempPathForViewModel -> copy(capturedTempPathForViewModel = intent.capturedTempPathForViewModel)
-        
-        // 検索・フィルター関連
-        is ItemsIntent.UpdateSearchQuery -> copy(searchQuery = intent.query)
-        is ItemsIntent.UpdateSelectedCategory -> copy(selectedCategory = intent.category)
-        is ItemsIntent.UpdateSortOrder -> copy(sortOrder = intent.sortOrder)
-        is ItemsIntent.SetFilteredItems -> copy(filteredItems = intent.filteredItems)
-        
-        // アイテム関連
-        is ItemsIntent.SetItems -> copy(items = intent.items)
-        
-        // バーコード・商品情報関連
-        is ItemsIntent.SetScannedBarcodeInfo -> copy(scannedBarcodeInfo = intent.barcodeInfo)
-        is ItemsIntent.SetProductInfoLoading -> copy(isLoadingProductInfo = intent.isLoading)
-        is ItemsIntent.SetProductInfo -> copy(productInfo = intent.productInfo)
-        is ItemsIntent.SetShouldClearForm -> copy(shouldClearForm = intent.shouldClear)
-
-        // ナビゲーション
-        ItemsIntent.NavigateToItemsList -> copy(currentRoute = ItemsRoute.ItemsList)
-        ItemsIntent.NavigateToCameraCapture -> copy(currentRoute = ItemsRoute.CameraCapture)
-        ItemsIntent.NavigateToBarcodeScanner -> copy(currentRoute = ItemsRoute.BarcodeScanner)
-        
-        // 他のIntentはViewModelで処理（非同期処理など）
-        else -> this
     }
 }

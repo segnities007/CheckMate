@@ -5,6 +5,23 @@
 
 ---
 
+## 0. ナビゲーションキー (NavKey)
+
+全てのナビゲーション先は `NavKey` sealed interface に集約されています。
+`Route` や `AuthRoute` などの個別のインターフェースは廃止されました。
+新しい画面を追加する場合は、必ず `core/navigation/src/main/java/com/segnities007/navigation/NavKey.kt` にキーを追加してください。
+
+```kotlin
+@Serializable
+sealed interface NavKey {
+    @Serializable
+    data object Home : NavKey
+    // ...
+}
+```
+
+---
+
 ## 1. モジュール公開ルール (Entry Provider Pattern)
 
 各機能モジュール（`presentation/dashboard`など）は、Composable Screenを直接公開せず、**`EntryProviderScope` への拡張関数** を公開してください。

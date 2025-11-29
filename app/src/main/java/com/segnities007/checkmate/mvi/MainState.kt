@@ -1,10 +1,10 @@
 package com.segnities007.checkmate.mvi
 
 import com.segnities007.model.UserStatus
-import com.segnities007.navigation.Route
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.mvi.MviState
 
 data class MainState(
     val userStatus: UserStatus = UserStatus(),
-    val currentRoute: Route = Route.Auth,
+    val currentRoute: NavKey = NavKey.Auth,
 ) : MviState

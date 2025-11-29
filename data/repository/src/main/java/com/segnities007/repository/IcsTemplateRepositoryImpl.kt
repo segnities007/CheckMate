@@ -14,6 +14,7 @@ import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.remote.GeminiAiService
 import com.segnities007.repository.BuildConfig
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -346,7 +347,7 @@ class IcsTemplateRepositoryImpl(
     }
 
     private suspend fun generateItemIdsForEvents(events: List<CalendarEvent>): List<Int> {
-        val allItemsFull = itemRepository.getAllItems()
+        val allItemsFull = itemRepository.getAllItems().first()
         val dynamicFallbackRules = buildFallbackRules(events)
         val allItems = keywordFilterItems(allItemsFull, events)
         if (events.isEmpty()) return emptyList()

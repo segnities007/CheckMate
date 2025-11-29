@@ -19,7 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,8 +45,11 @@ import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
-
 import com.segnities007.ui.theme.checkMateBackgroundBrush
+
+
+
+
 
 @Composable
 fun SettingScreen(
@@ -54,7 +57,8 @@ fun SettingScreen(
 ) {
     val localContext = LocalContext.current
     val settingViewModel: SettingViewModel = koinInject()
-    val state by settingViewModel.state.collectAsState()
+    val uiState by settingViewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.data
     val scrollState = rememberScrollState()
     val isVisible by rememberScrollVisibility(scrollState)
 
@@ -104,7 +108,7 @@ fun SettingScreen(
                     .verticalScroll(scrollState),
         ) {
             Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-            SettingUi(state = state, sendIntent = settingViewModel::sendIntent)
+            SettingContent(state = state, sendIntent = settingViewModel::sendIntent)
             Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
         }
     }
@@ -124,7 +128,7 @@ fun SettingScreen(
 }
 
 @Composable
-private fun SettingUi(
+private fun SettingContent(
     state: SettingState,
     sendIntent: (SettingIntent) -> Unit,
 ) {
@@ -174,7 +178,7 @@ private fun SettingUi(
 @Preview(showBackground = true)
 @Composable
 private fun SettingScreenPreview() {
-    SettingUi(
+    SettingContent(
         state = SettingState(
             userStatus = UserStatus(),
         ),

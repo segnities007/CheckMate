@@ -2,14 +2,10 @@ package com.segnities007.hub.mvi
 
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.user.GetUserStatusUseCase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.koin.core.component.KoinComponent
 
 class HubViewModel(
     private val getUserStatusUseCase: GetUserStatusUseCase,
-) : BaseViewModel<HubIntent, HubState, HubEffect>(HubState()),
-    KoinComponent {
+) : BaseViewModel<HubIntent, HubState, HubEffect>(HubState()) {
 
     override suspend fun handleIntent(intent: HubIntent) {
         when (intent) {
@@ -17,9 +13,9 @@ class HubViewModel(
             is HubIntent.ShowToast -> showToast(intent)
             HubIntent.LoadUserStatus -> loadUserStatus()
             HubIntent.Logout -> logout()
-            is HubIntent.SetBottomBar -> setBottomBar(intent)
-            is HubIntent.SetFab -> setFab(intent)
-            is HubIntent.SetTopBar -> setTopBar(intent)
+            is HubIntent.SetBottomBar -> setState { copy(bottomBar = intent.bottomBar) }
+            is HubIntent.SetFab -> setState { copy(fab = intent.fab) }
+            is HubIntent.SetTopBar -> setState { copy(topBar = intent.topBar) }
         }
     }
 
@@ -27,32 +23,15 @@ class HubViewModel(
         sendIntent(HubIntent.LoadUserStatus)
     }
 
-    private suspend fun loadUserStatus() {
-        getUserStatusUseCase().fold(
-            onSuccess = { userStatus ->
-                setState { copy(userStatus = userStatus) }
-            },
-            onFailure = { e ->
-                sendEffect { HubEffect.ShowToast("ユーザー情報の読み込みに失敗しました") }
-            }
+    private fun loadUserStatus() {
+        execute(
+            action = { getUserStatusUseCase().getOrThrow() },
+            reducer = { userStatus -> copy(userStatus = userStatus) }
         )
     }
 
-    private fun setBottomBar(intent: HubIntent.SetBottomBar) {
-        setState { reduce(intent) }
-    }
-
-    private fun setTopBar(intent: HubIntent.SetTopBar) {
-        setState { reduce(intent) }
-    }
-
-    private fun setFab(intent: HubIntent.SetFab) {
-        setState { reduce(intent) }
-    }
-
     private fun navigate(intent: HubIntent.Navigate) {
-        setState { reduce(intent) }
-        sendEffect { HubEffect.Navigate(intent.hubRoute) }
+        setState { copy(currentHubRoute = intent.hubRoute) }
     }
 
     private fun showToast(intent: HubIntent.ShowToast) {
@@ -61,21 +40,5 @@ class HubViewModel(
 
     private fun logout() {
         sendEffect { HubEffect.Logout }
-    }
-}
-
-// =============================================================================
-// Reducer Function
-// =============================================================================
-
-private fun HubState.reduce(intent: HubIntent): HubState {
-    return when (intent) {
-        is HubIntent.SetBottomBar -> copy(bottomBar = intent.bottomBar)
-        is HubIntent.SetTopBar -> copy(topBar = intent.topBar)
-        is HubIntent.SetFab -> copy(fab = intent.fab)
-        is HubIntent.Navigate -> copy(currentHubRoute = intent.hubRoute)
-        
-        // 他のIntentはViewModelで処理（非同期処理など）
-        else -> this
     }
 }

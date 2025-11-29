@@ -13,6 +13,7 @@ import com.segnities007.model.item.ItemCheckRecord
 import com.segnities007.model.item.ItemCheckState
 import com.segnities007.repository.model.ExportData
 import com.segnities007.repository.model.toDomain
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -32,7 +33,7 @@ class BackupRepositoryImpl(
     private val json: Json = Json { prettyPrint = true },
 ) : BackupRepository {
     override suspend fun exportData(): String {
-        val items = itemDao.getAll().map { it.toDomain() }
+        val items = itemDao.getAll().first().map { it.toDomain() }
         val states = itemCheckStateDao.getAll().map { it.toDomain() }
         val templates = weeklyTemplateDao.getAll().map { it.toDomain() }
 

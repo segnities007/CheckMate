@@ -16,29 +16,26 @@ import com.segnities007.hub.mvi.HubEffect
 import com.segnities007.hub.mvi.HubIntent
 import com.segnities007.hub.mvi.HubViewModel
 import com.segnities007.items.itemsEntry
-import com.segnities007.navigation.Route
+import com.segnities007.navigation.NavKey
 import com.segnities007.setting.settingEntry
 import com.segnities007.templates.templatesEntry
 import org.koin.compose.koinInject
 
 @Composable
-fun HubNavigation(onTopNavigate: (Route) -> Unit) {
+fun HubNavigation(onTopNavigate: (NavKey) -> Unit) {
     val hubViewModel: HubViewModel = koinInject()
-    val state by hubViewModel.state.collectAsState()
+    val uiState by hubViewModel.uiState.collectAsState()
+    val state = uiState.data
 
     LaunchedEffect(Unit) {
         hubViewModel.effect.collect { effect ->
             when (effect) {
-                is HubEffect.Navigate -> {
-                    // Navigation is handled by state observation
-                }
-
                 is HubEffect.ShowToast -> {
                     // TODO
                 }
 
                 HubEffect.Logout -> {
-                    onTopNavigate(Route.Auth)
+                    onTopNavigate(NavKey.Auth)
                 }
             }
         }

@@ -30,7 +30,7 @@ import com.segnities007.auth.AuthNavigation
 import com.segnities007.checkmate.mvi.MainIntent
 import com.segnities007.checkmate.mvi.MainViewModel
 import com.segnities007.hub.HubNavigation
-import com.segnities007.navigation.Route
+import com.segnities007.navigation.NavKey
 import com.segnities007.ui.theme.CheckMateTheme
 import org.koin.compose.koinInject
 
@@ -147,16 +147,17 @@ private fun NotificationPermissionRationaleDialog(
 @Composable
 private fun MainNavigation() {
     val mainViewModel: MainViewModel = koinInject()
-    val state by mainViewModel.state.collectAsState()
+    val uiState by mainViewModel.uiState.collectAsState()
+    val state = uiState.data
 
     val entryProvider = remember {
         entryProvider {
-            entry(Route.Auth) {
+            entry(NavKey.Auth) {
                 AuthNavigation(
                     topNavigate = { route -> mainViewModel.sendIntent(MainIntent.Navigate(route)) }
                 )
             }
-            entry(Route.Hub) {
+            entry(NavKey.Hub) {
                 HubNavigation(
                     onTopNavigate = { route -> mainViewModel.sendIntent(MainIntent.Navigate(route)) }
                 )

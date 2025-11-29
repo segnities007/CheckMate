@@ -8,12 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -22,10 +23,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.navigation.NavKey
-import com.segnities007.navigation.TemplatesRoute
 import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
 import com.segnities007.templates.mvi.TemplatesEffect
 import com.segnities007.templates.mvi.TemplatesIntent
+import com.segnities007.templates.mvi.TemplatesState
 import com.segnities007.templates.mvi.TemplatesViewModel
 import com.segnities007.templates.page.TemplateItemSelectPage
 import com.segnities007.templates.page.TemplateListPage
@@ -37,7 +38,8 @@ fun TemplatesScreen(
     onNavigate: (NavKey) -> Unit,
 ) {
     val templatesViewModel: TemplatesViewModel = koinInject()
-    val state by templatesViewModel.state.collectAsState()
+    val uiState by templatesViewModel.uiState.collectAsStateWithLifecycle()
+    val state = uiState.data
     val localContext = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -46,13 +48,10 @@ fun TemplatesScreen(
             uri?.let { templatesViewModel.sendIntent(TemplatesIntent.ImportIcsTemplates(it)) }
         }
 
+    // Effect handling
     LaunchedEffect(Unit) {
         templatesViewModel.effect.collect { effect ->
             when (effect) {
-                is TemplatesEffect.NavigateToWeeklyTemplateSelector ->
-                    { /* Handled by state */ }
-                TemplatesEffect.NavigateToWeeklyTemplateList ->
-                    { /* Handled by state */ }
                 is TemplatesEffect.ShowToast ->
                     Toast.makeText(localContext, effect.message, Toast.LENGTH_SHORT).show()
                 TemplatesEffect.LaunchIcsPicker ->
@@ -60,32 +59,55 @@ fun TemplatesScreen(
                         icsLauncher.launch(arrayOf("text/calendar"))
                     }
                 is TemplatesEffect.ShowIcsImportResult ->
-                    Toast.makeText(localContext, "${effect.successCount}件のテンプレートを生成", Toast.LENGTH_LONG).show()
+                    Toast.makeText(localContext, "${effect.successCount}件のテンプレートをインポートしました", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
+    // Delegate to Content
+    TemplatesContent(
+        state = state,
+        onIntent = templatesViewModel::sendIntent,
+        onNavigate = onNavigate,
+        sheetState = sheetState,
+        templatesViewModel = templatesViewModel,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TemplatesContent(
+    state: TemplatesState,
+    onIntent: (TemplatesIntent) -> Unit,
+    onNavigate: (NavKey) -> Unit,
+    sheetState: SheetState,
+    templatesViewModel: TemplatesViewModel,
+) {
     val entryProvider = remember {
         entryProvider {
-            entry(TemplatesRoute.WeeklyTemplateList) {
+            entry(NavKey.WeeklyTemplateList) {
+                val innerUiState by templatesViewModel.uiState.collectAsStateWithLifecycle()
+                val innerState = innerUiState.data
                 TemplateListPage(
                     onNavigate = onNavigate,
-                    sendIntent = templatesViewModel::sendIntent,
-                    templates = state.filteredTemplates,
-                    templateSearchQuery = state.templateSearchQuery,
-                    templateSortOrder = state.templateSortOrder,
-                    selectedDayOfWeek = state.selectedDayOfWeek,
-                    onTemplateClick = { templatesViewModel.sendIntent(TemplatesIntent.SelectTemplate(it)) },
-                    onSearchQueryChange = { query -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSearchQuery(query)) },
-                    onSortOrderChange = { sortOrder -> templatesViewModel.sendIntent(TemplatesIntent.UpdateTemplateSortOrder(sortOrder)) },
-                    onDayOfWeekChange = { dayOfWeek -> templatesViewModel.sendIntent(TemplatesIntent.UpdateSelectedDayOfWeek(dayOfWeek)) },
+                    sendIntent = onIntent,
+                    templates = innerState.filteredTemplates,
+                    templateSearchQuery = innerState.templateSearchQuery,
+                    templateSortOrder = innerState.templateSortOrder,
+                    selectedDayOfWeek = innerState.selectedDayOfWeek,
+                    onTemplateClick = { onIntent(TemplatesIntent.SelectTemplate(it)) },
+                    onSearchQueryChange = { query -> onIntent(TemplatesIntent.UpdateTemplateSearchQuery(query)) },
+                    onSortOrderChange = { sortOrder -> onIntent(TemplatesIntent.UpdateTemplateSortOrder(sortOrder)) },
+                    onDayOfWeekChange = { dayOfWeek -> onIntent(TemplatesIntent.UpdateSelectedDayOfWeek(dayOfWeek)) },
                 )
             }
-            entry(TemplatesRoute.WeeklyTemplateSelector) {
+            entry(NavKey.WeeklyTemplateSelector) {
+                val innerUiState by templatesViewModel.uiState.collectAsStateWithLifecycle()
+                val innerState = innerUiState.data
                 TemplateItemSelectPage(
-                    sendIntent = templatesViewModel::sendIntent,
-                    template = state.selectedTemplate ?: WeeklyTemplate(),
-                    allItems = state.filteredItems.ifEmpty { state.allItems },
+                    sendIntent = onIntent,
+                    template = innerState.selectedTemplate ?: WeeklyTemplate(),
+                    allItems = innerState.filteredItems.ifEmpty { innerState.allItems },
                 )
             }
         }
@@ -102,12 +124,12 @@ fun TemplatesScreen(
 
     if (state.isShowingBottomSheet) {
         CreateWeeklyTemplateBottomSheet(
-            onDismiss = { templatesViewModel.sendIntent(TemplatesIntent.HideBottomSheet) },
+            onDismiss = { onIntent(TemplatesIntent.HideBottomSheet) },
             onCreateTemplate = { title, dayOfWeek ->
-                templatesViewModel.sendIntent(TemplatesIntent.AddWeeklyTemplate(title, dayOfWeek))
+                onIntent(TemplatesIntent.AddWeeklyTemplate(title, dayOfWeek))
             },
             sheetState = sheetState,
-            onImportFromIcs = { templatesViewModel.sendIntent(TemplatesIntent.ShowIcsFilePicker) },
+            onImportFromIcs = { onIntent(TemplatesIntent.ShowIcsFilePicker) },
             isImportingIcs = state.isImportingIcs,
         )
     }
@@ -125,19 +147,19 @@ fun TemplatesScreen(
     // 削除確認ダイアログ
     state.templateToDelete?.let { template ->
         AlertDialog(
-            onDismissRequest = { templatesViewModel.sendIntent(TemplatesIntent.CancelDeleteTemplate) },
+            onDismissRequest = { onIntent(TemplatesIntent.CancelDeleteTemplate) },
             title = { Text("テンプレートの削除") },
             text = { Text("「${template.title}」を本当に削除しますか？") },
             confirmButton = {
                 TextButton(
-                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.ConfirmDeleteTemplate) },
+                    onClick = { onIntent(TemplatesIntent.ConfirmDeleteTemplate) },
                 ) {
                     Text("削除")
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { templatesViewModel.sendIntent(TemplatesIntent.CancelDeleteTemplate) },
+                    onClick = { onIntent(TemplatesIntent.CancelDeleteTemplate) },
                 ) {
                     Text("キャンセル")
                 }

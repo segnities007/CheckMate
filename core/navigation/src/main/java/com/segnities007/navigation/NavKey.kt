@@ -2,7 +2,14 @@ package com.segnities007.navigation
 
 import kotlinx.serialization.Serializable
 
-interface NavKey {
+@Serializable
+sealed interface NavKey {
+    @Serializable
+    data object Auth : NavKey
+
+    @Serializable
+    data object Hub : NavKey
+
     @Serializable
     data object Home : NavKey
 

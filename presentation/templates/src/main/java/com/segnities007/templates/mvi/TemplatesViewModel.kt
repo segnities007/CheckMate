@@ -3,7 +3,7 @@ package com.segnities007.templates.mvi
 import androidx.lifecycle.viewModelScope
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.navigation.TemplatesRoute
+import com.segnities007.navigation.NavKey
 import com.segnities007.templates.utils.TemplateFilter
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.ics.GenerateTemplatesFromIcsUseCase
@@ -13,9 +13,7 @@ import com.segnities007.usecase.template.AddTemplateUseCase
 import com.segnities007.usecase.template.DeleteTemplateUseCase
 import com.segnities007.usecase.template.GetAllTemplatesUseCase
 import com.segnities007.usecase.template.UpdateTemplateUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -31,9 +29,25 @@ class TemplatesViewModel(
         initialState = TemplatesState(),
     ) {
 
+
     init {
         sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
-        sendIntent(TemplatesIntent.GetAllItems)
+        
+        // Start collecting items Flow immediately
+        viewModelScope.launch {
+            getAllItemsUseCase().collect { items ->
+                setState {
+                    val newState = copy(allItems = items)
+                    val filtered = TemplateFilter.applyItemFilters(
+                        allItems = items,
+                        searchQuery = searchQuery,
+                        selectedCategory = selectedCategory,
+                        sortOrder = sortOrder,
+                    )
+                    newState.copy(filteredItems = filtered)
+                }
+            }
+        }
     }
 
     override suspend fun handleIntent(intent: TemplatesIntent) {
@@ -45,23 +59,21 @@ class TemplatesViewModel(
                 )
 
             is TemplatesIntent.EditWeeklyTemplate -> editWeeklyTemplate(intent.weeklyTemplate)
-            is TemplatesIntent.DeleteWeeklyTemplate -> showDeleteConfirmation(intent.weeklyTemplate)
+            is TemplatesIntent.DeleteWeeklyTemplate -> setState { copy(templateToDelete = intent.weeklyTemplate) }
             is TemplatesIntent.SelectTemplate -> selectTemplate(intent.weeklyTemplate)
 
             TemplatesIntent.GetAllWeeklyTemplates -> getAllWeeklyTemplates()
-            TemplatesIntent.GetAllItems -> getAllItems()
-            is TemplatesIntent.SetAllItems -> setState { reduce(intent) }
-            is TemplatesIntent.SetWeeklyTemplates -> setState { reduce(intent) }
-            is TemplatesIntent.SetFilteredItems -> setState { reduce(intent) }
-            is TemplatesIntent.SetFilteredTemplates -> setState { reduce(intent) }
+            TemplatesIntent.GetAllItems -> {} // No-op, Flow is already collecting
+            is TemplatesIntent.SetAllItems -> setState { copy(allItems = intent.allItems) }
+            is TemplatesIntent.SetWeeklyTemplates -> setState { copy(weeklyTemplates = intent.weeklyTemplates) }
+            is TemplatesIntent.SetFilteredItems -> setState { copy(filteredItems = intent.filteredItems) }
+            is TemplatesIntent.SetFilteredTemplates -> setState { copy(filteredTemplates = intent.filteredTemplates) }
 
-            TemplatesIntent.ShowBottomSheet -> setState { reduce(TemplatesIntent.ShowBottomSheet) }
-            TemplatesIntent.HideBottomSheet -> setState { reduce(TemplatesIntent.HideBottomSheet) }
+            TemplatesIntent.ShowBottomSheet -> setState { copy(isShowingBottomSheet = true) }
+            TemplatesIntent.HideBottomSheet -> setState { copy(isShowingBottomSheet = false) }
 
-            TemplatesIntent.NavigateToWeeklyTemplateList ->
-                setState { reduce(intent) }
-            TemplatesIntent.NavigateToWeeklyTemplateSelector ->
-                setState { reduce(intent) }
+            TemplatesIntent.NavigateToWeeklyTemplateList -> setState { copy(currentRoute = NavKey.WeeklyTemplateList) }
+            TemplatesIntent.NavigateToWeeklyTemplateSelector -> setState { copy(currentRoute = NavKey.WeeklyTemplateSelector) }
 
             is TemplatesIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is TemplatesIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
@@ -72,7 +84,7 @@ class TemplatesViewModel(
 
             // 削除確認ダイアログ
             TemplatesIntent.ConfirmDeleteTemplate -> confirmDeleteTemplate()
-            TemplatesIntent.CancelDeleteTemplate -> cancelDeleteTemplate()
+            TemplatesIntent.CancelDeleteTemplate -> setState { copy(templateToDelete = null) }
 
             is TemplatesIntent.ImportIcsTemplates -> importIcs(intent.uri)
             TemplatesIntent.ShowIcsFilePicker -> sendEffect { TemplatesEffect.LaunchIcsPicker }
@@ -82,148 +94,138 @@ class TemplatesViewModel(
     }
 
     private fun updateSearchQuery(intent: TemplatesIntent.UpdateSearchQuery) {
-        setState { reduce(intent) }
+        setState { copy(searchQuery = intent.query) }
         applyFilters()
     }
 
     private fun updateSelectedCategory(intent: TemplatesIntent.UpdateSelectedCategory) {
-        setState { reduce(intent) }
+        setState { copy(selectedCategory = intent.category) }
         applyFilters()
     }
 
     private fun updateSortOrder(intent: TemplatesIntent.UpdateSortOrder) {
-        setState { reduce(intent) }
+        setState { copy(sortOrder = intent.sortOrder) }
         applyFilters()
     }
 
     private fun updateTemplateSearchQuery(intent: TemplatesIntent.UpdateTemplateSearchQuery) {
-        setState { reduce(intent) }
+        setState { copy(templateSearchQuery = intent.query) }
         applyTemplateFilters()
     }
 
     private fun updateTemplateSortOrder(intent: TemplatesIntent.UpdateTemplateSortOrder) {
-        setState { reduce(intent) }
+        setState { copy(templateSortOrder = intent.sortOrder) }
         applyTemplateFilters()
     }
 
     private fun updateSelectedDayOfWeek(intent: TemplatesIntent.UpdateSelectedDayOfWeek) {
-        setState { reduce(intent) }
+        setState { copy(selectedDayOfWeek = intent.dayOfWeek) }
         applyTemplateFilters()
     }
 
     private fun applyFilters() {
-        val currentState = state.value
+        val currentState = currentState
         val filteredItems = TemplateFilter.applyItemFilters(
             allItems = currentState.allItems,
             searchQuery = currentState.searchQuery,
             selectedCategory = currentState.selectedCategory,
             sortOrder = currentState.sortOrder,
         )
-        setState { reduce(TemplatesIntent.SetFilteredItems(filteredItems)) }
+        setState { copy(filteredItems = filteredItems) }
     }
 
     private fun applyTemplateFilters() {
-        val currentState = state.value
+        val currentState = currentState
         val filteredTemplates = TemplateFilter.applyTemplateFilters(
             allTemplates = currentState.weeklyTemplates,
             searchQuery = currentState.templateSearchQuery,
             selectedDayOfWeek = currentState.selectedDayOfWeek,
             sortOrder = currentState.templateSortOrder,
         )
-        setState { reduce(TemplatesIntent.SetFilteredTemplates(filteredTemplates)) }
+        setState { copy(filteredTemplates = filteredTemplates) }
     }
 
-    private suspend fun getAllItems() {
-        getAllItemsUseCase().fold(
-            onSuccess = { items ->
-                setState { reduce(TemplatesIntent.SetAllItems(items)) }
-                applyFilters()
-            },
-            onFailure = { e ->
-                sendEffect { TemplatesEffect.ShowToast("アイテムの読み込みに失敗しました") }
+    private fun getAllWeeklyTemplates() {
+        execute(
+            action = { getAllTemplatesUseCase().getOrThrow() },
+            reducer = { templates ->
+                val newState = copy(weeklyTemplates = templates)
+                val filtered = TemplateFilter.applyTemplateFilters(
+                    allTemplates = templates,
+                    searchQuery = templateSearchQuery,
+                    selectedDayOfWeek = selectedDayOfWeek,
+                    sortOrder = templateSortOrder,
+                )
+                newState.copy(filteredTemplates = filtered)
             }
         )
     }
 
-    private suspend fun getAllWeeklyTemplates() {
-        getAllTemplatesUseCase().fold(
-            onSuccess = { templates ->
-                setState { reduce(TemplatesIntent.SetWeeklyTemplates(templates)) }
-                applyTemplateFilters()
-            },
-            onFailure = { e ->
-                sendEffect { TemplatesEffect.ShowToast("テンプレートの読み込みに失敗しました") }
-            }
-        )
-    }
-
-    private suspend fun addWeeklyTemplate(
+    private fun addWeeklyTemplate(
         title: String,
         daysOfWeek: Set<DayOfWeek>,
     ) {
         val template = WeeklyTemplate(
             title = title,
             daysOfWeek = daysOfWeek,
-            itemIds = emptyList(), // 追加時は空で作成し、後から編集で詰める
+            itemIds = emptyList(),
         )
-        addTemplateUseCase(template).fold(
-            onSuccess = {
-                getAllWeeklyTemplates()
-                sendEffect { TemplatesEffect.ShowToast("「${template.title}」を追加しました") }
-            },
-            onFailure = { e ->
-                sendEffect { TemplatesEffect.ShowToast("テンプレートの追加に失敗しました: ${e.message}") }
-            }
-        )
-    }
-
-    private suspend fun editWeeklyTemplate(template: WeeklyTemplate) {
-        updateTemplateUseCase(template).fold(
-            onSuccess = {
-                getAllWeeklyTemplates()
-                setState { reduce(TemplatesIntent.NavigateToWeeklyTemplateList) }
-                sendEffect { TemplatesEffect.ShowToast("「${template.title}」を更新しました") }
-            },
-            onFailure = { e ->
-                sendEffect { TemplatesEffect.ShowToast("テンプレートの更新に失敗しました: ${e.message}") }
-            }
-        )
-    }
-
-    private fun showDeleteConfirmation(template: WeeklyTemplate) {
-        setState { reduce(TemplatesIntent.DeleteWeeklyTemplate(template)) }
-    }
-
-    private suspend fun confirmDeleteTemplate() {
-        val templateToDelete = state.value.templateToDelete
-        if (templateToDelete != null) {
-            deleteTemplateUseCase(templateToDelete).fold(
+        viewModelScope.launch {
+            addTemplateUseCase(template).fold(
                 onSuccess = {
-                    setState { reduce(TemplatesIntent.ConfirmDeleteTemplate) }
-                    getAllWeeklyTemplates()
-                    sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
+                    sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
+                    sendEffect { TemplatesEffect.ShowToast("「${template.title}」を追加しました") }
                 },
                 onFailure = { e ->
-                    sendEffect { TemplatesEffect.ShowToast("削除失敗: ${e.message}") }
+                    sendEffect { TemplatesEffect.ShowToast("テンプレートの追加に失敗しました: ${e.message}") }
                 }
             )
         }
     }
 
-    private fun cancelDeleteTemplate() {
-        setState { reduce(TemplatesIntent.CancelDeleteTemplate) }
+    private fun editWeeklyTemplate(template: WeeklyTemplate) {
+        viewModelScope.launch {
+            updateTemplateUseCase(template).fold(
+                onSuccess = {
+                    sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
+                    setState { copy(currentRoute = NavKey.WeeklyTemplateList) }
+                    sendEffect { TemplatesEffect.ShowToast("「${template.title}」を更新しました") }
+                },
+                onFailure = { e ->
+                    sendEffect { TemplatesEffect.ShowToast("テンプレートの更新に失敗しました: ${e.message}") }
+                }
+            )
+        }
+    }
+
+    private fun confirmDeleteTemplate() {
+        val templateToDelete = currentState.templateToDelete
+        if (templateToDelete != null) {
+            viewModelScope.launch {
+                deleteTemplateUseCase(templateToDelete).fold(
+                    onSuccess = {
+                        setState { copy(templateToDelete = null) }
+                        sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
+                        sendEffect { TemplatesEffect.ShowToast("「${templateToDelete.title}」を削除しました") }
+                    },
+                    onFailure = { e ->
+                        sendEffect { TemplatesEffect.ShowToast("削除失敗: ${e.message}") }
+                    }
+                )
+            }
+        }
     }
 
     private fun selectTemplate(template: WeeklyTemplate) {
-        setState { reduce(TemplatesIntent.SelectTemplate(template)) }
-        setState { reduce(TemplatesIntent.NavigateToWeeklyTemplateSelector) }
+        setState { copy(selectedTemplate = template, currentRoute = NavKey.WeeklyTemplateSelector) }
     }
 
-    private fun importIcs(uri: android.net.Uri) =
-        viewModelScope.launch {
-            setState { copy(isImportingIcs = true) }
+    private fun importIcs(uri: android.net.Uri) {
+        setState { copy(isImportingIcs = true) }
 
-            val templates = generateTemplatesFromIcsUseCase(uri).getOrElse { e ->
+        viewModelScope.launch {
+            val templatesResult = generateTemplatesFromIcsUseCase(uri)
+            val templates = templatesResult.getOrElse { e ->
                 setState { copy(isImportingIcs = false) }
                 sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }
                 return@launch
@@ -235,49 +237,9 @@ class TemplatesViewModel(
                 return@launch
             }
 
-            getAllWeeklyTemplates()
+            sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
             setState { copy(isImportingIcs = false) }
             sendEffect { TemplatesEffect.ShowIcsImportResult(templates.size) }
         }
-}
-
-// =============================================================================
-// Reducer Function
-// =============================================================================
-
-private fun TemplatesState.reduce(intent: TemplatesIntent): TemplatesState {
-    return when (intent) {
-        // ボトムシート関連
-        TemplatesIntent.ShowBottomSheet -> copy(isShowingBottomSheet = true)
-        TemplatesIntent.HideBottomSheet -> copy(isShowingBottomSheet = false)
-        
-        // 検索・フィルター関連（アイテム）
-        is TemplatesIntent.UpdateSearchQuery -> copy(searchQuery = intent.query)
-        is TemplatesIntent.UpdateSelectedCategory -> copy(selectedCategory = intent.category)
-        is TemplatesIntent.UpdateSortOrder -> copy(sortOrder = intent.sortOrder)
-        
-        // 検索・フィルター関連（テンプレート）
-        is TemplatesIntent.UpdateTemplateSearchQuery -> copy(templateSearchQuery = intent.query)
-        is TemplatesIntent.UpdateTemplateSortOrder -> copy(templateSortOrder = intent.sortOrder)
-        is TemplatesIntent.UpdateSelectedDayOfWeek -> copy(selectedDayOfWeek = intent.dayOfWeek)
-        
-        // データ設定
-        is TemplatesIntent.SetFilteredItems -> copy(filteredItems = intent.filteredItems)
-        is TemplatesIntent.SetFilteredTemplates -> copy(filteredTemplates = intent.filteredTemplates)
-        is TemplatesIntent.SetAllItems -> copy(allItems = intent.allItems)
-        is TemplatesIntent.SetWeeklyTemplates -> copy(weeklyTemplates = intent.weeklyTemplates)
-        
-        // テンプレート選択・削除
-        is TemplatesIntent.SelectTemplate -> copy(selectedTemplate = intent.weeklyTemplate)
-        is TemplatesIntent.DeleteWeeklyTemplate -> copy(templateToDelete = intent.weeklyTemplate)
-        TemplatesIntent.ConfirmDeleteTemplate -> copy(templateToDelete = null)
-        TemplatesIntent.CancelDeleteTemplate -> copy(templateToDelete = null)
-        
-        // ナビゲーション
-        TemplatesIntent.NavigateToWeeklyTemplateList -> copy(currentRoute = TemplatesRoute.WeeklyTemplateList)
-        TemplatesIntent.NavigateToWeeklyTemplateSelector -> copy(currentRoute = TemplatesRoute.WeeklyTemplateSelector)
-        
-        // 他のIntentはViewModelで処理（非同期処理など）
-        else -> this
     }
 }

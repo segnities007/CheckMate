@@ -1,7 +1,6 @@
 package com.segnities007.auth.mvi
 
 import com.segnities007.navigation.NavKey
-import com.segnities007.navigation.Route
 import com.segnities007.ui.mvi.MviIntent
 
 sealed interface AuthIntent : MviIntent {
@@ -10,7 +9,7 @@ sealed interface AuthIntent : MviIntent {
     ) : AuthIntent
 
     data class TopNavigate(
-        val route: Route,
+        val route: NavKey,
     ) : AuthIntent
 
     data object CheckAccount : AuthIntent
