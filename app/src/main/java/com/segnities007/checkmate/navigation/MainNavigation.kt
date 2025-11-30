@@ -14,13 +14,39 @@ import com.segnities007.setting.settingEntry
 import com.segnities007.splash.splashEntry
 import com.segnities007.templates.templatesEntry
 
+import androidx.compose.runtime.LaunchedEffect
+import com.segnities007.checkmate.mvi.MainEffect
+import com.segnities007.checkmate.mvi.MainViewModel
+import org.koin.compose.koinInject
+
 private const val MIN_BACK_STACK_SIZE = 1
 
 @Composable
 internal fun MainNavigation() {
+    val mainViewModel: MainViewModel = koinInject()
     val backStack = rememberNavBackStack(NavKeys.SplashKey)
     val onNavigate: (NavKeys) -> Unit = { backStack.add(it) }
     val onBack: () -> Unit = { backStack.removeLast() }
+
+    LaunchedEffect(Unit) {
+        mainViewModel.effect.collect { effect ->
+            when (effect) {
+                is MainEffect.Navigate -> {
+                    if (effect.route is NavKeys.Hub || effect.route is NavKeys.Auth) {
+                        backStack.clear()
+                    }
+                    backStack.add(effect.route)
+                }
+                is MainEffect.ShowToast -> {
+                    // TODO: Show toast
+                }
+                MainEffect.Logout -> {
+                    backStack.clear()
+                    backStack.add(NavKeys.Auth.LoginKey)
+                }
+            }
+        }
+    }
 
     BackHandler(enabled = (backStack.size <= MIN_BACK_STACK_SIZE)) {
         // 何もしない（アプリ終了を防ぐ）

@@ -11,15 +11,10 @@ class MainViewModel(
 ) : BaseViewModel<MainIntent, MainState, MainEffect>(MainState()) {
     override suspend fun handleIntent(intent: MainIntent) {
         when (intent) {
-            is MainIntent.Navigate -> navigate(intent)
             MainIntent.CheckAccount -> checkAccount()
             is MainIntent.ShowToast -> showToast(intent)
             MainIntent.LoadUserStatus -> loadUserStatus()
             MainIntent.Logout -> logout()
-            MainIntent.GoBack -> goBack()
-            is MainIntent.SetBottomBar -> setState { copy(bottomBar = intent.bottomBar) }
-            is MainIntent.SetFab -> setState { copy(fab = intent.fab) }
-            is MainIntent.SetTopBar -> setState { copy(topBar = intent.topBar) }
         }
     }
 
@@ -32,13 +27,13 @@ class MainViewModel(
         isAccountCreatedUseCase().fold(
             onSuccess = { isCreated ->
                 if (isCreated) {
-                    navigate(MainIntent.Navigate(NavKeys.Hub.HomeKey))
+                    sendEffect { MainEffect.Navigate(NavKeys.Hub.HomeKey) }
                 } else {
-                    navigate(MainIntent.Navigate(NavKeys.Auth.LoginKey))
+                    sendEffect { MainEffect.Navigate(NavKeys.Auth.LoginKey) }
                 }
             },
             onFailure = {
-                navigate(MainIntent.Navigate(NavKeys.Auth.LoginKey))
+                sendEffect { MainEffect.Navigate(NavKeys.Auth.LoginKey) }
             }
         )
     }
@@ -50,27 +45,12 @@ class MainViewModel(
         )
     }
 
-    private fun navigate(intent: MainIntent.Navigate) {
-        val currentStack = currentState.backStack
-        // Prevent duplicate top navigation
-        if (currentStack.lastOrNull() != intent.route) {
-            setState { copy(backStack = currentStack + intent.route) }
-        }
-    }
-
-    private fun goBack() {
-        val currentStack = currentState.backStack
-        if (currentStack.size > 1) {
-            setState { copy(backStack = currentStack.dropLast(1)) }
-        }
-    }
-
     private fun showToast(intent: MainIntent.ShowToast) {
         sendEffect { MainEffect.ShowToast(intent.message) }
     }
 
     private fun logout() {
         // TODO: Implement logout use case if needed
-        navigate(MainIntent.Navigate(NavKeys.Auth.LoginKey))
+        sendEffect { MainEffect.Navigate(NavKeys.Auth.LoginKey) }
     }
 }
