@@ -7,7 +7,7 @@ import com.segnities007.items.mvi.ItemsState
 import com.segnities007.items.page.ItemsListPage
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.navigation.NavKey
+import com.segnities007.navigation.NavKeys
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.ExperimentalTime
@@ -69,7 +69,7 @@ class ItemsScreenTest {
                 state = ItemsState(
                     items = sampleItems,
                     filteredItems = sampleItems,
-                    currentRoute = NavKey.ItemsList,
+                    currentRoute = NavKeys.ItemsList,
                     isShowBottomSheet = false
                 )
             )
@@ -93,7 +93,7 @@ class ItemsScreenTest {
                 state = ItemsState(
                     items = sampleItems,
                     filteredItems = sampleItems,
-                    currentRoute = NavKey.ItemsList
+                    currentRoute = NavKeys.ItemsList
                 )
             )
         }
@@ -116,7 +116,7 @@ class ItemsScreenTest {
                 state = ItemsState(
                     items = emptyList(),
                     filteredItems = emptyList(),
-                    currentRoute = NavKey.ItemsList
+                    currentRoute = NavKeys.ItemsList
                 )
             )
         }
@@ -137,7 +137,7 @@ class ItemsScreenTest {
                 state = ItemsState(
                     items = sampleItems,
                     filteredItems = sampleItems,
-                    currentRoute = NavKey.ItemsList,
+                    currentRoute = NavKeys.ItemsList,
                     isShowBottomSheet = true
                 )
             )
@@ -156,7 +156,7 @@ class ItemsScreenTest {
     fun givenItemsListPage_whenSearchQueryEntered_thenFilteredItemsDisplayed() {
         // Given (Precondition: ItemsList with search functionality)
         val filteredItems = sampleItems.filter { it.name.contains("Pencil") }
-        
+
         composeTestRule.setContent {
             ItemsListPage(
                 onNavigate = {},
@@ -165,7 +165,7 @@ class ItemsScreenTest {
                 state = ItemsState(
                     items = sampleItems,
                     filteredItems = filteredItems,
-                    currentRoute = NavKey.ItemsList,
+                    currentRoute = NavKeys.ItemsList,
                     searchQuery = "Pencil"
                 )
             )
@@ -192,7 +192,7 @@ class ItemsScreenTest {
                 state = ItemsState(
                     items = sampleItems,
                     filteredItems = sampleItems,
-                    currentRoute = NavKey.ItemsList
+                    currentRoute = NavKeys.ItemsList
                 )
             )
         }
@@ -200,7 +200,7 @@ class ItemsScreenTest {
         // When (Action: User taps barcode scanner button in BottomSheet)
         // Note: This requires BottomSheet to be visible first
         // For simplicity, we test the callback mechanism
-        
+
         // Then (Result: Navigation callback would be invoked)
         // This test validates the page accepts the callback
         assert(!scannerNavigationCalled) { "Callback should not be invoked yet" }

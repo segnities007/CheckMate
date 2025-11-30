@@ -1,10 +1,16 @@
 package com.segnities007.checkmate.mvi
 
-import com.segnities007.navigation.NavKey
+import com.segnities007.navigation.NavKeys
 import com.segnities007.ui.mvi.MviEffect
 
-internal sealed interface MainEffect : MviEffect {
+sealed interface MainEffect : MviEffect {
     data class Navigate(
-        val route: NavKey,
+        val route: NavKeys,
     ) : MainEffect
+
+    data class ShowToast(
+        val message: String,
+    ) : MainEffect
+
+    object Logout : MainEffect
 }

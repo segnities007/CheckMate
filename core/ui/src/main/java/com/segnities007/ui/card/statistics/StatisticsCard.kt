@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.ui.indicator.CircularProgressWithPercentage
+import com.segnities007.designsystem.indicator.CircularProgressWithPercentage
 import androidx.compose.ui.tooling.preview.Preview
-import com.segnities007.ui.indicator.CircularWavyProgressWithPercentage
+import com.segnities007.designsystem.indicator.CircularWavyProgressWithPercentage
 import kotlin.time.ExperimentalTime
 
 @Composable

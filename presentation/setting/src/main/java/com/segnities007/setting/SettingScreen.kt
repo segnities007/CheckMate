@@ -9,7 +9,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -19,17 +18,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.segnities007.designsystem.divider.HorizontalDividerWithLabel
+import com.segnities007.designsystem.theme.Dimens
+import com.segnities007.designsystem.theme.checkMateBackgroundBrush
 import com.segnities007.model.UserStatus
-import com.segnities007.navigation.NavKey
+import com.segnities007.navigation.NavKeys
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
 import com.segnities007.setting.component.DeleteAllDataDialog
@@ -40,20 +39,14 @@ import com.segnities007.setting.mvi.SettingState
 import com.segnities007.setting.mvi.SettingViewModel
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UserStatusCard
-import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.scaffold.CheckMateScaffold
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
-
-import com.segnities007.ui.scaffold.CheckMateScaffold
-import com.segnities007.ui.theme.checkMateBackgroundBrush
-
-
-
 
 
 @Composable
 fun SettingScreen(
-    onNavigate: (NavKey) -> Unit,
+    onNavigate: (NavKeys) -> Unit,
 ) {
     val localContext = LocalContext.current
     val settingViewModel: SettingViewModel = koinInject()
@@ -79,6 +72,7 @@ fun SettingScreen(
                             Toast.LENGTH_SHORT,
                         ).show()
                 }
+
                 is SettingEffect.ShowIcsImportResult -> {
                     Toast
                         .makeText(
@@ -95,7 +89,7 @@ fun SettingScreen(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = NavKey.Setting,
+                currentHubRoute = NavKeys.Hub.SettingKey,
                 onNavigate = onNavigate,
             )
         }
@@ -140,8 +134,8 @@ private fun SettingContent(
         }
 
     Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(Dimens.PaddingMedium),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UserStatusCard(state.userStatus)

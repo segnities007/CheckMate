@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.ui.tag.CountTag
+import com.segnities007.designsystem.tag.CountTag
 
 @Composable
 fun TemplateCard(

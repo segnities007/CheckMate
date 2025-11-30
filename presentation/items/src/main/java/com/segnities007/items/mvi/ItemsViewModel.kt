@@ -1,7 +1,6 @@
 package com.segnities007.items.mvi
+
 import androidx.lifecycle.viewModelScope
-import com.segnities007.model.item.Item
-import com.segnities007.navigation.NavKey
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.image.DeleteImageUseCase
 import com.segnities007.usecase.image.SaveImageUseCase
@@ -34,10 +33,15 @@ class ItemsViewModel(
             getAllItemsUseCase().collect { items ->
                 setState {
                     val newState = copy(items = items)
-                    
+
                     var filtered = items
                     if (searchQuery.isNotBlank()) {
-                        filtered = filtered.filter { it.name.contains(searchQuery, ignoreCase = true) || it.description.contains(searchQuery, ignoreCase = true) }
+                        filtered = filtered.filter {
+                            it.name.contains(
+                                searchQuery,
+                                ignoreCase = true
+                            ) || it.description.contains(searchQuery, ignoreCase = true)
+                        }
                     }
                     if (selectedCategory != null) {
                         filtered = filtered.filter { it.category == selectedCategory }
@@ -62,12 +66,19 @@ class ItemsViewModel(
             is ItemsIntent.GetItemsById -> getItemById(intent)
             is ItemsIntent.InsertItems -> insertItem(intent)
             is ItemsIntent.DeleteItems -> deleteItem(intent)
-            is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> setState { copy(capturedImageUriForBottomSheet = intent.capturedImageUriForBottomSheet) }
-            is ItemsIntent.UpdateCapturedTempPathForViewModel -> setState { copy(capturedTempPathForViewModel = intent.capturedTempPathForViewModel) }
+            is ItemsIntent.UpdateCapturedImageUriForBottomSheet -> setState {
+                copy(
+                    capturedImageUriForBottomSheet = intent.capturedImageUriForBottomSheet
+                )
+            }
+
+            is ItemsIntent.UpdateCapturedTempPathForViewModel -> setState {
+                copy(
+                    capturedTempPathForViewModel = intent.capturedTempPathForViewModel
+                )
+            }
+
             is ItemsIntent.UpdateIsShowBottomSheet -> setState { copy(isShowBottomSheet = intent.isShowBottomSheet) }
-            ItemsIntent.NavigateToItemsList -> setState { copy(currentRoute = NavKey.ItemsList) }
-            ItemsIntent.NavigateToCameraCapture -> setState { copy(currentRoute = NavKey.CameraCapture) }
-            ItemsIntent.NavigateToBarcodeScanner -> setState { copy(currentRoute = NavKey.BarcodeScanner) }
             is ItemsIntent.BarcodeDetected -> handleBarcodeDetected(intent)
             is ItemsIntent.GetProductInfo -> getProductInfo(intent)
             ItemsIntent.ClearProductInfo -> clearProductInfo()
@@ -107,7 +118,7 @@ class ItemsViewModel(
             filteredItems =
                 filteredItems.filter { item ->
                     item.name.contains(currentState.searchQuery, ignoreCase = true) ||
-                        item.description.contains(currentState.searchQuery, ignoreCase = true)
+                            item.description.contains(currentState.searchQuery, ignoreCase = true)
                 }
         }
 
@@ -178,7 +189,11 @@ class ItemsViewModel(
                     // Flow will auto-update, no need to manually refresh
                 },
                 onFailure = { error ->
-                    sendEffect { ItemsEffect.ShowToast(error.message ?: "アイテムの追加に失敗しました") }
+                    sendEffect {
+                        ItemsEffect.ShowToast(
+                            error.message ?: "アイテムの追加に失敗しました"
+                        )
+                    }
                 }
             )
         }
@@ -219,20 +234,20 @@ class ItemsViewModel(
 
     private fun getProductInfo(intent: ItemsIntent.GetProductInfo) {
         setState { copy(isLoadingProductInfo = true) }
-        
+
         viewModelScope.launch {
             getProductInfoByBarcodeUseCase(intent.barcodeInfo).fold(
                 onSuccess = { productInfo ->
                     setState { copy(productInfo = productInfo, isLoadingProductInfo = false) }
 
                     if (productInfo != null) {
-                        setState { 
+                        setState {
                             copy(
                                 isShowBottomSheet = false,
                                 capturedImageUriForBottomSheet = null,
                                 capturedTempPathForViewModel = "",
                                 shouldClearForm = true
-                            ) 
+                            )
                         }
                         sendEffect { ItemsEffect.ReopenBottomSheetWithProductInfo }
                     } else {

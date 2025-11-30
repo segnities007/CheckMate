@@ -171,7 +171,7 @@ class SettingViewModel(
         setState { copy(isImportingIcs = true) }
 
         viewModelScope.launch {
-            val templatesResult = generateTemplatesFromIcsUseCase(intent.uri)
+            val templatesResult = generateTemplatesFromIcsUseCase(intent.uri.toString())
             val templates = templatesResult.getOrElse { e ->
                 setState { copy(isImportingIcs = false) }
                 sendEffect { SettingEffect.ShowToast("ICSファイルのインポートに失敗しました: ${e.message}") }

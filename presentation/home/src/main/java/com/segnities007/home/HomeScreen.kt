@@ -15,30 +15,31 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.segnities007.designsystem.theme.BackgroundAlt
+import com.segnities007.designsystem.theme.BackgroundLight
+import com.segnities007.designsystem.theme.Dimens
+import com.segnities007.designsystem.theme.checkMateBackgroundBrush
 import com.segnities007.home.mvi.HomeEffect
 import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.home.mvi.HomeState
 import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.home.page.EnhancedHomeContent
+import com.segnities007.navigation.NavKeys
 import com.segnities007.ui.bar.FloatingNavigationBar
+import com.segnities007.ui.scaffold.CheckMateScaffold
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
 
-import com.segnities007.ui.scaffold.CheckMateScaffold
-import com.segnities007.navigation.NavKey
-import com.segnities007.ui.theme.checkMateBackgroundBrush
-
 @Composable
 fun HomeScreen(
-    onNavigate: (NavKey) -> Unit,
+    onNavigate: (NavKeys) -> Unit,
 ) {
     val homeViewModel: HomeViewModel = koinInject()
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
@@ -68,7 +69,7 @@ fun HomeScreen(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = NavKey.Home,
+                currentHubRoute = NavKeys.Hub.HomeKey,
                 onNavigate = onNavigate,
             )
         }
@@ -90,14 +91,14 @@ private fun HomeContent(
     scrollState: ScrollState,
     brash: Brush,
     sendIntent: (HomeIntent) -> Unit,
-){
+) {
     Column(
         modifier =
             Modifier
                 .fillMaxSize()
                 .background(brash)
                 .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = Dimens.PaddingMedium),
     ) {
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
 
@@ -128,8 +129,8 @@ private fun HomeScreenPreview() {
         scrollState = rememberScrollState(),
         brash = verticalGradient(
             colors = listOf(
-                Color(0xFFFAF9F6),
-                Color(0xFFF0F0F0),
+                BackgroundLight,
+                BackgroundAlt,
             ),
         ),
         sendIntent = {},

@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.segnities007.designsystem.theme.Dimens
 import com.segnities007.login.R
 import com.segnities007.login.mvi.LoginIntent
 
@@ -17,7 +18,7 @@ fun LoginButtons(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         LoginButton(

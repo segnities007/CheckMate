@@ -1,10 +1,15 @@
 package com.segnities007.dashboard
 
 import androidx.navigation3.runtime.EntryProviderScope
-import com.segnities007.navigation.NavKey
+import androidx.navigation3.runtime.NavKey
+import com.segnities007.navigation.NavKeys
 
-fun EntryProviderScope<NavKey>.dashboardEntry(onNavigate: (NavKey) -> Unit) {
-    entry<NavKey.Dashboard> {
+
+fun EntryProviderScope<NavKey>.dashboardEntry(
+    onNavigate: (NavKeys) -> Unit,
+    onBack: () -> Unit,
+) {
+    entry<NavKeys.Hub.DashboardKey> {
         DashboardScreen(onNavigate = onNavigate)
     }
 }

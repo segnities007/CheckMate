@@ -35,13 +35,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.navigation.NavKey
+import com.segnities007.navigation.NavKeys
+import com.segnities007.navigation.NavKeys.Hub
 
 @Composable
 fun FloatingNavigationBar(
     alpha: Float = 1f,
-    currentHubRoute: NavKey,
-    onNavigate: (NavKey) -> Unit,
+    currentHubRoute: NavKeys,
+    onNavigate: (NavKeys) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -60,16 +61,16 @@ fun FloatingNavigationBar(
 
 @Composable
 private fun FloatingActionBarUi(
-    currentHubRoute: NavKey,
-    onNavigate: (NavKey) -> Unit,
+    currentHubRoute: NavKeys,
+    onNavigate: (NavKeys) -> Unit,
 ) {
     val info =
         mapOf(
-            NavKey.Home to listOf(Icons.Filled.Home, Icons.Outlined.Home),
-            NavKey.Items to listOf(Icons.Filled.Category, Icons.Outlined.Category),
-            NavKey.Dashboard to listOf(Icons.Filled.SpaceDashboard, Icons.Outlined.SpaceDashboard),
-            NavKey.Templates to listOf(Icons.Filled.ContentPaste, Icons.Outlined.ContentPaste),
-            NavKey.Setting to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
+            Hub.HomeKey to listOf(Icons.Filled.Home, Icons.Outlined.Home),
+            Hub.Items.ListKey to listOf(Icons.Filled.Category, Icons.Outlined.Category),
+            Hub.DashboardKey to listOf(Icons.Filled.SpaceDashboard, Icons.Outlined.SpaceDashboard),
+            Hub.Template.ListKey to listOf(Icons.Filled.ContentPaste, Icons.Outlined.ContentPaste),
+            Hub.SettingKey to listOf(Icons.Filled.Settings, Icons.Outlined.Settings),
         )
 
     val brush =
@@ -95,7 +96,9 @@ private fun FloatingActionBarUi(
                 selectedIcon = icons[0],
                 unselectedIcon = icons[1],
                 selected = currentHubRoute == route,
-                onClick = { onNavigate(route) },
+                onClick = {
+                    onNavigate(route)
+                },
             )
         }
     }
@@ -129,10 +132,12 @@ private fun NavItemButton(
 @Preview
 private fun FloatingNavigationBarPreview() {
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
     ) {
         FloatingNavigationBar(
-            currentHubRoute = NavKey.Home,
+            currentHubRoute = Hub.HomeKey,
             onNavigate = {},
         )
     }

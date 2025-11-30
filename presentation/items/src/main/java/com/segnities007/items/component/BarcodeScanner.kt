@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.segnities007.designsystem.theme.Dimens
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
@@ -325,8 +326,8 @@ fun BarcodeScanner(
                     .padding(top = 100.dp)
                     .background(
                         Color.Black.copy(alpha = 0.7f),
-                        RoundedCornerShape(8.dp),
-                    ).padding(horizontal = 16.dp, vertical = 8.dp),
+                        RoundedCornerShape(Dimens.CornerSmall),
+                    ).padding(horizontal = Dimens.PaddingMedium, vertical = Dimens.PaddingSmall),
         )
 
         // コントロールボタン
@@ -335,7 +336,7 @@ fun BarcodeScanner(
                 Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp),
+                    .padding(bottom = Dimens.PaddingExtraLarge),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {

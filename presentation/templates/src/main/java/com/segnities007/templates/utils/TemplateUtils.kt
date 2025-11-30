@@ -16,6 +16,21 @@ import androidx.compose.ui.unit.sp
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.item.ItemCategory
 
+import com.segnities007.designsystem.theme.CategoryBeauty
+import com.segnities007.designsystem.theme.CategoryCharging
+import com.segnities007.designsystem.theme.CategoryClothing
+import com.segnities007.designsystem.theme.CategoryDaily
+import com.segnities007.designsystem.theme.CategoryEvent
+import com.segnities007.designsystem.theme.CategoryFood
+import com.segnities007.designsystem.theme.CategoryHealth
+import com.segnities007.designsystem.theme.CategoryHobby
+import com.segnities007.designsystem.theme.CategoryId
+import com.segnities007.designsystem.theme.CategoryOther
+import com.segnities007.designsystem.theme.CategoryStudy
+import com.segnities007.designsystem.theme.CategoryTransport
+import com.segnities007.designsystem.theme.CategoryWeather
+import com.segnities007.designsystem.theme.Dimens
+
 fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String =
     when (dayOfWeek) {
         DayOfWeek.MONDAY -> "月"
@@ -29,19 +44,19 @@ fun getDayOfWeekDisplayName(dayOfWeek: DayOfWeek): String =
 
 fun getCategoryColor(category: ItemCategory): Color =
     when (category) {
-        ItemCategory.STUDY_SUPPLIES -> Color(0xFF2196F3) // Blue - 学業用品
-        ItemCategory.DAILY_SUPPLIES -> Color(0xFF4CAF50) // Green - 生活用品
-        ItemCategory.CLOTHING_SUPPLIES -> Color(0xFF9C27B0) // Purple - 衣類用品
-        ItemCategory.FOOD_SUPPLIES -> Color(0xFFFF9800) // Orange - 食事用品
-        ItemCategory.HEALTH_SUPPLIES -> Color(0xFFF44336) // Red - 健康用品
-        ItemCategory.BEAUTY_SUPPLIES -> Color(0xFFE91E63) // Pink - 美容用品
-        ItemCategory.EVENT_SUPPLIES -> Color(0xFF673AB7) // Deep Purple - イベント用品
-        ItemCategory.HOBBY_SUPPLIES -> Color(0xFF3F51B5) // Indigo - 趣味用品
-        ItemCategory.TRANSPORT_SUPPLIES -> Color(0xFF009688) // Teal - 交通用品
-        ItemCategory.CHARGING_SUPPLIES -> Color(0xFF795548) // Brown - 充電用品
-        ItemCategory.WEATHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - 天候対策用品
-        ItemCategory.ID_SUPPLIES -> Color(0xFF8BC34A) // Light Green - 証明用品
-        ItemCategory.OTHER_SUPPLIES -> Color(0xFF607D8B) // Blue Grey - その他用品
+        ItemCategory.STUDY_SUPPLIES -> CategoryStudy
+        ItemCategory.DAILY_SUPPLIES -> CategoryDaily
+        ItemCategory.CLOTHING_SUPPLIES -> CategoryClothing
+        ItemCategory.FOOD_SUPPLIES -> CategoryFood
+        ItemCategory.HEALTH_SUPPLIES -> CategoryHealth
+        ItemCategory.BEAUTY_SUPPLIES -> CategoryBeauty
+        ItemCategory.EVENT_SUPPLIES -> CategoryEvent
+        ItemCategory.HOBBY_SUPPLIES -> CategoryHobby
+        ItemCategory.TRANSPORT_SUPPLIES -> CategoryTransport
+        ItemCategory.CHARGING_SUPPLIES -> CategoryCharging
+        ItemCategory.WEATHER_SUPPLIES -> CategoryWeather
+        ItemCategory.ID_SUPPLIES -> CategoryId
+        ItemCategory.OTHER_SUPPLIES -> CategoryOther
     }
 
 fun getCategoryDisplayName(category: ItemCategory): String =
@@ -66,9 +81,9 @@ fun CategoryTag(category: ItemCategory) {
     Box(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(Dimens.CornerSmall))
                 .background(getCategoryColor(category).copy(alpha = 0.1f))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = Dimens.PaddingSmall, vertical = Dimens.PaddingExtraSmall),
     ) {
         Text(
             text = getCategoryDisplayName(category),

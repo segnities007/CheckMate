@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.FileProvider
+import com.segnities007.designsystem.theme.Dimens
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.File
 import java.text.SimpleDateFormat
@@ -112,7 +113,7 @@ fun CameraCapture(
                     Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
-                        .padding(top = 48.dp, start = 16.dp, end = 16.dp),
+                        .padding(top = Dimens.PaddingXXL, start = Dimens.PaddingMedium, end = Dimens.PaddingMedium),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -121,7 +122,7 @@ fun CameraCapture(
                     onClick = onCancel,
                     modifier =
                         Modifier
-                            .size(48.dp)
+                            .size(Dimens.IconExtraLarge)
                             .background(
                                 color = Color.Black.copy(alpha = 0.5f),
                                 shape = CircleShape,
@@ -131,7 +132,7 @@ fun CameraCapture(
                         imageVector = Icons.Default.Close,
                         contentDescription = "キャンセル",
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(Dimens.IconMedium),
                     )
                 }
 
@@ -145,12 +146,12 @@ fun CameraCapture(
                         Modifier
                             .background(
                                 color = Color.Black.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(20.dp),
-                            ).padding(horizontal = 16.dp, vertical = 8.dp),
+                                shape = RoundedCornerShape(Dimens.CornerLarge),
+                            ).padding(horizontal = Dimens.PaddingMedium, vertical = Dimens.PaddingSmall),
                 )
 
                 // 右側のスペーサー（バランス用）
-                Spacer(modifier = Modifier.size(48.dp))
+                Spacer(modifier = Modifier.size(Dimens.IconExtraLarge))
             }
 
             // 下部のコントロールエリア
@@ -159,7 +160,7 @@ fun CameraCapture(
                     Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 48.dp),
+                        .padding(bottom = Dimens.PaddingXXL),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 // 撮影ボタン

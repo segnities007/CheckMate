@@ -4,10 +4,23 @@ import android.net.Uri
 import com.segnities007.model.item.BarcodeInfo
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
+
 import com.segnities007.ui.mvi.MviIntent
 
 sealed interface ItemsIntent : MviIntent {
     data object GetAllItems : ItemsIntent
+
+    data class UpdateSearchQuery(
+        val query: String,
+    ) : ItemsIntent
+
+    data class UpdateSelectedCategory(
+        val category: ItemCategory?,
+    ) : ItemsIntent
+
+    data class UpdateSortOrder(
+        val sortOrder: SortOrder,
+    ) : ItemsIntent
 
     data class GetItemsById(
         val id: Int,
@@ -33,23 +46,7 @@ sealed interface ItemsIntent : MviIntent {
         val capturedTempPathForViewModel: String,
     ) : ItemsIntent
 
-    data object NavigateToItemsList : ItemsIntent
 
-    data object NavigateToCameraCapture : ItemsIntent
-
-    data class UpdateSearchQuery(
-        val query: String,
-    ) : ItemsIntent
-
-    data class UpdateSelectedCategory(
-        val category: ItemCategory?,
-    ) : ItemsIntent
-
-    data class UpdateSortOrder(
-        val sortOrder: SortOrder,
-    ) : ItemsIntent
-
-    data object NavigateToBarcodeScanner : ItemsIntent
 
     data class BarcodeDetected(
         val barcodeInfo: BarcodeInfo,

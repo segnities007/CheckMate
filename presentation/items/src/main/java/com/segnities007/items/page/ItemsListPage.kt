@@ -10,17 +10,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -30,18 +27,16 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.segnities007.designsystem.divider.HorizontalDividerWithLabel
+import com.segnities007.designsystem.theme.Dimens
+import com.segnities007.designsystem.theme.checkMateBackgroundBrush
 import com.segnities007.items.component.CreateBottomSheet
 import com.segnities007.items.component.ItemsList
 import com.segnities007.items.component.SearchFilterBar
@@ -49,22 +44,19 @@ import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsState
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.navigation.NavKey
+import com.segnities007.navigation.NavKeys
 import com.segnities007.ui.bar.FloatingNavigationBar
-import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.scaffold.CheckMateScaffold
 import com.segnities007.ui.util.rememberScrollVisibility
 import kotlin.time.ExperimentalTime
-
-import com.segnities007.ui.scaffold.CheckMateScaffold
-
-import com.segnities007.ui.theme.checkMateBackgroundBrush
 
 @OptIn(ExperimentalTime::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsListPage(
-    onNavigate: (NavKey) -> Unit,
+    onNavigate: (NavKeys) -> Unit,
     sendIntent: (ItemsIntent) -> Unit,
     onNavigateToBarcodeScanner: () -> Unit,
+    onNavigateToCameraCapture: () -> Unit,
     state: ItemsState,
 ) {
     val scrollState = rememberScrollState()
@@ -94,7 +86,7 @@ fun ItemsListPage(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = NavKey.Items,
+                currentHubRoute = NavKeys.Hub.Items.ListKey,
                 onNavigate = onNavigate,
             )
         },
@@ -103,7 +95,7 @@ fun ItemsListPage(
                 modifier = Modifier.graphicsLayer(alpha = alpha),
                 containerColor = FloatingActionButtonDefaults.containerColor,
                 contentColor = contentColorFor(FloatingActionButtonDefaults.containerColor),
-                elevation = FloatingActionButtonDefaults.elevation(2.dp),
+                elevation = FloatingActionButtonDefaults.elevation(Dimens.ElevationSmall),
                 onClick = {
                     sendIntent(ItemsIntent.UpdateIsShowBottomSheet(true))
                     sendIntent(ItemsIntent.UpdateCapturedImageUriForBottomSheet(null))
@@ -128,7 +120,8 @@ fun ItemsListPage(
 
     // BottomSheet
     if (state.isShowBottomSheet) {
-        val bottomSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val bottomSheetState: SheetState =
+            rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
         CreateBottomSheet(
             sheetState = bottomSheetState,
@@ -156,7 +149,7 @@ fun ItemsListPage(
             capturedImageUriFromParent = state.capturedImageUriForBottomSheet,
             onRequestLaunchCamera = {
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
-                sendIntent(ItemsIntent.NavigateToCameraCapture)
+                onNavigateToCameraCapture()
             },
             onRequestBarcodeScan = {
                 sendIntent(ItemsIntent.UpdateIsShowBottomSheet(false))
@@ -193,8 +186,8 @@ private fun ItemListUi(
         Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
 
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(horizontal = Dimens.PaddingMedium),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMediumSmall),
         ) {
             // 検索・フィルタ・ソートバー
             SearchFilterBar(
@@ -225,6 +218,7 @@ private fun ItemListUi(
         }
 
         // Bottom Padding
+        // Bottom Padding
         Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
     }
 }
@@ -238,10 +232,26 @@ fun ItemListUiPreview() {
         scrollState = rememberScrollState(),
         state = ItemsState(
             filteredItems = listOf(
-                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
-                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
-                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
-                Item(name = "Test Item", description = "Test Description", category = ItemCategory.STUDY_SUPPLIES),
+                Item(
+                    name = "Test Item",
+                    description = "Test Description",
+                    category = ItemCategory.STUDY_SUPPLIES
+                ),
+                Item(
+                    name = "Test Item",
+                    description = "Test Description",
+                    category = ItemCategory.STUDY_SUPPLIES
+                ),
+                Item(
+                    name = "Test Item",
+                    description = "Test Description",
+                    category = ItemCategory.STUDY_SUPPLIES
+                ),
+                Item(
+                    name = "Test Item",
+                    description = "Test Description",
+                    category = ItemCategory.STUDY_SUPPLIES
+                ),
             )
         ),
         sendIntent = {},

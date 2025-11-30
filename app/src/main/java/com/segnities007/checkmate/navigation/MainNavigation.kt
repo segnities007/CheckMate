@@ -1,0 +1,47 @@
+package com.segnities007.checkmate.navigation
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.segnities007.dashboard.dashboardEntry
+import com.segnities007.home.homeEntry
+import com.segnities007.items.itemsEntry
+import com.segnities007.login.loginEntry
+import com.segnities007.navigation.NavKeys
+import com.segnities007.setting.settingEntry
+import com.segnities007.splash.splashEntry
+import com.segnities007.templates.templatesEntry
+
+private const val MIN_BACK_STACK_SIZE = 1
+
+@Composable
+internal fun MainNavigation() {
+    val backStack = rememberNavBackStack(NavKeys.SplashKey)
+    val onNavigate: (NavKeys) -> Unit = { backStack.add(it) }
+    val onBack: () -> Unit = { backStack.removeLast() }
+
+    BackHandler(enabled = (backStack.size <= MIN_BACK_STACK_SIZE)) {
+        // 何もしない（アプリ終了を防ぐ）
+    }
+
+    val entryProvider = entryProvider {
+        splashEntry(onNavigate = {
+            backStack.clear()
+            onNavigate(it)
+        })
+        loginEntry(onNavigate = onNavigate)
+        homeEntry(onNavigate = onNavigate, onBack = onBack)
+        itemsEntry(onNavigate = onNavigate, onBack = onBack)
+        templatesEntry(onNavigate = onNavigate, onBack = onBack)
+        dashboardEntry(onNavigate = onNavigate, onBack = onBack)
+        settingEntry(onNavigate = onNavigate, onBack = onBack)
+    }
+
+    NavDisplay(
+        backStack = backStack,
+        onBack = onBack,
+        entryProvider = entryProvider,
+    )
+}

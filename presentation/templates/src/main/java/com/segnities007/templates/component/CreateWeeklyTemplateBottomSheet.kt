@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.designsystem.theme.Dimens
 import com.segnities007.model.DayOfWeek
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -77,8 +78,8 @@ fun CreateWeeklyTemplateBottomSheet(
                     enabled = !isImportingIcs,
                 ) {
                     if (isImportingIcs) {
-                        CircularProgressIndicator(modifier = Modifier.width(16.dp), strokeWidth = 2.dp)
-                        Spacer(Modifier.width(8.dp))
+                        CircularProgressIndicator(modifier = Modifier.width(Dimens.IconSmall), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(Dimens.PaddingSmall))
                         Text("読み込み中")
                     } else {
                         Text("ICSで作成")

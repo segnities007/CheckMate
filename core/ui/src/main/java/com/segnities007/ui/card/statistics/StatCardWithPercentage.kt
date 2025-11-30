@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.segnities007.ui.card.BaseCard
-import com.segnities007.ui.indicator.CircularWavyProgressWithPercentage
+import com.segnities007.designsystem.indicator.CircularWavyProgressWithPercentage
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

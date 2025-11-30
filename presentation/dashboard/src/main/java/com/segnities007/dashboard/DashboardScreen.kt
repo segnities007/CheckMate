@@ -5,52 +5,46 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Brush.Companion.verticalGradient
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import com.segnities007.ui.card.statistics.StatCard
-import com.segnities007.ui.card.statistics.StatCardWithPercentage
-import com.segnities007.ui.card.UncheckedItemsCard
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.segnities007.dashboard.mvi.DashboardIntent
 import com.segnities007.dashboard.mvi.DashboardState
 import com.segnities007.dashboard.mvi.DashboardViewModel
-import com.segnities007.navigation.NavKey
+import com.segnities007.designsystem.divider.HorizontalDividerWithLabel
+import com.segnities007.designsystem.theme.Dimens
+import com.segnities007.designsystem.theme.checkMateBackgroundBrush
+import com.segnities007.navigation.NavKeys
 import com.segnities007.ui.bar.FloatingNavigationBar
-import com.segnities007.ui.divider.HorizontalDividerWithLabel
+import com.segnities007.ui.card.UncheckedItemsCard
+import com.segnities007.ui.card.statistics.StatCard
+import com.segnities007.ui.card.statistics.StatCardWithPercentage
+import com.segnities007.ui.mvi.UiState
+import com.segnities007.ui.scaffold.CheckMateScaffold
 import com.segnities007.ui.util.rememberScrollVisibility
 import org.koin.compose.koinInject
-
-import com.segnities007.ui.scaffold.CheckMateScaffold
-import com.segnities007.ui.mvi.UiState
-
-
-
-import com.segnities007.ui.theme.checkMateBackgroundBrush
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    onNavigate: (NavKey) -> Unit,
+    onNavigate: (NavKeys) -> Unit,
 ) {
     val dashboardViewModel: DashboardViewModel = koinInject()
     val uiState by dashboardViewModel.uiState.collectAsStateWithLifecycle()
@@ -68,7 +62,7 @@ fun DashboardScreen(
         bottomBar = {
             FloatingNavigationBar(
                 alpha = alpha,
-                currentHubRoute = NavKey.Dashboard,
+                currentHubRoute = NavKeys.Hub.DashboardKey,
                 onNavigate = onNavigate,
             )
         }
@@ -91,7 +85,7 @@ fun DashboardScreen(
             }
 
             if (uiState is UiState.Failure) {
-                val message = (uiState as UiState.Failure).message
+                (uiState as UiState.Failure).message
                 // Error handling, e.g. show toast or banner
             }
         }
@@ -111,14 +105,14 @@ private fun DashboardContent(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .background(MaterialTheme.checkMateBackgroundBrush)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = Dimens.PaddingMedium),
     ) {
         Spacer(Modifier.height(innerPadding.calculateTopPadding()))
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium),
         ) {
             HorizontalDividerWithLabel("統計")
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)) {
                 StatCard(
                     title = "総アイテム数",
                     value = state.itemCount.toString(),
@@ -130,7 +124,7 @@ private fun DashboardContent(
                     modifier = Modifier.weight(1f),
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)) {
                 StatCardWithPercentage(
                     title = "本日の完了率",
                     value = "${state.checkedItemCountToday}/${state.scheduledItemCountToday})",
@@ -167,6 +161,7 @@ private fun DashboardContent(
                 items = state.uncheckedItemsTomorrow,
             )
         }
+        Spacer(Modifier.height(innerPadding.calculateBottomPadding()))
     }
 }
 

@@ -1,16 +1,13 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("checkmate.android.library")
+    id("checkmate.android.compose")
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.segnities007.items"
-    compileSdk = 36
-
+    
     defaultConfig {
-        minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -24,14 +21,6 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
     lint {
         disable += "UnsafeOptInUsageError"
     }
@@ -40,6 +29,7 @@ android {
 dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:ui"))
+    implementation(project(":core:designsystem"))
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
     implementation(project(":domain:usecase"))

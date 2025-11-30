@@ -3,7 +3,6 @@ package com.segnities007.templates.mvi
 import androidx.lifecycle.viewModelScope
 import com.segnities007.model.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.navigation.NavKey
 import com.segnities007.templates.utils.TemplateFilter
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.ics.GenerateTemplatesFromIcsUseCase
@@ -26,13 +25,13 @@ class TemplatesViewModel(
     private val generateTemplatesFromIcsUseCase: GenerateTemplatesFromIcsUseCase,
     private val saveGeneratedTemplatesUseCase: SaveGeneratedTemplatesUseCase,
 ) : BaseViewModel<TemplatesIntent, TemplatesState, TemplatesEffect>(
-        initialState = TemplatesState(),
-    ) {
+    initialState = TemplatesState(),
+) {
 
 
     init {
         sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
-        
+
         // Start collecting items Flow immediately
         viewModelScope.launch {
             getAllItemsUseCase().collect { items ->
@@ -72,8 +71,6 @@ class TemplatesViewModel(
             TemplatesIntent.ShowBottomSheet -> setState { copy(isShowingBottomSheet = true) }
             TemplatesIntent.HideBottomSheet -> setState { copy(isShowingBottomSheet = false) }
 
-            TemplatesIntent.NavigateToWeeklyTemplateList -> setState { copy(currentRoute = NavKey.WeeklyTemplateList) }
-            TemplatesIntent.NavigateToWeeklyTemplateSelector -> setState { copy(currentRoute = NavKey.WeeklyTemplateSelector) }
 
             is TemplatesIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is TemplatesIntent.UpdateSelectedCategory -> updateSelectedCategory(intent)
@@ -188,7 +185,7 @@ class TemplatesViewModel(
             updateTemplateUseCase(template).fold(
                 onSuccess = {
                     sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
-                    setState { copy(currentRoute = NavKey.WeeklyTemplateList) }
+                    sendIntent(TemplatesIntent.GetAllWeeklyTemplates)
                     sendEffect { TemplatesEffect.ShowToast("「${template.title}」を更新しました") }
                 },
                 onFailure = { e ->
@@ -217,14 +214,14 @@ class TemplatesViewModel(
     }
 
     private fun selectTemplate(template: WeeklyTemplate) {
-        setState { copy(selectedTemplate = template, currentRoute = NavKey.WeeklyTemplateSelector) }
+        setState { copy(selectedTemplate = template) }
     }
 
     private fun importIcs(uri: android.net.Uri) {
         setState { copy(isImportingIcs = true) }
 
         viewModelScope.launch {
-            val templatesResult = generateTemplatesFromIcsUseCase(uri)
+            val templatesResult = generateTemplatesFromIcsUseCase(uri.toString())
             val templates = templatesResult.getOrElse { e ->
                 setState { copy(isImportingIcs = false) }
                 sendEffect { TemplatesEffect.ShowToast("ICSインポート失敗: ${e.message}") }

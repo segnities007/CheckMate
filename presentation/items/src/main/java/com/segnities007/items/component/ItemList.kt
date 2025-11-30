@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.segnities007.designsystem.theme.Dimens
 import androidx.compose.ui.tooling.preview.Preview
 import com.segnities007.items.mvi.ItemsState
 import com.segnities007.model.item.Item
@@ -30,7 +31,7 @@ fun ItemsList(
 private fun ItemsListUi(state: ItemsState){
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium),
     ){
         state.items.forEach { item ->
             ItemCard(

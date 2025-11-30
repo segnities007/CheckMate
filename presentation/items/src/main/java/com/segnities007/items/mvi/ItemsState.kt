@@ -1,15 +1,11 @@
 package com.segnities007.items.mvi
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import com.segnities007.model.item.BarcodeInfo
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.model.item.ProductInfo
-import com.segnities007.navigation.NavKey
+import com.segnities007.navigation.NavKeys
 import com.segnities007.ui.mvi.MviState
 
 data class ItemsState(
@@ -25,7 +21,7 @@ data class ItemsState(
     val productInfo: ProductInfo? = null,
     val isLoadingProductInfo: Boolean = false,
     val shouldClearForm: Boolean = false,
-    val currentRoute: NavKey = NavKey.ItemsList,
+    val currentRoute: NavKeys = NavKeys.Hub.Items.ListKey,
 ) : MviState
 
 enum class SortOrder {

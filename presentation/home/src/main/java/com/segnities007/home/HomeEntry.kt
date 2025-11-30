@@ -1,10 +1,15 @@
 package com.segnities007.home
 
 import androidx.navigation3.runtime.EntryProviderScope
-import com.segnities007.navigation.NavKey
+import androidx.navigation3.runtime.NavKey
+import com.segnities007.navigation.NavKeys
 
-fun EntryProviderScope<NavKey>.homeEntry(onNavigate: (NavKey) -> Unit) {
-    entry<NavKey.Home> {
+
+fun EntryProviderScope<NavKey>.homeEntry(
+    onNavigate: (NavKeys) -> Unit,
+    onBack: () -> Unit,
+) {
+    entry<NavKeys.Hub.HomeKey> {
         HomeScreen(onNavigate = onNavigate)
     }
 }

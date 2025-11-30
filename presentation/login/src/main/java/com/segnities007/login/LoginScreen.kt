@@ -15,21 +15,21 @@ import com.segnities007.login.component.LoginTitles
 import com.segnities007.login.mvi.LoginEffect
 import com.segnities007.login.mvi.LoginIntent
 import com.segnities007.login.mvi.LoginViewModel
-import com.segnities007.navigation.NavKey
+import com.segnities007.navigation.NavKeys
+import com.segnities007.ui.scaffold.CheckMateScaffold
 import org.koin.compose.koinInject
 
-import com.segnities007.ui.scaffold.CheckMateScaffold
-
 @Composable
-fun LoginScreen(topNavigate: (NavKey) -> Unit) {
+fun LoginScreen(topNavigate: (NavKeys) -> Unit) {
     val loginViewModel: LoginViewModel = koinInject()
 
     LaunchedEffect(Unit) {
         loginViewModel.effect.collect { effect ->
             when (effect) {
                 LoginEffect.NavigateToHub -> {
-                    topNavigate(NavKey.Hub)
+                    topNavigate(NavKeys.Hub.HomeKey)
                 }
+
                 is LoginEffect.ShowToast -> {
                     // TODO
                 }

@@ -2,19 +2,18 @@ import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.application)
+    id("checkmate.android.application")
+    id("checkmate.android.compose")
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.devtools.ksp")
 }
 
 android {
     namespace = "com.segnities007.checkmate"
-    compileSdk = 36
-
+    
     defaultConfig {
         applicationId = "com.segnities007.checkmate"
-        minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -40,15 +39,8 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlin {
-        jvmToolchain(17)
-    }
+    
     buildFeatures {
-        compose = true
         buildConfig = true
     }
 
@@ -62,12 +54,21 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
-    implementation(project(":presentation:auth"))
-    implementation(project(":presentation:hub"))
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
+    implementation(project(":domain:usecase"))
+    implementation(project(":data:remote"))
+    implementation(project(":data:repository"))
+    implementation(project(":data:local"))
+    implementation(project(":presentation:login"))
+    implementation(project(":presentation:splash"))
+    implementation(project(":presentation:dashboard"))
+    implementation(project(":presentation:home"))
+    implementation(project(":presentation:items"))
+    implementation(project(":presentation:setting"))
+    implementation(project(":presentation:templates"))
     implementation(project(":widget"))
 
     implementation(libs.androidx.core.ktx)
@@ -79,6 +80,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -103,4 +106,8 @@ dependencies {
 
     // kotlinx-datetime
     implementation(libs.kotlinx.datetime)
+
+    // room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
 }

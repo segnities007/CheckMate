@@ -48,7 +48,8 @@ import com.segnities007.ui.card.ItemCard
 import kotlin.time.ExperimentalTime
 
 import com.segnities007.ui.scaffold.CheckMateScaffold
-import com.segnities007.ui.theme.checkMateBackgroundBrush
+import com.segnities007.designsystem.theme.checkMateBackgroundBrush
+import com.segnities007.designsystem.theme.Dimens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +57,7 @@ fun TemplateItemSelectPage(
     template: WeeklyTemplate,
     allItems: List<Item>,
     sendIntent: (TemplatesIntent) -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
     val selectedStates =
         remember {
@@ -86,7 +88,7 @@ fun TemplateItemSelectPage(
                     )
                 },
                 onCancel = {
-                    sendIntent(TemplatesIntent.NavigateToWeeklyTemplateList)
+                    onNavigateBack()
                 },
                 alpha = alpha,
             )
@@ -118,16 +120,16 @@ private fun TemplateItemSelectorUi(
     selectedStates: MutableMap<Int, Boolean>,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium),
     ) {
         // テンプレート情報
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(Dimens.CornerMedium),
             elevation =
                 CardDefaults.elevatedCardElevation(
                     defaultElevation = 1.dp,
-                    pressedElevation = 2.dp,
+                    pressedElevation = Dimens.ElevationSmall,
                     focusedElevation = 1.dp,
                     hoveredElevation = 1.dp,
                 ),
@@ -140,8 +142,8 @@ private fun TemplateItemSelectorUi(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                        .padding(Dimens.PaddingMedium),
+                verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMediumSmall),
             ) {
                 Text(
                     text = template.title,
@@ -154,15 +156,15 @@ private fun TemplateItemSelectorUi(
 
                 // 曜日タグ
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
                 ) {
                     template.daysOfWeek.forEach { dayOfWeek ->
                         Box(
                             modifier =
                                 Modifier
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(Dimens.CornerSmall))
                                     .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                                    .padding(horizontal = Dimens.PaddingSmall, vertical = Dimens.PaddingExtraSmall),
                         ) {
                             Text(
                                 text = getDayOfWeekDisplayName(dayOfWeek),
@@ -252,5 +254,6 @@ fun WeeklyTemplateSelectorPreview() {
         template = dummyTemplate,
         allItems = dummyItems,
         sendIntent = {},
+        onNavigateBack = {},
     )
 }

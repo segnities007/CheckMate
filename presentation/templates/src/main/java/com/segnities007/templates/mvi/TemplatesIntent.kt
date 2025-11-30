@@ -32,9 +32,7 @@ sealed interface TemplatesIntent : MviIntent {
 
     data object HideBottomSheet : TemplatesIntent
 
-    data object NavigateToWeeklyTemplateList : TemplatesIntent
 
-    data object NavigateToWeeklyTemplateSelector : TemplatesIntent
 
     data class UpdateSearchQuery(
         val query: String,

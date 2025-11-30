@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.segnities007.designsystem.theme.Dimens
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.model.item.ProductInfo
 import kotlin.time.ExperimentalTime
@@ -126,8 +127,8 @@ fun CreateBottomSheet(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+                    .padding(Dimens.PaddingLarge),
+            verticalArrangement = Arrangement.spacedBy(Dimens.PaddingLarge),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -144,24 +145,24 @@ fun CreateBottomSheet(
                     enabled = !isLoadingFromParent,
                     modifier =
                         Modifier
-                            .size(40.dp)
+                            .size(Dimens.IconExtraLarge)
                             .background(
                                 color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(8.dp),
+                                shape = RoundedCornerShape(Dimens.CornerSmall),
                             ),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.QrCodeScanner,
                         contentDescription = "バーコードスキャン",
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(Dimens.IconMedium),
                     )
                 }
             }
 
             // 写真エリア
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(Dimens.PaddingSmall),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 if (imageUriForPreview != null) {
@@ -178,7 +179,7 @@ fun CreateBottomSheet(
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .clip(RoundedCornerShape(16.dp)),
+                                    .clip(RoundedCornerShape(Dimens.CornerMedium)),
                             // 角丸
                             contentScale = ContentScale.Crop,
                         )
@@ -189,8 +190,8 @@ fun CreateBottomSheet(
                             modifier =
                                 Modifier
                                     .align(Alignment.TopEnd)
-                                    .padding(12.dp)
-                                    .size(36.dp)
+                                    .padding(Dimens.PaddingMediumSmall)
+                                    .size(Dimens.IconLarge)
                                     .clip(RoundedCornerShape(50))
                                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
                         ) {
@@ -216,7 +217,7 @@ fun CreateBottomSheet(
                             modifier =
                                 Modifier
                                     .fillMaxSize()
-                                    .clip(RoundedCornerShape(16.dp)),
+                                    .clip(RoundedCornerShape(Dimens.CornerMedium)),
                             contentScale = ContentScale.Crop,
                             onError = { state ->
                                 // 画像読み込みに失敗した場合、表紙画像を非表示にする
@@ -230,8 +231,8 @@ fun CreateBottomSheet(
                             modifier =
                                 Modifier
                                     .align(Alignment.TopEnd)
-                                    .padding(12.dp)
-                                    .size(36.dp)
+                                    .padding(Dimens.PaddingMediumSmall)
+                                    .size(Dimens.IconLarge)
                                     .clip(RoundedCornerShape(50))
                                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
                         ) {
@@ -249,7 +250,7 @@ fun CreateBottomSheet(
                             Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(Dimens.CornerMedium))
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -260,10 +261,10 @@ fun CreateBottomSheet(
                             Icon(
                                 Icons.Default.Book,
                                 contentDescription = "書籍アイコン",
-                                modifier = Modifier.size(48.dp),
+                                modifier = Modifier.size(Dimens.IconExtraLarge),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Dimens.PaddingSmall))
                             Text(
                                 text = "表紙画像は利用できません",
                                 style = MaterialTheme.typography.bodyMedium,

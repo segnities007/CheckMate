@@ -5,12 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.segnities007.designsystem.theme.Dimens
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.ui.button.CheckBoxButton
+import com.segnities007.designsystem.button.CheckBoxButton
 import com.segnities007.ui.card.empty.EmptyStateCard
 import com.segnities007.ui.card.ItemCard
-import com.segnities007.ui.divider.HorizontalStatDivider
+import com.segnities007.designsystem.divider.HorizontalStatDivider
 import kotlin.time.ExperimentalTime
 
 @Composable
@@ -39,7 +40,7 @@ private fun CategoryBasedItemListUi(
     val selectedItems = itemList.filter { allItemIdsForSelectedDate.contains(it.id) }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium)
     ) {
             HorizontalStatDivider(
                 label = "今日の持ち物",

@@ -1,16 +1,13 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("checkmate.android.library")
+    id("checkmate.android.compose")
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.segnities007.splash"
-    compileSdk = 36
-
+    
     defaultConfig {
-        minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -23,13 +20,6 @@ android {
                 "proguard-rules.pro",
             )
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
     }
 }
 
@@ -54,8 +44,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // koin
+    // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+
+    implementation(project(":domain:usecase"))
 
     // navigation
     implementation(libs.androidx.navigation3.runtime)

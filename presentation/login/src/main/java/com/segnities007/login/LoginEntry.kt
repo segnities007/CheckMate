@@ -1,10 +1,12 @@
 package com.segnities007.login
 
 import androidx.navigation3.runtime.EntryProviderScope
-import com.segnities007.navigation.NavKey
+import androidx.navigation3.runtime.NavKey
+import com.segnities007.navigation.NavKeys
 
-fun EntryProviderScope<NavKey>.loginEntry(topNavigate: (NavKey) -> Unit) {
-    entry<NavKey.Login> {
-        LoginScreen(topNavigate = topNavigate)
+
+fun EntryProviderScope<NavKey>.loginEntry(onNavigate: (NavKeys) -> Unit) {
+    entry<NavKeys.Auth.LoginKey> {
+        LoginScreen(topNavigate = onNavigate)
     }
 }
