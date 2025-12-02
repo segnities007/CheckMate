@@ -10,6 +10,7 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun CheckMateScaffold(
@@ -36,4 +37,10 @@ fun CheckMateScaffold(
         contentWindowInsets = contentWindowInsets,
         content = content
     )
+}
+
+@Composable
+@Preview
+private fun CheckMateScaffoldPreview(){
+    CheckMateScaffold() { }
 }

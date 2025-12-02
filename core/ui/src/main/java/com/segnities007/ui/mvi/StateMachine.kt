@@ -29,7 +29,7 @@ class StateMachine<S : MviState, E : MviEffect>(
     fun setState(reducer: S.() -> S) {
         _uiState.update { currentState ->
             val newState = currentState.data.reducer()
-            currentState.toSuccess(newState)
+            currentState.toIdle(newState)
         }
     }
 

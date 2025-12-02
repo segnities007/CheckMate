@@ -34,4 +34,5 @@ sealed interface UiState<T : MviState> {
     fun toFailure(message: String): UiState<T> = Failure(message, data)
     fun toSuccess(newData: T): UiState<T> = Success(newData)
     fun toIdle(): UiState<T> = Idle(data)
+    fun toIdle(newData: T): UiState<T> = Idle(newData)
 }

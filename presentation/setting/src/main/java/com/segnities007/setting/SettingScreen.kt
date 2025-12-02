@@ -134,7 +134,7 @@ private fun SettingContent(
         }
 
     Column(
-        modifier = Modifier.padding(Dimens.PaddingMedium),
+        modifier = Modifier.padding(horizontal = Dimens.PaddingMedium),
         verticalArrangement = Arrangement.spacedBy(Dimens.PaddingMedium),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
