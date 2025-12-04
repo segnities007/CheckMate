@@ -5,8 +5,8 @@ plugins {
 }
 
 android {
-    namespace = "com.segnities007.setting"
-    
+    namespace = "com.segnities007.splash"
+
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -25,11 +25,8 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":domain:repository"))
-    implementation(project(":domain:model"))
-    implementation(project(":domain:usecase"))
+
+    implementation(project(":presentation:ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -48,12 +45,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // koin
+    // koin
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
 
-    // icon
-    implementation(libs.androidx.material.icons.extended)
+    implementation(project(":domain:usecase"))
 
     // navigation
     implementation(libs.androidx.navigation3.runtime)

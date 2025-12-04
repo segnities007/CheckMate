@@ -5,8 +5,8 @@ plugins {
 }
 
 android {
-    namespace = "com.segnities007.items"
-    
+    namespace = "com.segnities007.home"
+
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -21,18 +21,17 @@ android {
             )
         }
     }
-    lint {
-        disable += "UnsafeOptInUsageError"
-    }
 }
 
 dependencies {
     implementation(project(":core:navigation"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":domain:repository"))
+    implementation(project(":presentation:designsystem"))
+
     implementation(project(":domain:model"))
+    implementation(project(":domain:repository"))
     implementation(project(":domain:usecase"))
+
+    implementation(project(":presentation:ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -42,6 +41,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.runtime)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlin.test)
@@ -58,25 +58,16 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
 
-    // cameraX
-    implementation(libs.androidx.camera.core)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-
     // coil
     implementation(libs.coil.compose)
-    implementation(libs.coil.network.ktor3)
 
-    // navigation
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
+    // datetime
+    implementation(libs.kotlinx.datetime)
 
     // icon
     implementation(libs.androidx.material.icons.extended)
 
-    // barcode scanning
-    implementation(libs.mlkit.barcode.scanning)
+    //navigation
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 }

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.segnities007.dashboard"
+    namespace = "com.segnities007.setting"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -25,11 +25,13 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:designsystem"))
+    implementation(project(":presentation:designsystem"))
+
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
     implementation(project(":domain:usecase"))
+
+    implementation(project(":presentation:ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -39,7 +41,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -56,8 +57,7 @@ dependencies {
     // icon
     implementation(libs.androidx.material.icons.extended)
 
-    // datetime
-    implementation(libs.kotlinx.datetime)
+    // navigation
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
 }

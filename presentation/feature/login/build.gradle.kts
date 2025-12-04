@@ -5,8 +5,8 @@ plugins {
 }
 
 android {
-    namespace = "com.segnities007.home"
-    
+    namespace = "com.segnities007.login"
+
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -25,11 +25,13 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":domain:model"))
+    implementation(project(":presentation:designsystem"))
+
     implementation(project(":domain:repository"))
+    implementation(project(":domain:model"))
     implementation(project(":domain:usecase"))
+
+    implementation(project(":presentation:ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -39,11 +41,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.runtime)
     testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -55,15 +53,6 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
-
-    // coil
-    implementation(libs.coil.compose)
-
-    // datetime
-    implementation(libs.kotlinx.datetime)
-
-    // icon
-    implementation(libs.androidx.material.icons.extended)
 
     //navigation
     implementation(libs.androidx.navigation3.runtime)

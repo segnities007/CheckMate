@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.segnities007.checkmate"
-    
+
     defaultConfig {
         applicationId = "com.segnities007.checkmate"
         targetSdk = 36
@@ -27,7 +27,11 @@ android {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
 
-        buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY", "")}\"")
+        buildConfigField(
+            "String",
+            "GEMINI_API_KEY",
+            "\"${localProperties.getProperty("GEMINI_API_KEY", "")}\""
+        )
     }
 
     buildTypes {
@@ -39,7 +43,7 @@ android {
             )
         }
     }
-    
+
     buildFeatures {
         buildConfig = true
     }
@@ -55,20 +59,20 @@ android {
 dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:common"))
-    implementation(project(":core:ui"))
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
     implementation(project(":domain:usecase"))
     implementation(project(":data:remote"))
     implementation(project(":data:repository"))
     implementation(project(":data:local"))
-    implementation(project(":presentation:login"))
-    implementation(project(":presentation:splash"))
-    implementation(project(":presentation:dashboard"))
-    implementation(project(":presentation:home"))
-    implementation(project(":presentation:items"))
-    implementation(project(":presentation:setting"))
-    implementation(project(":presentation:templates"))
+    implementation(project(":presentation:ui"))
+    implementation(project(":presentation:feature:login"))
+    implementation(project(":presentation:feature:splash"))
+    implementation(project(":presentation:feature:dashboard"))
+    implementation(project(":presentation:feature:home"))
+    implementation(project(":presentation:feature:items"))
+    implementation(project(":presentation:feature:setting"))
+    implementation(project(":presentation:feature:templates"))
     implementation(project(":widget"))
 
     implementation(libs.androidx.core.ktx)

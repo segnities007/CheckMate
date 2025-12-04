@@ -5,8 +5,8 @@ plugins {
 }
 
 android {
-    namespace = "com.segnities007.templates"
-    
+    namespace = "com.segnities007.ui"
+
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -24,12 +24,9 @@ android {
 }
 
 dependencies {
+    api(project(":presentation:designsystem"))
     implementation(project(":core:navigation"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":domain:repository"))
     implementation(project(":domain:model"))
-    implementation(project(":domain:usecase"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -39,10 +36,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.material3)
     testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -50,26 +46,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // koin
-    implementation(libs.koin.core)
-    implementation(libs.koin.android)
-    implementation(libs.koin.compose)
-
-    // serialization
-    implementation(libs.kotlinx.serialization.json)
-
-    // navigation
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-
     // coil
     implementation(libs.coil.compose)
 
-    // datetime
-    implementation(libs.kotlinx.datetime)
-
     // icon
     implementation(libs.androidx.material.icons.extended)
+
+    // datetime
+    implementation(libs.kotlinx.datetime)
 }
