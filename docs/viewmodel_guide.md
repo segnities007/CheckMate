@@ -1,129 +1,143 @@
-# ViewModel 実装ガイドライン
+# UiState\<T\> 実装・活用ガイド
 
-このドキュメントは、CheckMate プロジェクトにおける **ViewModel** の実装ルールとベストプラクティスを定義します。
-ViewModel は UI ロジックの中心であり、MVI アーキテクチャにおける **Model (State)** の管理と **Intent** の処理を担当します。
+この `UiState` の最大の特徴は、**「LoadingやFailureになっても、以前のDataを捨てずに持ち運べる」**
+点です。これにより、画面のリロード時に「一瞬真っ白になる（ホワイトフラッシュ）」を防ぐことができます。
 
-## 1. ViewModel の役割
+## 1\. 状態遷移のイメージ
 
-ViewModel の主な責務は以下の通りです。
+このクラスを使うと、以下のようなデータフローが実現できます。
 
-1.  **状態 (State) の保持と公開**: 画面の Source of Truth として、UI に最新の状態を提供します。
-2.  **ナビゲーション状態の管理**: Navigation3 を採用しているため、**現在の画面 (`currentRoute`) や遷移ロジックは ViewModel が管理します**。
-3.  **ビジネスロジックの実行**: Repository や UseCase を呼び出し、データの取得や加工を行います。
-4.  **副作用 (Effect) の送信**: トースト表示などの一時的なイベントを UI に通知します。
+1. **初期状態**: `Idle(data=null)`
+2. **初回ロード**: `Loading(data=null)`
+3. **成功**: `Success(data="A")`
+4. **リフレッシュ**: `Loading(data="A")` ← **ここが重要！ "A"を表示したままローディングを出せる**
+5. **失敗**: `Failure(msg="Err", data="A")` ← **"A"を表示したままエラーを出せる**
 
----
+-----
 
-## 2. 基本実装 (BaseViewModel)
+## 2\. ViewModelでの扱い方 (BaseViewModel)
 
-本プロジェクトでは、共通の振る舞いを提供する `BaseViewModel<I, S, E>` を継承して実装します。
-内部では `StateMachine` クラスを使用して、状態遷移と副作用の管理を行っています。
-
-### 2.1 クラス定義
-
-Intent, State, Effect の型パラメータを指定します。
+`toLoading()` や `toSuccess()` を活用して、現在のデータを自動的に引き継ぐヘルパーを作成します。
 
 ```kotlin
-class MyViewModel(
-    private val repository: MyRepository
-) : BaseViewModel<MyIntent, MyState, MyEffect>(MyState()) {
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-    override suspend fun handleIntent(intent: MyIntent) {
-        when (intent) {
-            is MyIntent.LoadData -> loadData()
+abstract class BaseViewModel<S>(initialData: S? = null) : ViewModel() {
+
+    // データの変更を監視するStateFlow
+    private val _uiState = MutableStateFlow<UiState<S>>(UiState.Idle(initialData))
+    val uiState: StateFlow<UiState<S>> = _uiState.asStateFlow()
+
+    /**
+     * 非同期処理を実行し、UiStateを自動更新するヘルパー
+     */
+    protected fun execute(
+        block: suspend () -> S // S型（データ）を返す関数を受け取る
+    ) {
+        viewModelScope.launch {
+            // 1. Loadingへ遷移（現在のdataを引き継ぐ）
+            _uiState.update { it.toLoading() }
+
+            try {
+                // 2. 処理実行
+                val result = block()
+
+                // 3. Successへ遷移（新しいdataで更新）
+                _uiState.update { it.toSuccess(result) }
+
+            } catch (e: Exception) {
+                // 4. Failureへ遷移（現在のdataを引き継ぎ、エラーメッセージを付与）
+                _uiState.update { it.toFailure(e.message ?: "Unknown Error") }
+            }
+        }
+    }
+
+    // 手動更新用（部分更新など）
+    protected fun updateState(reducer: UiState<S>.() -> UiState<S>) {
+        _uiState.update(reducer)
+    }
+}
+```
+
+### 使用例 (FeatureViewModel)
+
+```kotlin
+class UserViewModel(private val repository: UserRepository) : BaseViewModel<User>() {
+
+    init {
+        loadUser()
+    }
+
+    fun loadUser() {
+        // これだけで「Loading(保持) -> 処理 -> Success/Failure(保持)」が動く
+        execute {
+            repository.fetchUser()
         }
     }
 }
 ```
 
-### 2.2 データの読み込みと更新 (`execute`)
+-----
 
-非同期処理（API 通信など）を行い、その結果に基づいて State を更新する場合は `execute` メソッドを使用します。
-これは **LCE (Loading / Content / Error)** パターンを自動的に適用します。
+## 3\. Jetpack Compose での描画戦略
+
+`UiState` を使う場合、従来の `when(state)` で画面全体を切り替えるのではなく、*
+*「データがあれば表示し、状態に応じてオーバーレイを重ねる」** アプローチが推奨されます。
+
+### ❌ 良くない例（データが消えるパターン）
 
 ```kotlin
-fun loadData() {
-    // 1. Loading 状態へ遷移 (以前のデータは保持)
-    // 2. repository.getData() を実行
-    // 3. 成功なら Success、失敗なら Failure へ遷移
-    execute(
-        action = { repository.getData() },
-        reducer = { data -> copy(items = data) }
-    )
+// これだとLoadingのたびに中身が消えてしまう
+when (state) {
+    is UiState.Loading -> CircularProgressIndicator() // 前のデータが見えなくなる
+    is UiState.Success -> UserContent(state.data)
+    is UiState.Failure -> ErrorText(state.message)
 }
 ```
 
-### 2.3 同期的な更新 (`setState`)
-
-ユーザー入力や**ナビゲーション**など、非同期処理を伴わない更新には `setState` を使用します。
-Loading 状態を経由せず、即座に State を書き換えます。
+### ✅ 推奨パターン（データを維持するパターン）
 
 ```kotlin
-// ナビゲーションの例
-fun onDetailRequested(id: String) {
-    setState {
-        copy(currentRoute = NavKey.Detail(id))
+@Composable
+fun UserScreen(viewModel: UserViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // ------------------------------------------------
+        // 1. ベースコンテンツレイヤー (データがあれば常に表示)
+        // ------------------------------------------------
+        state.data?.let { data ->
+            UserContent(user = data)
+        }
+
+        // ------------------------------------------------
+        // 2. ステータスレイヤー (Loading / Error)
+        // ------------------------------------------------
+        when (state) {
+            is UiState.Loading -> {
+                // データが空なら全画面ローディング、あるなら上部にバー表示など
+                if (state.data == null) {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                } else {
+                    LinearProgressIndicator(Modifier.fillMaxWidth().align(Alignment.TopCenter))
+                }
+            }
+            is UiState.Failure -> {
+                // エラーメッセージの表示
+                val message = (state as UiState.Failure).message
+                if (state.data == null) {
+                    // データがないので全画面エラー
+                    RetryButton(message) { viewModel.loadUser() }
+                } else {
+                    // データはあるのでSnackbarでエラー通知
+                    ErrorSnackbar(message)
+                }
+            }
+            else -> {} // Idle, Successは何もしない
+        }
     }
-}
-```
-
----
-
-## 3. 状態管理 (UiState)
-
-ViewModel は `UiState<S>` 型で State を公開します。
-`UiState` は以下の4つの状態を持つステートマシンです。
-**すべての状態で `data: S` (Non-nullable) を保持します。**
-
-*   **Idle**: 初期状態。
-*   **Loading**: 読み込み中。**以前のデータを保持します**。
-*   **Success**: 成功。
-*   **Failure**: 失敗。エラーメッセージを持ち、**以前のデータを保持します**。
-
-この仕組みにより、リフレッシュ時などに画面が真っ白になることを防ぎます。
-
----
-
-## 4. 副作用 (Effect) の処理
-
-`BaseViewModel` には Effect 管理機能が組み込まれています。
-`sendEffect` メソッドを使用して Effect を送信します。
-
-```kotlin
-fun onErrorOccurred() {
-    sendEffect { MyEffect.ShowSnackbar("エラーが発生しました") }
-}
-```
-
----
-
-## 5. ベストプラクティス
-
-### ✅ 推奨事項
-*   **execute の活用**: 非同期処理は可能な限り `execute` を使って、Loading/Error 状態の管理を統一してください。
-*   **ナビゲーション**: ナビゲーションは `setState` で `currentRoute` を更新することで行います。
-
-### ❌ 禁止事項
-*   **UiState の手動生成**: 基本的に `execute` や `setState` を通じて `UiState` を更新してください。手動で `UiState.Loading` などを生成する必要はありません。
-
----
-
-## 6. テスト
-
-ViewModel のテストは、入力（メソッド呼び出し）に対する出力（State の変化）を検証します。
-
-```kotlin
-@Test
-fun `loadData updates state correctly`() = runTest {
-    // Arrange
-    val viewModel = MyViewModel(mockRepository)
-
-    // Act
-    viewModel.sendIntent(MyIntent.LoadData)
-
-    // Assert
-    val state = viewModel.uiState.value
-    assert(state is UiState.Success)
-    assertEquals(expectedData, state.data.items)
 }
 ```

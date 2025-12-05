@@ -2,7 +2,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.library)
+    id("checkmate.android.library")
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -15,11 +15,8 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.segnities007.remote"
-    compileSdk = 36
-
+    
     defaultConfig {
-        minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         buildConfigField("String", "WEB_CLIENT_ID", "\"${localProperties.getProperty("WEB_CLIENT_ID")}\"")
@@ -34,14 +31,7 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
+    
     buildFeatures {
         buildConfig = true
     }

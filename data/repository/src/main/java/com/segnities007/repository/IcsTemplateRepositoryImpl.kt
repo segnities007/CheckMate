@@ -32,8 +32,8 @@ class IcsTemplateRepositoryImpl(
         GeminiAiService(BuildConfig.GEMINI_API_KEY)
     }
 
-    override suspend fun generateTemplatesFromIcs(uri: Uri): List<WeeklyTemplate> {
-        val icsContent = readIcsFile(uri)
+    override suspend fun generateTemplatesFromIcs(uri: String): List<WeeklyTemplate> {
+        val icsContent = readIcsFile(Uri.parse(uri))
         val events = parseIcsContent(icsContent)
         return generateTemplatesFromEvents(events)
     }
