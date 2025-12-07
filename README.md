@@ -30,7 +30,7 @@
 *   **Asynchronous**: [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
 *   **Network**: KtorClient
 
-## 📦 モジュール構成 (Modules)
+## 📦 モジュール構成 (image)
 
 ```mermaid
 graph LR
@@ -75,8 +75,6 @@ graph LR
     DataRepo --> Local & Remote
 
     %% --- Auxiliary Dependencies (点線: 補助的・共通利用) ---
-    App -.-> Features & UI
-    Nav -.-> UI
     Features -.-> UI
     UI -.-> Design
     UI -.-> DomainModel
