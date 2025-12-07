@@ -33,13 +33,75 @@
 ## 📦 モジュール構成 (Modules)
 
 ```mermaid
-graph TD
-    App --> Feature
-    Feature --> Domain
-    Feature --> Common
-    Feature --> DesignSystem
-    Data --> Domain
-    App --> Data
+graph LR
+    %% スタイル定義
+    classDef app fill:#BBDEFB,stroke:#1976D2,color:black
+    classDef feature fill:#E1BEE7,stroke:#7B1FA2,color:black
+    classDef ui fill:#F8BBD0,stroke:#C2185B,color:black
+    classDef domain fill:#C8E6C9,stroke:#388E3C,color:black
+    classDef data fill:#FFE0B2,stroke:#F57C00,color:black
+
+    App(":app"):::app
+
+    subgraph Presentation [Presentation Layer]
+        direction TB
+        Nav(":presentation:navigation"):::ui
+        
+        subgraph Features [Feature Modules]
+            Splash(":feature:splash"):::feature
+            Login(":feature:login"):::feature
+            Home(":feature:home"):::feature
+            Dashboard(":feature:dashboard"):::feature
+            Items(":feature:items"):::feature
+            Templates(":feature:templates"):::feature
+            Setting(":feature:setting"):::feature
+        end
+        
+        UI(":presentation:ui"):::ui
+        CommonPres(":presentation:common"):::ui
+        Design(":presentation:designsystem"):::ui
+    end
+
+    subgraph Domain [Domain Layer]
+        direction TB
+        UseCase(":domain:usecase"):::domain
+        DomainModel(":domain:model"):::domain
+        DomainRepo(":domain:repository"):::domain
+    end
+
+    subgraph Data [Data Layer]
+        direction TB
+        DataRepo(":data:repository"):::data
+        Local(":data:local"):::data
+        Remote(":data:remote"):::data
+    end
+
+    %% --- Main Dependency Flow (実線: 主要な流れ) ---
+    App --> Nav
+    Nav --> Splash & Login & Home & Dashboard & Items & Templates & Setting
+    
+    Splash & Login & Home & Dashboard & Items & Templates & Setting --> UseCase
+    
+    UseCase --> DomainRepo
+    DataRepo --> DomainRepo
+    DataRepo --> Local & Remote
+
+    %% --- Auxiliary Dependencies (点線: 補助的・共通利用) ---
+    %% App Setup
+    App -.-> DataRepo & UseCase & DomainModel & UI & Splash & Login & Dashboard & Home & Items & Setting & Templates
+
+    %% UI & Common
+    Nav -.-> UI
+    Splash & Login & Home & Dashboard & Items & Templates & Setting -.-> CommonPres
+    CommonPres -.-> UI
+    UI -.-> Design
+    UI -.-> DomainModel
+
+    %% Domain & Data Details
+    UseCase -.-> DomainModel
+    DomainRepo -.-> DomainModel
+    DataRepo -.-> DomainModel
+    Local & Remote -.-> DomainModel
 ```
 詳細なモジュール構成やアーキテクチャについては [Architecture Overview](docs/architecture_overview.md) を参照してください。
 
