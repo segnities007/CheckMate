@@ -32,7 +32,7 @@
 | -------------- | ------------------------ |
 | 言語           | Kotlin 2.2.20            |
 | UI             | Jetpack Compose          |
-| アーキテクチャ | Clean Architecture + MVI |
+| アーキテクチャ | Layered Architecture + MVI |
 | DI             | Koin                     |
 | 非同期処理     | Coroutines + Flow        |
 | データ永続化   | Room Database            |
@@ -71,9 +71,9 @@ CheckMate/
 
 ## アーキテクチャ原則
 
-### Clean Architecture + MVI
+### Layered Architecture + MVI
 
-本プロジェクトは**Clean Architecture**と**MVI (Model-View-Intent)**を組み合わせたアーキテクチャを採用しています。
+本プロジェクトは**Layered Architecture**と**MVI (Model-View-Intent)**を組み合わせたアーキテクチャを採用しています。
 
 ```text
 ┌─────────────────────────────────────────────┐
@@ -1522,7 +1522,7 @@ class ItemRepositoryImpl(
 1. **関心の分離:** UI 層やビジネスロジック層はログ出力の責任を持たない
 2. **デバッグ効率:** データアクセスレベルでのログのみで、問題の根本原因を特定できる
 3. **パフォーマンス:** 不要なログ出力を削減
-4. **Clean Architecture:** 各層の責務を明確に保つ
+4. **Layered Architecture:** 各層の責務を明確に保つ
 
 **悪い例:**
 
@@ -1692,7 +1692,7 @@ private suspend fun loadDashboardData() {
 
 ### アーキテクチャ
 
-- Clean Architecture by Robert C. Martin
+- Layered Architecture
 - SOLID Principles
 - Domain-Driven Design by Eric Evans
 - Use Case Pattern (Interactor Pattern)

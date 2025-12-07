@@ -1,6 +1,6 @@
 # CheckMate Architecture Documentation
 
-CheckMate adopts a multi-module architecture based on Clean Architecture and MVVM/MVI patterns.
+CheckMate adopts a multi-module architecture based on Layered Architecture and MVVM/MVI patterns.
 
 ## Module Dependency Graph
 
