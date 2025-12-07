@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.segnities007.local.converter.WeeklyTemplateConverters
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 
 @Entity(tableName = "weekly_templates")

@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.designsystem.tag.CountTag
 

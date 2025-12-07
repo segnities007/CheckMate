@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory

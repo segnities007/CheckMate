@@ -59,16 +59,16 @@ fun EnhancedHomeContentPreview() {
             id = 1,
             title = "Work",
             daysOfWeek = setOf(
-                com.segnities007.model.DayOfWeek.MONDAY,
-                com.segnities007.model.DayOfWeek.TUESDAY
+                kotlinx.datetime.DayOfWeek.MONDAY,
+                kotlinx.datetime.DayOfWeek.TUESDAY
             ),
             itemIds = listOf(1, 2)
         ), WeeklyTemplate(
             id = 2,
             title = "Personal",
             daysOfWeek = setOf(
-                com.segnities007.model.DayOfWeek.WEDNESDAY,
-                com.segnities007.model.DayOfWeek.THURSDAY
+                kotlinx.datetime.DayOfWeek.WEDNESDAY,
+                kotlinx.datetime.DayOfWeek.THURSDAY
             ),
             itemIds = listOf(3, 4)
         )),

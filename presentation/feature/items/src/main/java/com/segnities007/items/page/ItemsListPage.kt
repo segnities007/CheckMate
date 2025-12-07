@@ -44,7 +44,7 @@ import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsState
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.scaffold.CheckMateScaffold
 import com.segnities007.ui.util.rememberScrollVisibility

@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.home.page.EnhancedHomeContent
 import com.segnities007.model.WeeklyTemplate
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import kotlinx.datetime.LocalDate
@@ -48,8 +49,8 @@ class HomeScreenTest {
             id = 1,
             title = "Work",
             daysOfWeek = setOf(
-                com.segnities007.model.DayOfWeek.MONDAY,
-                com.segnities007.model.DayOfWeek.TUESDAY
+                DayOfWeek.MONDAY,
+                DayOfWeek.TUESDAY
             ),
             itemIds = listOf(1)
         )

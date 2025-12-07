@@ -4,7 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.utils.getDayOfWeekDisplayName
 import com.segnities007.ui.card.search.SearchCard

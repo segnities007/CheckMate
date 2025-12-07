@@ -12,6 +12,6 @@ val MaterialTheme.checkMateBackgroundBrush: Brush
         colorStops = arrayOf(
             0f to colorScheme.primaryContainer,
             0.8f to colorScheme.primaryContainer,
-            1f to colorScheme.background
+            1f to colorScheme.primaryContainer.copy(0.5f)
         ),
     )

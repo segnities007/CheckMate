@@ -1,16 +1,16 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml:2:13-83
-INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml:2:13-83
+ADDED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml:2:13-83
+INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml:2:13-83
 	package
-		INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml
+		INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml
 	xmlns:android
-		ADDED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml:2:23-81
+		ADDED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml:2:23-81
 uses-sdk
-INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml reason: use-sdk injection requested
-INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml
-INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml
+INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml reason: use-sdk injection requested
+INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml
+INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml
 	android:targetSdkVersion
-		INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml
+		INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml
 	android:minSdkVersion
-		INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/core/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest11788726509319577308.xml
+		INJECTED from /home/segnities007/AndroidStudioProjects/CheckMate/presentation/designsystem/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest1120863706150577917.xml

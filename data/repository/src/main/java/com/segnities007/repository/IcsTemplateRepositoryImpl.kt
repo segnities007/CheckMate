@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.segnities007.local.dao.WeeklyTemplateDao
 import com.segnities007.local.entity.toEntity
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.calendar.CalendarEvent
 import com.segnities007.model.calendar.EventGroup

@@ -3,7 +3,7 @@ package com.segnities007.splash
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.splash.mvi.SplashEffect
 import com.segnities007.splash.mvi.SplashViewModel
 import org.koin.compose.koinInject

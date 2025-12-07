@@ -5,7 +5,7 @@ import com.segnities007.model.item.BarcodeInfo
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
 import com.segnities007.model.item.ProductInfo
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.ui.mvi.MviState
 
 data class ItemsState(

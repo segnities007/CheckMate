@@ -1,5 +1,9 @@
 plugins {
-    id("checkmate.jvm.library")
+    id("checkmate.android.library")
+}
+
+android {
+    namespace = "com.segnities007.usecase"
 }
 
 dependencies {

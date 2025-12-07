@@ -4,13 +4,13 @@
 
 ## 階層化レイアウト
 
-| レイヤー         | 目的                                                                                                                                                                      | 主要モジュール                                                                                               |
-|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| App          | すべてのレイヤーを統合し、DI とナビゲーションをホストするアプリケーションのエントリーポイント。                                                                                                                       | `app`                                                                                                 |
-| Core         | ナビゲーション、共通の Kotlin API、およびビルドロジックのための共有ユーティリティ。                                                                                                                         | `core:navigation`, `core:common`, `core:designsystem` (Compose テーマ用に `presentation:designsystem` に移動) |
-| Domain       | ビジネスルールと契約。                                                                                                                                                             | `domain:model`, `domain:repository`, `domain:usecase`                                                 |
-| Data         | データソースとリポジトリの実装。                                                                                                                                                        | `data:remote`, `data:repository`, `data:local`                                                        |
-| Presentation | Compose UI サーフェス。共通の UI ピースは `presentation:ui` と `presentation:designsystem` にあり、各機能は `presentation:feature:<name>` (ログイン、スプラッシュ、ホーム、設定、アイテム、ダッシュボード、テンプレート) の下に配置されます。 | `presentation:feature:*`, `presentation:ui`, `presentation:designsystem`, `widget`                    |
+| レイヤー         | 目的                                                                                                                                                                                                            | 主要モジュール                                                                                                       |
+|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| App          | すべてのレイヤーを統合し、DI とナビゲーションをホストするアプリケーションのエントリーポイント。                                                                                                                                                             | `app`                                                                                                         |
+| Core         | ナビゲーションは `presentation:navigation` に移設され、共通の Kotlin API とビルドロジックのためのユーティリティを提供します。                                                                                                                            | `core:common`, `core:designsystem` (Compose テーマ用が `presentation:designsystem` に移動)                            |
+| Domain       | ビジネスルールと契約。                                                                                                                                                                                                   | `domain:model`, `domain:repository`, `domain:usecase`                                                         |
+| Data         | データソースとリポジトリの実装。                                                                                                                                                                                              | `data:remote`, `data:repository`, `data:local`                                                                |
+| Presentation | Compose UI サーフェス。共通の UI ピースは `presentation:ui`、テーマは `presentation:designsystem`、ナビゲーションは `presentation:navigation` にあり、各機能は `presentation:feature:<name>` (ログイン、スプラッシュ、ホーム、設定、アイテム、ダッシュボード、テンプレート) の下に配置されます。 | `presentation:feature:*`, `presentation:ui`, `presentation:designsystem`, `presentation:navigation`, `widget` |
 
 ## 依存関係フロー
 
@@ -32,127 +32,102 @@
 ## モジュール構成図
 
 ```mermaid
-graph TB
-    subgraph "App Layer"
-        App[app]
-    end
-    
-    subgraph "Presentation Layer"
-        direction TB
-        subgraph "Feature Modules"
-            Login[feature:login]
-            Splash[feature:splash]
-            Home[feature:home]
-            Setting[feature:setting]
-            Items[feature:items]
-            Dashboard[feature:dashboard]
-            Templates[feature:templates]
+graph TD
+    %% App Module
+    App[":app"]
+
+    %% Presentation Layer
+    subgraph Presentation
+        Nav[":presentation:navigation"]
+        UI[":presentation:ui"]
+        CommonPres[":presentation:common"]
+        Design[":presentation:designsystem"]
+        
+        subgraph Features
+            Splash[":presentation:feature:splash"]
+            Login[":presentation:feature:login"]
+            Home[":presentation:feature:home"]
+            Dashboard[":presentation:feature:dashboard"]
+            Items[":presentation:feature:items"]
+            Templates[":presentation:feature:templates"]
+            Setting[":presentation:feature:setting"]
         end
-        UI[presentation:ui]
-        DesignSystem[presentation:designsystem]
-        Widget[widget]
     end
-    
-    subgraph "Domain Layer"
-        UseCase[domain:usecase]
-        DomainRepo[domain:repository<br/>インターフェース]
-        Model[domain:model]
+
+    %% Domain Layer
+    subgraph Domain
+        UseCase[":domain:usecase"]
+        DomainModel[":domain:model"]
+        DomainRepo[":domain:repository"]
     end
-    
-    subgraph "Data Layer"
-        DataRepo[data:repository<br/>実装]
-        Remote[data:remote]
-        Local[data:local]
+
+    %% Data Layer
+    subgraph Data
+        DataRepo[":data:repository"]
+        Local[":data:local"]
+        Remote[":data:remote"]
     end
-    
-    subgraph "Core Layer"
-        Navigation[core:navigation]
-        Common[core:common]
+
+    %% Core Layer
+    subgraph Core
+        CoreCommon[":core:common"]
     end
-    
-    %% App層の依存関係
-    App --> Login
-    App --> Splash
-    App --> Home
-    App --> Setting
-    App --> Items
-    App --> Dashboard
-    App --> Templates
-    App --> UI
-    App --> Widget
-    App --> UseCase
-    App --> Model
+
+    %% Dependencies
+    App --> Nav
     App --> DataRepo
-    App --> Navigation
-    App --> Common
-    
-    %% Feature層の依存関係
-    Login --> UI
-    Login --> DesignSystem
-    Login --> Navigation
+    App --> UseCase
+    App --> DomainModel
+
+    Nav --> Splash
+    Nav --> Login
+    Nav --> Home
+    Nav --> Dashboard
+    Nav --> Items
+    Nav --> Templates
+    Nav --> Setting
+    Nav --> UI
+    Nav --> UseCase
+    Nav --> DomainModel
+
+    Splash --> CommonPres
+    Login --> CommonPres
+    Home --> CommonPres
+    Dashboard --> CommonPres
+    Items --> CommonPres
+    Templates --> CommonPres
+    Setting --> CommonPres
+
+    CommonPres --> UI
+    UI --> Design
+    UI --> DomainModel
+
+    %% Feature Dependencies
+    Splash --> UseCase
     Login --> UseCase
-    Login --> Model
-    
-    Splash --> UI
-    Splash --> Navigation
-    
-    Home --> UI
-    Home --> DesignSystem
-    Home --> Navigation
     Home --> UseCase
-    Home --> Model
-    
-    Setting --> UI
-    Setting --> DesignSystem
-    Setting --> Navigation
-    Setting --> UseCase
-    Setting --> Model
-    
-    Items --> UI
-    Items --> DesignSystem
-    Items --> Navigation
-    Items --> UseCase
-    Items --> Model
-    
-    Dashboard --> UI
-    Dashboard --> DesignSystem
-    Dashboard --> Navigation
     Dashboard --> UseCase
-    Dashboard --> Model
-    
-    Templates --> UI
-    Templates --> DesignSystem
-    Templates --> Navigation
+    Items --> UseCase
     Templates --> UseCase
-    Templates --> Model
-    
-    %% Presentation層内部の依存関係
-    UI --> DesignSystem
-    UI --> Navigation
-    UI --> Model
-    
-    %% Domain層の依存関係
+    Setting --> UseCase
+
+    %% Domain Dependencies
     UseCase --> DomainRepo
-    UseCase --> Model
-    
-    %% Data層の依存関係
+    UseCase --> DomainModel
+    DomainRepo --> DomainModel
+
+    %% Data Dependencies
     DataRepo --> DomainRepo
-    DataRepo --> Model
-    DataRepo --> Remote
     DataRepo --> Local
-    
-    %% スタイル定義
-    classDef appLayer fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    classDef presentationLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef domainLayer fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
-    classDef dataLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef coreLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    
-    class App appLayer
-    class Login,Splash,Home,Setting,Items,Dashboard,Templates,UI,DesignSystem,Widget presentationLayer
-    class UseCase,DomainRepo,Model domainLayer
-    class DataRepo,Remote,Local dataLayer
-    class Navigation,Common coreLayer
+    DataRepo --> Remote
+    DataRepo --> DomainModel
+    Local --> DomainModel
+    Remote --> DomainModel
+
+    %% Core Dependencies
+    DomainModel --> CoreCommon
+    UI --> CoreCommon
+    DataRepo --> CoreCommon
 ```
 
 ## レイヤー間の依存ルール
@@ -215,9 +190,6 @@ graph TB
 
 #### Core Layer
 
-- **core:navigation**
-    - ナビゲーション定義
-    - 画面遷移の共通ロジック
 - **core:common**
     - 汎用的なユーティリティ
     - 拡張関数、ヘルパークラス

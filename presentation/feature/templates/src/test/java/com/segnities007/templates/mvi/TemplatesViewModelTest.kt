@@ -1,6 +1,6 @@
 package com.segnities007.templates.mvi
 
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.usecase.template.AddWeeklyTemplateUseCase
 import com.segnities007.usecase.template.DeleteWeeklyTemplateUseCase
 import com.segnities007.usecase.template.GetAllWeeklyTemplatesUseCase

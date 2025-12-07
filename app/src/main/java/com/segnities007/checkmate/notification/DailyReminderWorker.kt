@@ -4,7 +4,9 @@ import android.content.Context
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.segnities007.model.DayOfWeek
+import com.segnities007.model.WeeklyTemplate
+import com.segnities007.model.item.Item
+import com.segnities007.model.item.ItemCheckState
 import com.segnities007.repository.ItemCheckStateRepository
 import com.segnities007.repository.ItemRepository
 import com.segnities007.repository.WeeklyTemplateRepository
@@ -38,7 +40,7 @@ class DailyReminderWorker(
                     .now()
                     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
                     .date
-            val todayDayOfWeek = convertToDomainDayOfWeek(today.dayOfWeek)
+            val todayDayOfWeek = today.dayOfWeek
             
             Log.d(TAG, "Today: $today, DayOfWeek: $todayDayOfWeek")
 
@@ -94,18 +96,4 @@ class DailyReminderWorker(
     companion object {
         private const val TAG = "DailyReminderWorker"
     }
-
-    /**
-     * kotlinx.datetime.DayOfWeekをドメインのDayOfWeekに変換
-     */
-    private fun convertToDomainDayOfWeek(dayOfWeek: kotlinx.datetime.DayOfWeek): DayOfWeek =
-        when (dayOfWeek) {
-            kotlinx.datetime.DayOfWeek.MONDAY -> DayOfWeek.MONDAY
-            kotlinx.datetime.DayOfWeek.TUESDAY -> DayOfWeek.TUESDAY
-            kotlinx.datetime.DayOfWeek.WEDNESDAY -> DayOfWeek.WEDNESDAY
-            kotlinx.datetime.DayOfWeek.THURSDAY -> DayOfWeek.THURSDAY
-            kotlinx.datetime.DayOfWeek.FRIDAY -> DayOfWeek.FRIDAY
-            kotlinx.datetime.DayOfWeek.SATURDAY -> DayOfWeek.SATURDAY
-            kotlinx.datetime.DayOfWeek.SUNDAY -> DayOfWeek.SUNDAY
-        }
 }

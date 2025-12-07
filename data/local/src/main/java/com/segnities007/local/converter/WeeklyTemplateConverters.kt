@@ -1,7 +1,7 @@
 package com.segnities007.local.converter
 
 import androidx.room.TypeConverter
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 
 class WeeklyTemplateConverters {
     @TypeConverter

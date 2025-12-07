@@ -33,7 +33,8 @@ object NotificationScheduler {
             PeriodicWorkRequestBuilder<DailyReminderWorker>(
                 1,
                 TimeUnit.DAYS,
-            ).setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+            )
+                // .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
                 .build()
 
         // WorkManagerにスケジュール（既存のものがあれば置き換え）

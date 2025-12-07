@@ -31,7 +31,7 @@ import com.segnities007.home.mvi.HomeIntent
 import com.segnities007.home.mvi.HomeState
 import com.segnities007.home.mvi.HomeViewModel
 import com.segnities007.home.page.EnhancedHomeContent
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.scaffold.CheckMateScaffold
 import com.segnities007.ui.util.rememberScrollVisibility
