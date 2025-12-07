@@ -15,67 +15,96 @@
 
 -----
 
-## 2\. ViewModelでの扱い方 (BaseViewModel)
+## 2. ViewModelでの扱い方 (BaseViewModel)
 
-`toLoading()` や `toSuccess()` を活用して、現在のデータを自動的に引き継ぐヘルパーを作成します。
+`BaseViewModel<I, S, E>` は、Intent (I), State (S), Effect (E) の 3 つの要素を持つ MVI アーキテクチャの基底クラスです。
+内部で `StateMachine` を使用して状態遷移を管理します。
 
 ```kotlin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+// ... imports
 
-abstract class BaseViewModel<S>(initialData: S? = null) : ViewModel() {
+/**
+ * MVIアーキテクチャの基底ViewModel
+ * I: Intent (イベント)
+ * S: State (状態データ)
+ * E: Effect (副作用・単発イベント)
+ */
+abstract class BaseViewModel<I : MviIntent, S : MviState, E : MviEffect>(
+    initialState: S
+) : ViewModel() {
 
-    // データの変更を監視するStateFlow
-    private val _uiState = MutableStateFlow<UiState<S>>(UiState.Idle(initialData))
-    val uiState: StateFlow<UiState<S>> = _uiState.asStateFlow()
+    private val stateMachine = StateMachine<S, E>(initialState, viewModelScope)
 
-    /**
-     * 非同期処理を実行し、UiStateを自動更新するヘルパー
-     */
-    protected fun execute(
-        block: suspend () -> S // S型（データ）を返す関数を受け取る
-    ) {
+    // UIで監視するStateFlow (UiState<S> でラップされている)
+    val uiState: StateFlow<UiState<S>> = stateMachine.uiState
+    
+    // 副作用（ナビゲーション、トーストなど）のFlow
+    val effect = stateMachine.effect
+
+    // 現在の状態データ（S）へのショートカット
+    protected val currentState: S
+        get() = uiState.value.data
+
+    // Intentハンドラ（サブクラスで実装）
+    abstract suspend fun handleIntent(intent: I)
+
+    // Intent送信（UIから呼ばれる）
+    fun sendIntent(intent: I) {
         viewModelScope.launch {
-            // 1. Loadingへ遷移（現在のdataを引き継ぐ）
-            _uiState.update { it.toLoading() }
-
-            try {
-                // 2. 処理実行
-                val result = block()
-
-                // 3. Successへ遷移（新しいdataで更新）
-                _uiState.update { it.toSuccess(result) }
-
-            } catch (e: Exception) {
-                // 4. Failureへ遷移（現在のdataを引き継ぎ、エラーメッセージを付与）
-                _uiState.update { it.toFailure(e.message ?: "Unknown Error") }
-            }
+            handleIntent(intent)
         }
     }
 
-    // 手動更新用（部分更新など）
-    protected fun updateState(reducer: UiState<S>.() -> UiState<S>) {
-        _uiState.update(reducer)
+    // Effect送信（ViewModel内部から呼ぶ）
+    protected fun sendEffect(builder: () -> E) {
+        stateMachine.sendEffect(builder)
+    }
+
+    // 非同期処理の実行と状態更新
+    protected fun <T> execute(
+        action: suspend () -> T,    // 実行する処理
+        reducer: S.(T) -> S         // 結果を受け取ってStateを更新する処理
+    ) {
+        stateMachine.execute(action, reducer)
+    }
+    
+    // 手動での状態更新
+    protected fun setState(reducer: S.() -> S) {
+        stateMachine.setState(reducer)
     }
 }
 ```
 
 ### 使用例 (FeatureViewModel)
 
-```kotlin
-class UserViewModel(private val repository: UserRepository) : BaseViewModel<User>() {
+`handleIntent` を実装し、Intent に応じて処理を振り分けます。
 
+```kotlin
+class UserViewModel(
+    private val getUserUseCase: GetUserUseCase
+) : BaseViewModel<UserIntent, UserState, UserEffect>(UserState()) {
+
+    // 初期化時にIntentを送信
     init {
-        loadUser()
+        sendIntent(UserIntent.LoadUser)
     }
 
-    fun loadUser() {
-        // これだけで「Loading(保持) -> 処理 -> Success/Failure(保持)」が動く
-        execute {
-            repository.fetchUser()
+    // Intentのハンドリング
+    override suspend fun handleIntent(intent: UserIntent) {
+        when (intent) {
+            is UserIntent.LoadUser -> loadUser()
+            is UserIntent.Refresh -> loadUser()
         }
+    }
+
+    private fun loadUser() {
+        // execute: Loading -> Action -> Success/Failure の自動遷移
+        execute(
+            action = { getUserUseCase().getOrThrow() },
+            reducer = { user -> copy(user = user) }
+        )
     }
 }
 ```

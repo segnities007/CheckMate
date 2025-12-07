@@ -50,17 +50,19 @@ Koin のスコープ関数を適切に使い分けます。
 *   要求されるたびに新しいインスタンスを生成します。
 *   **用途**: ステートフルな UseCase や、使い捨てのヘルパークラス（あまり使いません）。
 
-### 3.3 `viewModel` / `viewModelOf`
+### 3.3 `viewModel` / `factoryOf`
 *   Android の ViewModel ライフサイクルに従います。
 *   **用途**: ViewModel クラス。
+*   **注意**: Compose Multiplatform / Koin Compose では `koinViewModel()` が使用されるため、Koin モジュール側の定義は `factory` (または `factoryOf`) で十分なケースが増えています。Android固有の `viewModel { }` DSL の代わりに、**`factoryOf`** の使用を推奨します。
 
 ```kotlin
 val viewModelModule = module {
-    // 推奨: Constructor DSL (viewModelOf) を使うと記述が簡潔になります
-    viewModelOf(::DashboardViewModel)
+    // 推奨: Constructor DSL (factoryOf) を使うと記述が簡潔になります
+    // ViewModelも純粋なクラスとしてファクトリー定義します
+    factoryOf(::DashboardViewModel)
     
-    // 従来の方法
-    // viewModel { DashboardViewModel(get()) }
+    // 従来の方法 (viewModelOf)
+    // viewModelOf(::DashboardViewModel)
 }
 ```
 

@@ -85,9 +85,11 @@ val entryProvider = entryProvider {
 ## 2. 状態管理ルール (BackStack Management)
 
 ナビゲーションの状態（バックスタック）は、Navigation3の `rememberNavBackStack` を使用して管理します。
+また、`BackHandler` を使用してシステムバックボタンの挙動を制御します。
 
 *   **BackStack**: `rememberNavBackStack` を使用して `MutableList<NavKeys>` のような振る舞いをするバックスタックを生成します。
 *   **Navigation**: `backStack.add(key)` で遷移し、`backStack.removeLast()` で戻ります。
+*   **BackHandler**: バックスタックに画面が残っている場合のみ、`backStack.removeLastOrNull()` を呼び出します。
 
 ```kotlin
 // MainNavigation.kt
@@ -101,7 +103,30 @@ fun MainNavigation() {
     val onNavigate: (NavKeys) -> Unit = { backStack.add(it) }
     val onBack: () -> Unit = { backStack.removeLastOrNull() }
 
-    // ... Effect handling ...
+    // MVI Effect handling (ViewModelからの遷移指示)
+    LaunchedEffect(Unit) {
+        mainViewModel.effect.collect { effect ->
+            when (effect) {
+                is MainEffect.Navigate -> {
+                    with(backStack) {
+                        // Hub画面やLogin画面への遷移時はバックスタックをクリアするなどのロジック
+                        if (effect.route is NavKeys.Hub || effect.route is NavKeys.Auth) clear()
+                        add(effect.route)
+                    }
+                }
+                // ...
+            }
+        }
+    }
+
+    // バックボタン制御: バックスタックが1つより多い場合は戻る
+    BackHandler(enabled = (backStack.size > 1)) {
+        onBack()
+    }
+
+    val entryProvider = entryProvider {
+         // ...
+    }
 
     NavDisplay(
         backStack = backStack,
