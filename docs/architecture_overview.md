@@ -32,102 +32,75 @@
 ## モジュール構成図
 
 ```mermaid
-graph TD
-    %% App Module
-    App[":app"]
+graph LR
+    %% スタイル定義
+    classDef app fill:#BBDEFB,stroke:#1976D2,color:black
+    classDef feature fill:#E1BEE7,stroke:#7B1FA2,color:black
+    classDef ui fill:#F8BBD0,stroke:#C2185B,color:black
+    classDef domain fill:#C8E6C9,stroke:#388E3C,color:black
+    classDef data fill:#FFE0B2,stroke:#F57C00,color:black
 
-    %% Presentation Layer
-    subgraph Presentation
-        Nav[":presentation:navigation"]
-        UI[":presentation:ui"]
-        CommonPres[":presentation:common"]
-        Design[":presentation:designsystem"]
+    App(":app"):::app
+
+    subgraph Presentation [Presentation Layer]
+        direction TB
+        Nav(":presentation:navigation"):::ui
         
-        subgraph Features
-            Splash[":presentation:feature:splash"]
-            Login[":presentation:feature:login"]
-            Home[":presentation:feature:home"]
-            Dashboard[":presentation:feature:dashboard"]
-            Items[":presentation:feature:items"]
-            Templates[":presentation:feature:templates"]
-            Setting[":presentation:feature:setting"]
+        subgraph Features [Feature Modules]
+            Splash(":feature:splash"):::feature
+            Login(":feature:login"):::feature
+            Home(":feature:home"):::feature
+            Dashboard(":feature:dashboard"):::feature
+            Items(":feature:items"):::feature
+            Templates(":feature:templates"):::feature
+            Setting(":feature:setting"):::feature
         end
+        
+        UI(":presentation:ui"):::ui
+        CommonPres(":presentation:common"):::ui
+        Design(":presentation:designsystem"):::ui
     end
 
-    %% Domain Layer
-    subgraph Domain
-        UseCase[":domain:usecase"]
-        DomainModel[":domain:model"]
-        DomainRepo[":domain:repository"]
+    subgraph Domain [Domain Layer]
+        direction TB
+        UseCase(":domain:usecase"):::domain
+        DomainModel(":domain:model"):::domain
+        DomainRepo(":domain:repository"):::domain
     end
 
-    %% Data Layer
-    subgraph Data
-        DataRepo[":data:repository"]
-        Local[":data:local"]
-        Remote[":data:remote"]
+    subgraph Data [Data Layer]
+        direction TB
+        DataRepo(":data:repository"):::data
+        Local(":data:local"):::data
+        Remote(":data:remote"):::data
     end
 
-    %% Core Layer
-    subgraph Core
-        CoreCommon[":core:common"]
-    end
-
-    %% Dependencies
+    %% --- Main Dependency Flow (実線: 主要な流れ) ---
     App --> Nav
-    App --> DataRepo
-    App --> UseCase
-    App --> DomainModel
-
-    Nav --> Splash
-    Nav --> Login
-    Nav --> Home
-    Nav --> Dashboard
-    Nav --> Items
-    Nav --> Templates
-    Nav --> Setting
-    Nav --> UI
-    Nav --> UseCase
-    Nav --> DomainModel
-
-    Splash --> CommonPres
-    Login --> CommonPres
-    Home --> CommonPres
-    Dashboard --> CommonPres
-    Items --> CommonPres
-    Templates --> CommonPres
-    Setting --> CommonPres
-
-    CommonPres --> UI
-    UI --> Design
-    UI --> DomainModel
-
-    %% Feature Dependencies
-    Splash --> UseCase
-    Login --> UseCase
-    Home --> UseCase
-    Dashboard --> UseCase
-    Items --> UseCase
-    Templates --> UseCase
-    Setting --> UseCase
-
-    %% Domain Dependencies
+    Nav --> Splash & Login & Home & Dashboard & Items & Templates & Setting
+    
+    Splash & Login & Home & Dashboard & Items & Templates & Setting --> UseCase
+    
     UseCase --> DomainRepo
-    UseCase --> DomainModel
-    DomainRepo --> DomainModel
-
-    %% Data Dependencies
     DataRepo --> DomainRepo
-    DataRepo --> Local
-    DataRepo --> Remote
-    DataRepo --> DomainModel
-    Local --> DomainModel
-    Remote --> DomainModel
+    DataRepo --> Local & Remote
 
-    %% Core Dependencies
-    DomainModel --> CoreCommon
-    UI --> CoreCommon
-    DataRepo --> CoreCommon
+    %% --- Auxiliary Dependencies (点線: 補助的・共通利用) ---
+    %% App Setup
+    App -.-> DataRepo & UseCase & DomainModel & UI & Splash & Login & Dashboard & Home & Items & Setting & Templates
+
+    %% UI & Common
+    Nav -.-> UI
+    Splash & Login & Home & Dashboard & Items & Templates & Setting -.-> CommonPres
+    CommonPres -.-> UI
+    UI -.-> Design
+    UI -.-> DomainModel
+
+    %% Domain & Data Details
+    UseCase -.-> DomainModel
+    DomainRepo -.-> DomainModel
+    DataRepo -.-> DomainModel
+    Local & Remote -.-> DomainModel
 ```
 
 ## レイヤー間の依存ルール
