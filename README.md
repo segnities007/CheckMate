@@ -46,19 +46,8 @@ graph LR
     subgraph Presentation [Presentation Layer]
         direction TB
         Nav(":presentation:navigation"):::ui
-        
-        subgraph Features [Feature Modules]
-            Splash(":feature:splash"):::feature
-            Login(":feature:login"):::feature
-            Home(":feature:home"):::feature
-            Dashboard(":feature:dashboard"):::feature
-            Items(":feature:items"):::feature
-            Templates(":feature:templates"):::feature
-            Setting(":feature:setting"):::feature
-        end
-        
+        Features(":presentation:feature:*"):::feature
         UI(":presentation:ui"):::ui
-        CommonPres(":presentation:common"):::ui
         Design(":presentation:designsystem"):::ui
     end
 
@@ -78,30 +67,23 @@ graph LR
 
     %% --- Main Dependency Flow (実線: 主要な流れ) ---
     App --> Nav
-    Nav --> Splash & Login & Home & Dashboard & Items & Templates & Setting
-    
-    Splash & Login & Home & Dashboard & Items & Templates & Setting --> UseCase
+    Nav --> Features
+    Features --> UseCase
     
     UseCase --> DomainRepo
     DataRepo --> DomainRepo
     DataRepo --> Local & Remote
 
     %% --- Auxiliary Dependencies (点線: 補助的・共通利用) ---
-    %% App Setup
-    App -.-> DataRepo & UseCase & DomainModel & UI & Splash & Login & Dashboard & Home & Items & Setting & Templates
-
-    %% UI & Common
+    App -.-> Features & UI
     Nav -.-> UI
-    Splash & Login & Home & Dashboard & Items & Templates & Setting -.-> CommonPres
-    CommonPres -.-> UI
+    Features -.-> UI
     UI -.-> Design
     UI -.-> DomainModel
 
-    %% Domain & Data Details
     UseCase -.-> DomainModel
     DomainRepo -.-> DomainModel
     DataRepo -.-> DomainModel
-    Local & Remote -.-> DomainModel
 ```
 詳細なモジュール構成やアーキテクチャについては [Architecture Overview](docs/architecture_overview.md) を参照してください。
 
