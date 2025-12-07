@@ -24,7 +24,8 @@ fun DashboardScreen(
     onNavigate: (NavKey) -> Unit
 ) {
     val viewModel: DashboardViewModel = koinViewModel()
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    // BaseViewModelのuiStateを監視
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Effect処理
     LaunchedEffect(Unit) {
@@ -37,9 +38,10 @@ fun DashboardScreen(
         }
     }
 
-    // Contentへ委譲
+    // uiStateからデータを取得してContentへ委譲
+    // dataがnullの場合のハンドリングもここで行うのが一般的（あるいはContent内でLoading表示）
     DashboardContent(
-        state = state,
+        uiState = uiState,
         onIntent = viewModel::sendIntent
     )
 }
@@ -47,21 +49,28 @@ fun DashboardScreen(
 // 2. Stateless Content (UI Logic Only)
 @Composable
 fun DashboardContent(
-    state: DashboardState,
+    uiState: UiState<DashboardState>,
     onIntent: (DashboardIntent) -> Unit
 ) {
     Scaffold(...) { padding ->
-        if (state.isLoading) {
-            LoadingIndicator()
-        } else {
-            LazyColumn(...) {
-                items(state.items) { item ->
-                    ItemRow(
-                        item = item,
-                        onClick = { onIntent(DashboardIntent.SelectItem(item.id)) }
-                    )
+        // UiStateに応じて表示を切り替える
+        when (uiState) {
+            is UiState.Loading -> {
+                // データがあればコンテンツを表示しつつ、上部にローディングバーなどを出す
+                if (uiState.data != null) {
+                    DashboardList(items = uiState.data.items, onIntent = onIntent)
+                    LinearProgressIndicator(...)
+                } else {
+                    LoadingIndicator()
                 }
             }
+            is UiState.Success -> {
+                DashboardList(items = uiState.data.items, onIntent = onIntent)
+            }
+            is UiState.Failure -> {
+                // エラー表示
+            }
+            else -> {}
         }
     }
 }
@@ -99,9 +108,11 @@ Stateless な `Content` Composable に対して Preview を作成します。
 private fun DashboardContentPreview() {
     CheckMateTheme {
         DashboardContent(
-            state = DashboardState(
-                isLoading = false,
-                items = listOf(Item(name = "Test Item"))
+            uiState = UiState.Success(
+                DashboardState(
+                    isLoading = false,
+                    items = listOf(Item(name = "Test Item"))
+                )
             ),
             onIntent = {}
         )
@@ -128,7 +139,7 @@ fun DashboardContent(viewModel: DashboardViewModel) {
 // ✅ 良い例
 @Composable
 fun DashboardContent(
-    state: DashboardState,
+    uiState: UiState<DashboardState>,
     onIntent: (DashboardIntent) -> Unit
 ) {
     ...
