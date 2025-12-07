@@ -6,13 +6,13 @@ import com.segnities007.checkmate.di.remoteModule
 import com.segnities007.checkmate.di.repositoryModule
 import com.segnities007.checkmate.di.useCaseModule
 import com.segnities007.checkmate.di.viewModelModule
-import com.segnities007.checkmate.mvi.MainViewModel
+import com.segnities007.navigation.mvi.MainViewModel
 import com.segnities007.checkmate.notification.NotificationHelper
 import com.segnities007.checkmate.notification.NotificationScheduler
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
-import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 class MainApplication : Application() {
@@ -21,7 +21,7 @@ class MainApplication : Application() {
 
         val mainModule =
             module {
-                viewModelOf(::MainViewModel)
+                factoryOf(::MainViewModel)
             }
 
         startKoin {

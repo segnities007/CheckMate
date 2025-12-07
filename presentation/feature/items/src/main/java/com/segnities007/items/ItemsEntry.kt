@@ -8,8 +8,8 @@ import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsViewModel
 import com.segnities007.items.page.BarcodeScannerPage
 import com.segnities007.items.page.CameraCapturePage
-import com.segnities007.navigation.NavKeys
-import com.segnities007.navigation.NavKeys.Hub.Items
+import com.segnities007.common.keys.NavKeys
+import com.segnities007.common.keys.NavKeys.Hub.Items
 import org.koin.compose.koinInject
 
 fun EntryProviderScope<NavKey>.itemsEntry(

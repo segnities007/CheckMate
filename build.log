@@ -1,0 +1,32 @@
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+
+> Configure project :presentation:navigation
+e: file:///home/segnities007/AndroidStudioProjects/CheckMate/presentation/navigation/build.gradle.kts:54:42: Unresolved reference: runtime
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/home/segnities007/AndroidStudioProjects/CheckMate/presentation/navigation/build.gradle.kts' line: 54
+
+* What went wrong:
+Script compilation error:
+
+  Line 54:     implementation(libs.androidx.compose.runtime)
+                                                    ^ Unresolved reference: runtime
+
+1 error
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+4 actionable tasks: 4 up-to-date

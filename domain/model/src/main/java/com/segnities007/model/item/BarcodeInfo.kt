@@ -13,16 +13,4 @@ data class BarcodeInfo(
     val timestamp: Long = System.currentTimeMillis(),
 )
 
-@Serializable
 
-data class ProductInfo(
-    val barcode: String,
-    val name: String,
-    val description: String,
-    val category: ItemCategory,
-    val manufacturer: String? = null,
-    val imageUrl: String? = null,
-    val isbn: String? = null,
-    val publisher: String? = null,
-    val author: String? = null,
-)

@@ -7,7 +7,7 @@ import com.segnities007.items.mvi.ItemsState
 import com.segnities007.items.page.ItemsListPage
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.ExperimentalTime

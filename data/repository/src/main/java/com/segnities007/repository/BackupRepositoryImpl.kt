@@ -5,7 +5,7 @@ import com.segnities007.local.dao.ItemDao
 import com.segnities007.local.dao.WeeklyTemplateDao
 import com.segnities007.local.entity.toDomain
 import com.segnities007.local.entity.toEntity
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.model.item.Item
 import com.segnities007.model.item.ItemCategory

@@ -9,7 +9,7 @@
 
 全てのナビゲーション先は `NavKeys` sealed interface に集約されています。
 階層構造を持っており、機能ごとにグループ化されています。
-新しい画面を追加する場合は、必ず `core/navigation/src/main/java/com/segnities007/navigation/NavKeys.kt` にキーを追加してください。
+新しい画面を追加する場合は、必ず `presentation/common/src/main/java/com/segnities007/common/keys/NavKeys.kt` にキーを追加してください。
 
 ```kotlin
 @Serializable
@@ -92,13 +92,16 @@ val entryProvider = entryProvider {
 ```kotlin
 // MainNavigation.kt
 @Composable
-internal fun MainNavigation() {
+fun MainNavigation() {
+    val mainViewModel: MainViewModel = koinViewModel()
     // 初期画面を設定してバックスタックを生成
-    val backStack = rememberNavBackStack(NavKeys.SplashKey)
+    val backStack = remember { mutableStateListOf<NavKeys>(NavKeys.SplashKey) }
     
     // 遷移操作を定義
     val onNavigate: (NavKeys) -> Unit = { backStack.add(it) }
-    val onBack: () -> Unit = { backStack.removeLast() }
+    val onBack: () -> Unit = { backStack.removeLastOrNull() }
+
+    // ... Effect handling ...
 
     NavDisplay(
         backStack = backStack,

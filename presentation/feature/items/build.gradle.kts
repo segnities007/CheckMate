@@ -27,8 +27,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:navigation"))
     implementation(project(":presentation:designsystem"))
+    implementation(project(":presentation:common"))
 
     implementation(project(":domain:repository"))
     implementation(project(":domain:model"))

@@ -1,7 +1,7 @@
 package com.segnities007.templates.mvi
 
 import androidx.lifecycle.viewModelScope
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
 import com.segnities007.templates.utils.TemplateFilter
 import com.segnities007.ui.mvi.BaseViewModel

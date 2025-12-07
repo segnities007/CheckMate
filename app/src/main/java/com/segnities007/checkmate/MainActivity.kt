@@ -20,8 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import com.segnities007.checkmate.navigation.MainNavigation
-import com.segnities007.designsystem.theme.CheckMateTheme
+import com.segnities007.navigation.MainNavigation
 
 class MainActivity : ComponentActivity() {
 
@@ -51,25 +50,23 @@ class MainActivity : ComponentActivity() {
         requestNotificationPermissionIfNeeded()
 
         setContent {
-            CheckMateTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainNavigation()
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                MainNavigation()
 
-                    // 通知権限の説明ダイアログ
-                    if (showNotificationRationaleDialog) {
-                        NotificationPermissionRationaleDialog(
-                            onConfirm = {
-                                showNotificationRationaleDialog = false
-                                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            },
-                            onDismiss = {
-                                showNotificationRationaleDialog = false
-                            }
-                        )
-                    }
+                // 通知権限の説明ダイアログ
+                if (showNotificationRationaleDialog) {
+                    NotificationPermissionRationaleDialog(
+                        onConfirm = {
+                            showNotificationRationaleDialog = false
+                            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        },
+                        onDismiss = {
+                            showNotificationRationaleDialog = false
+                        }
+                    )
                 }
             }
         }

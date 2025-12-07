@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.templates.component.CreateWeeklyTemplateBottomSheet
 import com.segnities007.templates.mvi.TemplatesEffect
 import com.segnities007.templates.mvi.TemplatesIntent

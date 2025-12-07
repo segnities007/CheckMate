@@ -28,7 +28,7 @@ import com.segnities007.designsystem.divider.HorizontalDividerWithLabel
 import com.segnities007.designsystem.theme.Dimens
 import com.segnities007.designsystem.theme.checkMateBackgroundBrush
 import com.segnities007.model.UserStatus
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.setting.component.AccountButtons
 import com.segnities007.setting.component.DataButtons
 import com.segnities007.setting.component.DeleteAllDataDialog

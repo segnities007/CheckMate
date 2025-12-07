@@ -1,6 +1,7 @@
 package com.segnities007.model
 
 
+import kotlinx.datetime.DayOfWeek
 import kotlinx.serialization.Serializable
 
 @Serializable

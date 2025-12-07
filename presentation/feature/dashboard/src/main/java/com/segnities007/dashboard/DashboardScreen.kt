@@ -31,7 +31,7 @@ import com.segnities007.dashboard.mvi.DashboardViewModel
 import com.segnities007.designsystem.divider.HorizontalDividerWithLabel
 import com.segnities007.designsystem.theme.Dimens
 import com.segnities007.designsystem.theme.checkMateBackgroundBrush
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.ui.bar.FloatingNavigationBar
 import com.segnities007.ui.card.UncheckedItemsCard
 import com.segnities007.ui.card.statistics.StatCard

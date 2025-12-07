@@ -12,7 +12,7 @@
 
 ## 2. モジュール構成
 
-`core/common/src/main/java/com/segnities007/common/module/` 配下に以下のモジュールを定義します。
+`app/src/main/java/com/segnities007/checkmate/di/` 配下に以下のモジュールを定義します。
 
 | モジュール名 | 役割 | 定義内容の例 |
 | :--- | :--- | :--- |

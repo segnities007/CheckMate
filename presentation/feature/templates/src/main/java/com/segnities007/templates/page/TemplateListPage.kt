@@ -32,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import com.segnities007.designsystem.divider.HorizontalDividerWithLabel
 import com.segnities007.designsystem.theme.Dimens
 import com.segnities007.designsystem.theme.checkMateBackgroundBrush
-import com.segnities007.model.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.templates.component.TemplateSearchFilterSortBar
 import com.segnities007.templates.mvi.TemplateSortOrder
 import com.segnities007.templates.mvi.TemplatesIntent

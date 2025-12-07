@@ -1,9 +1,13 @@
 plugins {
-    id("checkmate.jvm.library")
+    id("checkmate.android.library")
+}
+
+android {
+    namespace = "com.segnities007.repository"
 }
 
 dependencies {
-    implementation(project(":domain:model"))
+    api(project(":domain:model"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.datetime)
 }

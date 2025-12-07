@@ -5,7 +5,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.segnities007.model.WeeklyTemplate
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.templates.mvi.TemplatesViewModel
 import com.segnities007.templates.page.TemplateItemSelectPage
 import org.koin.compose.koinInject

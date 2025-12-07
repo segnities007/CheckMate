@@ -1,6 +1,6 @@
 package com.segnities007.splash.mvi
 
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.ui.mvi.BaseViewModel
 import com.segnities007.usecase.user.IsAccountCreatedUseCase
 import kotlinx.coroutines.delay

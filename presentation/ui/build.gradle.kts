@@ -25,12 +25,13 @@ android {
 
 dependencies {
     api(project(":presentation:designsystem"))
-    implementation(project(":core:navigation"))
+
+    api(project(":presentation:common"))
     implementation(project(":domain:model"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    api(libs.androidx.lifecycle.runtime.ktx)
+    api(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -54,4 +55,7 @@ dependencies {
 
     // datetime
     implementation(libs.kotlinx.datetime)
+
+    // koin
+    implementation(libs.koin.android)
 }

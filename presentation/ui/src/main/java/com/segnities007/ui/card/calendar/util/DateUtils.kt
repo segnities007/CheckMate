@@ -15,7 +15,7 @@ fun japaneseWeekday(dayOfWeek: DayOfWeek): String = when (dayOfWeek) {
 }
 
 fun hasTemplateFor(date: LocalDate, templates: List<WeeklyTemplate>): Boolean {
-    val modelDay = com.segnities007.model.DayOfWeek.valueOf(date.dayOfWeek.name)
+    val modelDay = date.dayOfWeek
     return templates.any { modelDay in it.daysOfWeek }
 }
 

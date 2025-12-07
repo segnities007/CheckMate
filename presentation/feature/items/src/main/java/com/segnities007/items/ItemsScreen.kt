@@ -16,7 +16,7 @@ import com.segnities007.items.mvi.ItemsEffect
 import com.segnities007.items.mvi.ItemsIntent
 import com.segnities007.items.mvi.ItemsViewModel
 import com.segnities007.items.page.ItemsListPage
-import com.segnities007.navigation.NavKeys
+import com.segnities007.common.keys.NavKeys
 import com.segnities007.ui.mvi.UiState
 import org.koin.compose.koinInject
 

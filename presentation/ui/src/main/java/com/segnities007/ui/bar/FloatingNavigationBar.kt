@@ -35,8 +35,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.segnities007.navigation.NavKeys
-import com.segnities007.navigation.NavKeys.Hub
+import com.segnities007.common.keys.NavKeys
+import com.segnities007.common.keys.NavKeys.Hub
 
 @Composable
 fun FloatingNavigationBar(
